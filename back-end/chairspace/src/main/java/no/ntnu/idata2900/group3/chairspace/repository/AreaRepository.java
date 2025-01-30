@@ -1,0 +1,8 @@
+package no.ntnu.idata2900.group3.chairspace.repository;
+
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+import no.ntnu.idata2900.group3.chairspace.entity.Area;
+
+@Repository
+public interface AreaRepository extends CrudRepository<Area, Integer> {}
