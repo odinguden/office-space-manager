@@ -33,6 +33,10 @@ public class Account {
 
 	public Account() {}
 
+	public Account(AccountDto accountDto) {
+
+	}
+
 	/* ---- Getters ---- */
 
 	/**
