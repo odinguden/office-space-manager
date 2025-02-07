@@ -2,7 +2,7 @@ package no.ntnu.idata2900.group3.chairspace.repository;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import no.ntnu.idata2900.group3.chairspace.entity.User;
+import no.ntnu.idata2900.group3.chairspace.entity.Account;
 
 @Repository
-public interface UserRepository extends CrudRepository<User, Integer> {}
+public interface AccountRepository extends CrudRepository<Account, Integer> {}

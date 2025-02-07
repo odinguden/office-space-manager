@@ -1,57 +1,63 @@
 package no.ntnu.idata2900.group3.chairspace.entity;
 
+import java.io.Serializable;
 import java.util.Set;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 
 /**
  * Represents a user.
  */
 @Entity
-public class User {
+public class Account {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	private int user_id;
 	private String firstName;
 	private String lastName;
 	private String email;
 	private int phoneNumber;
-
-	@OneToMany
+	@ManyToMany
 	private Set<Area> administrates;
+	@OneToMany
+	private Set<Reservation> reservations;
 
-	public User() {}
+	public Account() {}
 
 	/* ---- Getters ---- */
 
 	public int getId() {
-		return id;
+		return this.user_id;
 	}
 
 	public String getFirstName() {
-		return firstName;
+		return this.firstName;
 	}
 
 	public String getLastName() {
-		return lastName;
+		return this.lastName;
 	}
 
 	public String getEmail() {
-		return email;
+		return this.email;
 	}
 
 	public int getPhoneNumber() {
-		return phoneNumber;
+		return this.phoneNumber;
 	}
 
 	/* ---- Setters ---- */
 
 	public void setId(int id) {
-		this.id = id;
+		this.user_id = id;
 	}
 
 	public void setFirstName(String firstName) {
