@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import no.ntnu.idata2900.group3.chairspace.dto.AccountDto;
 
 /**
  * Represents a user.
@@ -34,6 +35,10 @@ public class Account {
 
 	/* ---- Getters ---- */
 
+	/**
+	 * Returns the id of the user as a string.
+	 * @return Id as string
+	 */
 	public int getId() {
 		return this.user_id;
 	}
@@ -75,6 +80,51 @@ public class Account {
 	public void setPhoneNumber(int phoneNumber) {
 		this.phoneNumber = phoneNumber;
 	}
-	
 
+	public void setAdministrates(Set<Area> administrates) {
+		this.administrates = administrates;
+	}
+
+	public void setReservations(Set<Reservation> reservations) {
+		this.reservations = reservations;
+	}
+
+	/* ---- Reservations ---- */
+
+	public void addReservation(Reservation reservation) {
+		if (this.reservations == null) {
+			throw new IllegalArgumentException("Reservations is null");
+		}
+		if (!this.reservations.contains(reservation)) {
+			this.reservations.add(reservation);
+		}
+	}
+
+	public void removeReservation(Reservation reservation) {
+		if(this.reservations.isEmpty()) {
+			throw new IllegalStateException("No reservations to remove");
+		}
+		this.reservations.remove(reservation);
+	}
+
+	/* ---- Area permissions ---- */
+
+	public void addArea(Area area) {
+		if (this.administrates == null) {
+			throw new IllegalArgumentException("Administrates is null");
+		}
+		if (!this.administrates.contains(area)) {
+			this.administrates.add(area);
+		}
+	}
+
+	public void removeArea(Area area) {
+		if(this.administrates.isEmpty()) {
+			throw new IllegalStateException("No areas to remove");
+		}
+		if (!this.administrates.contains(area)) {
+			throw new IllegalArgumentException("Area not found");
+		}
+		this.administrates.remove(area);
+	}
 }
