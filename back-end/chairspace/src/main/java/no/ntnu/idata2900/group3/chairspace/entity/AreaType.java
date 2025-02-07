@@ -1,9 +1,12 @@
 package no.ntnu.idata2900.group3.chairspace.entity;
 
+import java.util.Set;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 /**
  * Represents a type that an area can be.
@@ -13,9 +16,14 @@ public class AreaType {
 	@Id
 	private String name;
 	private String description;
+	@OneToMany(mappedBy = "areaType")
+	private Set<Area> areas;
 
-	public AreaType(int id, String name, String description) {
+	public AreaType() {}
 
+	public AreaType(String name, String description) {
+		setName(name);
+		setDescription(description);
 	}
 
 

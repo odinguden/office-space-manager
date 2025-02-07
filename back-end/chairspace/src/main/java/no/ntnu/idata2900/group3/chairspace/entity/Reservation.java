@@ -3,6 +3,7 @@ package no.ntnu.idata2900.group3.chairspace.entity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -13,8 +14,10 @@ public class Reservation {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
+	@ManyToOne
 	private Area area;
-	private User user;
+	@ManyToOne
+	private Account user;
 	private LocalDateTime start;
 	private LocalDateTime end;
 	private String comment;
@@ -29,7 +32,7 @@ public class Reservation {
 	public void setArea(Area area) {
 		this.area = area;
 	}
-	public void setUser(User user) {
+	public void setUser(Account user) {
 		this.user = user;
 	}
 	public void setStart(LocalDateTime start) {
@@ -50,7 +53,7 @@ public class Reservation {
 	public Area getArea() {
 		return area;
 	}
-	public User getUser() {
+	public Account getUser() {
 		return user;
 	}
 	public LocalDateTime getStart() {
