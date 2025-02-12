@@ -66,7 +66,7 @@ public class Reservation {
 	 *
 	 * @param id as UUID
 	 */
-	private void setId(UUID id) {
+	public void setId(UUID id) {
 		this.id = id;
 	}
 

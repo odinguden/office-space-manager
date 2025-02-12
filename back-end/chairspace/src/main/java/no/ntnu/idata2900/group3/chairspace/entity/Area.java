@@ -34,7 +34,7 @@ public class Area {
 	/**
 	 * No args constructor for JPA.
 	 */
-	private Area() {}
+	public Area() {}
 
 	/**
 	 * Args constructor for Area.
