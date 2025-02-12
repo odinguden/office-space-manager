@@ -1,15 +1,11 @@
 package no.ntnu.idata2900.group3.chairspace.entity;
 
-import java.io.Serializable;
 import java.util.Set;
-
+import java.util.UUID;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import no.ntnu.idata2900.group3.chairspace.dto.AccountDto;
@@ -20,8 +16,8 @@ import no.ntnu.idata2900.group3.chairspace.dto.AccountDto;
 @Entity
 public class Account {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int user_id;
+	@GeneratedValue(strategy = GenerationType.UUID)
+	private UUID user_id;
 	private String firstName;
 	private String lastName;
 	private String email;
@@ -31,10 +27,32 @@ public class Account {
 	@OneToMany
 	private Set<Reservation> reservations;
 
+	/**
+	 * No args constructor for JPA.
+	 */
 	public Account() {}
 
+	/**
+	 * Account constructor using a DTO.
+	 *
+	 * @param accountDto Account DTO
+	 */
 	public Account(AccountDto accountDto) {
 
+	}
+
+	/**
+	 * Account constructor with arguments.
+	 * @param firstName First name as string
+	 * @param lastName Last name as string
+	 * @param email Email as string
+	 * @param phoneNumber Phone number as int
+	 */
+	public Account(String firstName, String lastName, String email, int phoneNumber) {
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.email = email;
+		this.phoneNumber = phoneNumber;
 	}
 
 	/* ---- Getters ---- */
@@ -43,7 +61,7 @@ public class Account {
 	 * Returns the id of the user as a string.
 	 * @return Id as string
 	 */
-	public int getId() {
+	public UUID getId() {
 		return this.user_id;
 	}
 
@@ -65,7 +83,7 @@ public class Account {
 
 	/* ---- Setters ---- */
 
-	public void setId(int id) {
+	public void setId(UUID id) {
 		this.user_id = id;
 	}
 

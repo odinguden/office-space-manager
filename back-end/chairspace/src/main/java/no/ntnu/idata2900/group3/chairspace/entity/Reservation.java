@@ -1,9 +1,8 @@
 package no.ntnu.idata2900.group3.chairspace.entity;
 
 import java.time.LocalDateTime;
-
+import java.util.UUID;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,8 +11,8 @@ import jakarta.persistence.ManyToOne;
 @Entity
 public class Reservation {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	@GeneratedValue(strategy = GenerationType.UUID)
+	private UUID id;
 	@ManyToOne
 	private Area area;
 	@ManyToOne
@@ -26,7 +25,7 @@ public class Reservation {
 
 	/* ---- Setters ---- */
 
-	public void setId(int id) {
+	public void setId(UUID id) {
 		this.id = id;
 	}
 	public void setArea(Area area) {
@@ -47,7 +46,7 @@ public class Reservation {
 
 	/* ---- Getters ---- */
 
-	public int getId() {
+	public UUID getId() {
 		return id;
 	}
 	public Area getArea() {
