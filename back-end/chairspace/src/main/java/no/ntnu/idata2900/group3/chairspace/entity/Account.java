@@ -1,29 +1,43 @@
 package no.ntnu.idata2900.group3.chairspace.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
 /**
  * Represents a user.
+ *
+ * @TODO Implement factory pattern for creating users.
  */
 @Entity
+@Schema(description = "Represents a user in the database")
+@Table(name = "accounts")
 public class Account {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID userUuid;
+	@Column(name = "first_name", nullable = false)
 	private String firstName;
+	@Column(name = "last_name", nullable = false)
 	private String lastName;
+	@Column(nullable = false)
 	private String email;
+	@Column(name = "phone_number", nullable = false)
 	private int phoneNumber;
 	@ManyToMany
+	@Column(nullable = true)
 	private Set<Area> administrates;
 	@OneToMany
+	@Column(nullable = true)
 	private Set<Reservation> reservations;
 
 	/**
@@ -40,10 +54,16 @@ public class Account {
 	 * @param phoneNumber Phone number as int
 	 */
 	public Account(String firstName, String lastName, String email, int phoneNumber) {
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.email = email;
-		this.phoneNumber = phoneNumber;
+		setFirstName(firstName);
+		setLastName(lastName);
+		setEmail(email);
+		setPhoneNumber(phoneNumber);
+		setAdministrates(
+			new HashSet<Area>()
+		);
+		setReservations(
+			new HashSet<Reservation>()
+		);
 	}
 
 	/* ---- Getters ---- */
@@ -101,7 +121,10 @@ public class Account {
 	 *
 	 * @param id UUID
 	 */
-	public void setId(UUID id) {
+	private void setId(UUID id) {
+		if (id == null) {
+			throw new IllegalArgumentException("Id is null");
+		}
 		this.userUuid = id;
 	}
 
@@ -110,7 +133,10 @@ public class Account {
 	 *
 	 * @param firstName First name as string
 	 */
-	public void setFirstName(String firstName) {
+	private void setFirstName(String firstName) {
+		if (firstName == null || firstName.isEmpty()) {
+			throw new IllegalArgumentException("First name is null");
+		}
 		this.firstName = firstName;
 	}
 
@@ -119,7 +145,10 @@ public class Account {
 	 *
 	 * @param lastName Last name as string
 	 */
-	public void setLastName(String lastName) {
+	private void setLastName(String lastName) {
+		if (lastName == null || lastName.isEmpty()) {
+			throw new IllegalArgumentException("Last name is null");
+		}
 		this.lastName = lastName;
 	}
 
@@ -128,7 +157,10 @@ public class Account {
 	 *
 	 * @param email Email as string
 	 */
-	public void setEmail(String email) {
+	private void setEmail(String email) {
+		if (email == null || email.isEmpty()) {
+			throw new IllegalArgumentException("Email is null");
+		}
 		this.email = email;
 	}
 
@@ -137,7 +169,8 @@ public class Account {
 	 *
 	 * @param phoneNumber Phone number as int
 	 */
-	public void setPhoneNumber(int phoneNumber) {
+	private void setPhoneNumber(int phoneNumber) {
+		//TODO error handling for phone number
 		this.phoneNumber = phoneNumber;
 	}
 
@@ -146,7 +179,7 @@ public class Account {
 	 *
 	 * @param administrates Set of areas
 	 */
-	public void setAdministrates(Set<Area> administrates) {
+	private void setAdministrates(Set<Area> administrates) {
 		this.administrates = administrates;
 	}
 
@@ -155,7 +188,7 @@ public class Account {
 	 *
 	 * @param reservations Set of reservations
 	 */
-	public void setReservations(Set<Reservation> reservations) {
+	private void setReservations(Set<Reservation> reservations) {
 		this.reservations = reservations;
 	}
 

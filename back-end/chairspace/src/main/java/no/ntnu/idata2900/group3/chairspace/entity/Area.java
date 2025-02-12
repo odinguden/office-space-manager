@@ -13,6 +13,8 @@ import java.util.UUID;
 
 /**
  * Represents a reservable area in the database.
+ *
+ * @TODO Implement factory pattern for creating areas.
  */
 @Entity
 @Schema(description = "Represents a reservable area in the database")
