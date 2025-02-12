@@ -18,6 +18,29 @@
 
 >[!example] Set up new spaces
 
+
+
 ## Space Manager
 Owns a space
 A space is a grouping of any number of reservable areas
+
+## User Stories
+
+### Roles
+Role | Description
+-|-
+External user | A user coming from another organization
+User | A internal user who administrates their own desk, and also might need to be able to reserve their own desk / area if they are visiting another area in the organization.
+Administrator | A person who administers more than one desk / area.
+
+### Stories
+
+Role | Story | importance |
+ -|-|-
+User | As a user i want to be able to book a desk in advance, so that i know i will have a place to work | important
+User | As a user i want to be able to see the reservations i have made perviously | Nice to have
+User | As a user i want to be able to see my desks status, so that i know if i am able to use the desk at my job. | Nice to have
+User | As a user i want to be able to find my desk without much hassle. This is so i will save time on looking for my desk. | Nice to have
+Administrator | As a administrator, i want to be able to assign desks to users | Important
+
+
