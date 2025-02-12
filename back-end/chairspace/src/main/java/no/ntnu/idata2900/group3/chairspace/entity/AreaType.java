@@ -1,12 +1,9 @@
 package no.ntnu.idata2900.group3.chairspace.entity;
 
-import java.util.Set;
-
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import java.util.Set;
 
 /**
  * Represents a type that an area can be.
@@ -19,8 +16,17 @@ public class AreaType {
 	@OneToMany(mappedBy = "areaType")
 	private Set<Area> areas;
 
+	/**
+	 * No args constructor for JPA.
+	 */
 	public AreaType() {}
 
+	/**
+	 * Constructor for AreaType.
+	 *
+	 * @param name of the area type
+	 * @param description of the area type
+	 */
 	public AreaType(String name, String description) {
 		setName(name);
 		setDescription(description);
@@ -30,13 +36,19 @@ public class AreaType {
 	/* ---- Getters ---- */
 
 	/**
-	 * Gets the name of the area type
+	 * Gets the name of the area type.
+	 *
 	 * @return name as string
 	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Gets the description of the area type.
+	 *
+	 * @return description as string
+	 */
 	public String getDescription() {
 		return description;
 	}
@@ -48,7 +60,7 @@ public class AreaType {
 	 *
 	 * @param name of the area type
 	 */
-	public void setName(String name) {
+	private void setName(String name) {
 		this.name = name;
 	}
 
@@ -57,7 +69,7 @@ public class AreaType {
 	 *
 	 * @param description of area type as string.
 	 */
-	public void setDescription(String description) {
+	private void setDescription(String description) {
 		this.description = description;
 	}
 }
