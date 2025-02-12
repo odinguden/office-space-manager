@@ -17,21 +17,19 @@ import java.util.UUID;
 public class Reservation {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
-	private UUID id;
+	private UUID reservationUuid;
 	@ManyToOne
 	private Area area;
 	@ManyToOne
 	private Account user;
-	private LocalDateTime start;
-	private LocalDateTime end;
+	private LocalDateTime startDateTime;
+	private LocalDateTime endDateTime;
 	private String comment;
 
 	/**
 	 * No args constructor for JPA.
 	 */
-	public Reservation() {
-		// No args constructor for JPA.
-	}
+	public Reservation() {}
 
 	/**
 	 * Constructor for Reservation.
@@ -67,7 +65,7 @@ public class Reservation {
 	 * @param id as UUID
 	 */
 	public void setId(UUID id) {
-		this.id = id;
+		this.reservationUuid = id;
 	}
 
 	/**
@@ -94,7 +92,7 @@ public class Reservation {
 	 * @param start date and time of reservation
 	 */
 	private void setStart(LocalDateTime start) {
-		this.start = start;
+		this.startDateTime = start;
 	}
 
 	/**
@@ -103,7 +101,7 @@ public class Reservation {
 	 * @param end date and time of reservation
 	 */
 	private void setEnd(LocalDateTime end) {
-		this.end = end;
+		this.endDateTime = end;
 	}
 
 	/**
@@ -123,7 +121,7 @@ public class Reservation {
 	 * @return Id as UUID
 	 */
 	public UUID getId() {
-		return id;
+		return reservationUuid;
 	}
 
 	/**
@@ -150,7 +148,7 @@ public class Reservation {
 	 * @return Start date and time of reservation
 	 */
 	public LocalDateTime getStart() {
-		return start;
+		return startDateTime;
 	}
 
 	/**
@@ -159,7 +157,7 @@ public class Reservation {
 	 * @return End date and time of reservation
 	 */
 	public LocalDateTime getEnd() {
-		return end;
+		return endDateTime;
 	}
 
 	/**
