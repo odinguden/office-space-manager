@@ -21,7 +21,7 @@ public class Reservation {
 	@ManyToOne
 	private Area area;
 	@ManyToOne
-	private Account user;
+	private User user;
 	private LocalDateTime startDateTime;
 	private LocalDateTime endDateTime;
 	private String comment;
@@ -42,7 +42,7 @@ public class Reservation {
 	 */
 	public Reservation(
 		Area area,
-		Account account,
+		User account,
 		LocalDateTime start,
 		LocalDateTime end,
 		String comment
@@ -82,7 +82,7 @@ public class Reservation {
 	 *
 	 * @param user that is reserving the area
 	 */
-	private void setUser(Account user) {
+	private void setUser(User user) {
 		this.user = user;
 	}
 
@@ -138,7 +138,7 @@ public class Reservation {
 	 *
 	 * @return User that is reserving the area
 	 */
-	public Account getUser() {
+	public User getUser() {
 		return user;
 	}
 

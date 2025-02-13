@@ -21,7 +21,7 @@ import java.util.UUID;
 @Entity
 @Schema(description = "Represents a user in the database")
 @Table(name = "accounts")
-public class Account {
+public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID userUuid;
@@ -43,7 +43,7 @@ public class Account {
 	/**
 	 * No args constructor for JPA.
 	 */
-	public Account() {}
+	public User() {}
 
 	/**
 	 * Account constructor with arguments.
@@ -53,17 +53,25 @@ public class Account {
 	 * @param email Email as string
 	 * @param phoneNumber Phone number as int
 	 */
-	public Account(String firstName, String lastName, String email, int phoneNumber) {
+	public User(String firstName, String lastName, String email, int phoneNumber) {
 		setFirstName(firstName);
 		setLastName(lastName);
 		setEmail(email);
 		setPhoneNumber(phoneNumber);
 		setAdministrates(
-			new HashSet<Area>()
+			new HashSet<>()
 		);
 		setReservations(
-			new HashSet<Reservation>()
+			new HashSet<>()
 		);
+	}
+
+	private User(Builder builder) {
+		setFirstName(builder.firstName);
+		setLastName(builder.lastName);
+		setEmail(builder.email);
+		setPhoneNumber(builder.phoneNumber);
+
 	}
 
 	/* ---- Getters ---- */
@@ -170,7 +178,6 @@ public class Account {
 	 * @param phoneNumber Phone number as int
 	 */
 	private void setPhoneNumber(int phoneNumber) {
-		//TODO error handling for phone number
 		this.phoneNumber = phoneNumber;
 	}
 
@@ -249,5 +256,153 @@ public class Account {
 			throw new IllegalArgumentException("Area not found");
 		}
 		this.administrates.remove(area);
+	}
+
+	/**
+	 * Builder class for User.
+	 */
+	public static class Builder {
+
+		private String firstName;
+		private String lastName;
+		private String email;
+		private int phoneNumber;
+		private Set<Area> administrates;
+		private Set<Reservation> reservations;
+		// Im sure you're wondering why there are private variables, and no getters.
+		// If a class that is not the userBuilder or the user needs the values, then they are using
+		// the builder pattern wrong.
+
+		/**
+		 * Constructor for UserBuilder.
+		 *
+		 * @param firstName First name as string
+		 * @param lastName Last name as string
+		 * @throws IllegalArgumentException if first name or last name is null
+		 */
+		public Builder(String firstName, String lastName) {
+			if (firstName == null || firstName.isEmpty()) {
+				throw new IllegalArgumentException("First name is null");
+			}
+			if (lastName == null || lastName.isEmpty()) {
+				throw new IllegalArgumentException("Last name is null");
+			}
+			
+			this.lastName = lastName;
+			this.firstName = firstName;
+			this.administrates = new HashSet<>();
+			this.reservations = new HashSet<>();
+		}
+
+		/**
+		 * Sets the email of the user.
+		 *
+		 * @param email Email as string
+		 * @return UserBuilder object
+		 */
+		public Builder email(String email) {
+			if (email == null || email.isEmpty()) {
+				throw new IllegalArgumentException("Email is null");
+			}
+			this.email = email;
+			return this;
+		}
+
+		/**
+		 * Sets the phone number of the user.
+		 *
+		 * @param phoneNumber Phone number as int
+		 * @return UserBuilder object
+		 * @throws IllegalArgumentException if phone number is null
+		 */
+		public Builder phoneNumber(int phoneNumber) {
+			if (phoneNumber == 0) {
+				throw new IllegalArgumentException("Phone number is null");
+			}
+			this.phoneNumber = phoneNumber;
+			return this;
+		}
+
+		/**
+		 * Adds an area to the user.
+		 *
+		 * @param area Area object
+		 * @return UserBuilder object
+		 * @throws IllegalArgumentException if area is null
+		 */
+		public Builder area(Area area) {
+			if (area == null) {
+				throw new IllegalArgumentException("Area is null");
+			}
+			this.administrates.add(area);
+
+			return this;
+		}
+
+		/**
+		 * Adds multiple areas to the user.
+		 *
+		 * @param areas Set of areas
+		 * @return UserBuilder object
+		 * @throws IllegalArgumentException if areas is null
+		 */
+		public Builder areas(Set<Area> areas) {
+			if (areas == null) {
+				throw new IllegalArgumentException("Areas is null");
+			}
+			for (Area area : areas) {
+				this.administrates.add(area);
+			}
+
+			return this;
+		}
+
+		/**
+		 * Adds a single reservation to the user.
+		 *
+		 * @param reservation Reservation object
+		 * @return UserBuilder object
+		 * @throws IllegalArgumentException if reservation is null
+		 */
+		public Builder reservation(Reservation reservation) {
+			if (reservation == null) {
+				throw new IllegalArgumentException("Reservation is null");
+			}
+			this.reservations.add(reservation);
+
+			return this;
+		}
+
+		/**
+		 * Adds multiple reservations to the user.
+		 * This should only be used for testing purposes.
+		 * If you are creating a new user, then reservations should not be added upon creation.
+		 *
+		 * @param reservations Set of reservations
+		 * @return UserBuilder object
+		 * @throws IllegalArgumentException if reservations is null
+		 */
+		public Builder reservations(Set<Reservation> reservations) {
+			if (reservations == null) {
+				throw new IllegalArgumentException("Reservations is null");
+			}
+			for (Reservation reservation : reservations) {
+				this.reservations.add(reservation);
+			}
+
+			return this;
+		}
+
+
+
+		/**
+		 * Builds the User object.
+		 *
+		 * @return User object
+		 */
+		public User build() {
+			return new User(this);
+		}
+
 	}
 }

@@ -4,20 +4,19 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Main class for the application.
+ * Main.
  */
 @SpringBootApplication
 public class Main {
 
 	/**
-	 * Main method for the application.
+	 * Main method.
 	 *
-	 * @param args The arguments for the application.
+	 * @param args the arguments.
 	 */
 	public static void main(String[] args) {
 		// I realize that the javadoc is redundant. But the lint is bullying me.
 		// If you read the javadoc, and you feel like you need it. Then don't touch my code.
 		SpringApplication.run(Main.class, args);
 	}
-
 }

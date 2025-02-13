@@ -23,7 +23,7 @@ public class Area {
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID id;
 	@ManyToMany
-	private Set<Account> administrators;
+	private Set<User> administrators;
 	@ManyToOne()
 	private Area superArea;
 	@ManyToOne
@@ -45,7 +45,7 @@ public class Area {
 	 * @param superArea Super area
 	 * @param areaType Area type
 	 */
-	public Area(Set<Account> administrator, Area superArea, AreaType areaType) {
+	public Area(Set<User> administrator, Area superArea, AreaType areaType) {
 		setAdministrators(administrator);
 		setSuperArea(superArea);
 		setAreaType(areaType);
@@ -68,7 +68,7 @@ public class Area {
 	 *
 	 * @return Set of administrators
 	 */
-	public Set<Account> getAdministrator() {
+	public Set<User> getAdministrator() {
 		return administrators;
 	}
 
@@ -106,7 +106,7 @@ public class Area {
 	 *
 	 * @param administrators Set of administrators
 	 */
-	private void setAdministrators(Set<Account> administrators) {
+	private void setAdministrators(Set<User> administrators) {
 		this.administrators = administrators;
 	}
 
