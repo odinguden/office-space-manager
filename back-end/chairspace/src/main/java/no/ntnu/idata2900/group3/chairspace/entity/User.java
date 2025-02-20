@@ -33,7 +33,7 @@ public class User {
 	private String email;
 	@Column(name = "phone_number", nullable = false)
 	private int phoneNumber;
-	@ManyToMany
+	@ManyToMany(mappedBy = "administrators")
 	@Column(nullable = true)
 	private Set<Area> administrates;
 	@OneToMany
