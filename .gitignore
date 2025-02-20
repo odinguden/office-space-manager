@@ -26,3 +26,4 @@ replay_pid*
 # .env files
 .env
 /.vscode
+/back-end/Database Scripts/.idea
