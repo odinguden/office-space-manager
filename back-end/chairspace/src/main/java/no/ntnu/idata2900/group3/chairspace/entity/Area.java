@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -24,17 +26,27 @@ import java.util.UUID;
 public class Area {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
-	@Column(name = "area_uuid")
+	@Column(name = "area_id")
 	private UUID id;
 	@ManyToMany
+	@JoinTable(
+		name = "area_administrators",
+		joinColumns = {
+			@JoinColumn(name = "area_id")
+		},
+		inverseJoinColumns = {
+			@JoinColumn(name = "user_id")
+		}
+	)
+	@Column(name = "administrators")
 	private Set<User> administrators;
-	@ManyToOne()
+	@ManyToOne
 	private Area superArea;
 	@ManyToOne
 	private AreaType areaType;
 	@OneToMany(mappedBy = "superArea")
 	private Set<Area> subAreas;
-	@OneToMany
+	@OneToMany(mappedBy = "area")
 	private Set<Reservation> reservations;
 	private int capacity;
 	private boolean calendarControlled;
@@ -42,6 +54,15 @@ public class Area {
 	private String name;
 	private String description;
 	@ManyToMany
+	@JoinTable(
+		name = "area_features",
+		joinColumns = {
+			@JoinColumn(name = "area_id")
+		},
+		inverseJoinColumns = {
+			@JoinColumn(name = "feature_id")
+		}
+	)
 	private Set<AreaFeature> features;
 
 	/**
