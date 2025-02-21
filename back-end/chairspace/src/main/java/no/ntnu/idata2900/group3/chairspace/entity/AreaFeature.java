@@ -28,12 +28,27 @@ public class AreaFeature {
 	 *
 	 * @param name Name of the area feature
 	 * @param description Description of the area feature
+	 * @param areas Areas that have this feature
+	 * @throws IllegalArgumentException if name or description is null or blank
+	 */
+	public AreaFeature(String name, String description, Set<Area> areas) {
+		setName(name);
+		setDescription(description);
+		setAreas(areas);
+	}
+
+	/**
+	 * Constructor for AreaFeature.
+	 *
+	 * @param name Name of the area feature
+	 * @param description Description of the area feature
 	 * @throws IllegalArgumentException if name or description is null or blank
 	 */
 	public AreaFeature(String name, String description) {
 		setName(name);
 		setDescription(description);
 	}
+
 
 	/* ---- Getters ---- */
 
@@ -53,6 +68,15 @@ public class AreaFeature {
 	 */
 	public String getDescription() {
 		return description;
+	}
+
+	/**
+	 * Returns the areas that have this feature.
+	 *
+	 * @return Areas as Set
+	 */
+	public Set<Area> getAreas() {
+		return areas;
 	}
 
 	/* ---- Setters ---- */
@@ -81,5 +105,33 @@ public class AreaFeature {
 			throw new IllegalArgumentException("Description cannot be null or blank.");
 		}
 		this.description = description;
+	}
+
+	/**
+	 * Sets the areas that have this feature.
+	 *
+	 * @param areas Areas as Set
+	 * @throws IllegalArgumentException if areas is null or empty
+	 */
+	private void setAreas(Set<Area> areas) {
+		if (areas == null || areas.isEmpty()) {
+			throw new IllegalArgumentException("Areas cannot be null or empty.");
+		}
+		for (Area area : areas) {
+			addArea(area);
+		}
+	}
+
+	/**
+	 * Adds an area to the list of areas that have this feature.
+	 *
+	 * @param area Area to add
+	 * @throws IllegalArgumentException if area is null
+	 */
+	private void addArea(Area area) {
+		if (area == null) {
+			throw new IllegalArgumentException("Area cannot be null.");
+		}
+		areas.add(area);
 	}
 }
