@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -24,29 +26,56 @@ import java.util.UUID;
 public class Area {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
-	@Column(name = "area_uuid")
+	@Column(name = "area_id")
 	private UUID id;
 	@ManyToMany
+	@JoinTable(
+		name = "area_administrators",
+		joinColumns = {
+			@JoinColumn(name = "area_id")
+		},
+		inverseJoinColumns = {
+			@JoinColumn(name = "user_id")
+		}
+	)
+	@Column(name = "administrators")
 	private Set<User> administrators;
-	@ManyToOne()
+	@ManyToOne
 	private Area superArea;
 	@ManyToOne
 	private AreaType areaType;
 	@OneToMany(mappedBy = "superArea")
 	private Set<Area> subAreas;
-	@OneToMany
+	@OneToMany(mappedBy = "area")
 	private Set<Reservation> reservations;
 	private int capacity;
 	private boolean calendarControlled;
 	private String calendarLink;
 	private String name;
 	private String description;
+	@ManyToMany
+	@JoinTable(
+		name = "area_features",
+		joinColumns = {
+			@JoinColumn(name = "area_id")
+		},
+		inverseJoinColumns = {
+			@JoinColumn(name = "feature_id")
+		}
+	)
+	private Set<AreaFeature> features;
 
 	/**
 	 * No args constructor for JPA.
 	 */
 	public Area() {}
 
+	/**
+	 * Constructor for Area.
+	 * Uses a builder pattern.
+	 *
+	 * @param builder Builder object
+	 */
 	private Area(Builder builder) {
 		this.name = builder.name;
 		this.description = builder.description;
@@ -72,6 +101,12 @@ public class Area {
 			this.reservations = new HashSet<>();
 		} else {
 			this.reservations = builder.reservations;
+		}
+
+		if (builder.features == null) {
+			this.features = new HashSet<>();
+		} else {
+			this.features = builder.features;
 		}
 	}
 
@@ -212,6 +247,7 @@ public class Area {
 		private AreaType areaType;
 		private Set<Area> subAreas;
 		private Set<Reservation> reservations;
+		private Set<AreaFeature> features;
 		// Damn this is a lot of fields.
 		// Good im using the builder pattern then 😎
 
@@ -372,6 +408,21 @@ public class Area {
 		}
 
 		/**
+		 * Adds a single sub area to the area.
+		 *
+		 * @param subArea Area object
+		 * @return Builder object
+		 * @throws IllegalArgumentException if sub area is null
+		 */
+		public Builder subArea(Area subArea) {
+			if (subArea == null) {
+				throw new IllegalArgumentException("Sub area is null");
+			}
+			subAreas.add(subArea);
+			return this;
+		}
+
+		/**
 		 * Sets the reservations of the area.
 		 *
 		 * @param reservations Set of Reservation objects
@@ -387,6 +438,55 @@ public class Area {
 					reservations.add(reservation);
 				}
 			}
+			return this;
+		}
+
+		/**
+		 * Adds a single reservation to the area.
+		 *
+		 * @param reservation Reservation object
+		 * @return builder object
+		 * @throws IllegalArgumentException if reservation is null
+		 */
+		public Builder reservation(Reservation reservation) {
+			if (reservation == null) {
+				throw new IllegalArgumentException("Reservation is null");
+			}
+			reservations.add(reservation);
+			return this;
+		}
+
+		/**
+		 * Sets the features of the area.
+		 *
+		 * @param features Set of AreaFeature objects
+		 * @return Builder object
+		 * @throws IllegalArgumentException if features is null
+		 */
+		public Builder features(Set<AreaFeature> features) {
+			if (features == null || features.isEmpty()) {
+				throw new IllegalArgumentException("Features is null");
+			}
+			for (AreaFeature feature : features) {
+				if (feature != null) {
+					features.add(feature);
+				}
+			}
+			return this;
+		}
+
+		/**
+		 * Adds a single feature to the area.
+		 *
+		 * @param feature AreaFeature object
+		 * @return Builder object
+		 * @throws IllegalArgumentException if feature is null
+		 */
+		public Builder feature(AreaFeature feature) {
+			if (feature == null) {
+				throw new IllegalArgumentException("Feature is null");
+			}
+			features.add(feature);
 			return this;
 		}
 

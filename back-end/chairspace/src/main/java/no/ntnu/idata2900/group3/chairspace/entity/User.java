@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -16,7 +18,6 @@ import java.util.UUID;
 /**
  * Represents a user.
  *
- * @TODO Implement factory pattern for creating users.
  */
 @Entity
 @Schema(description = "Represents a user in the database")
@@ -33,11 +34,16 @@ public class User {
 	private String email;
 	@Column(name = "phone_number", nullable = false)
 	private int phoneNumber;
-	@ManyToMany
+	@ManyToMany(mappedBy = "administrators")
 	@Column(nullable = true)
 	private Set<Area> administrates;
 	@OneToMany
 	@Column(nullable = true)
+	@JoinTable(
+		name = "account_reservations",
+		joinColumns = @JoinColumn(name = "user_id"),
+		inverseJoinColumns = @JoinColumn(name = "reservation_id")
+	)
 	private Set<Reservation> reservations;
 
 	/**
