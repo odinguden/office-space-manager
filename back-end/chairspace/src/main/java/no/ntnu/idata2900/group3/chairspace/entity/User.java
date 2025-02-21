@@ -18,7 +18,6 @@ import java.util.UUID;
 /**
  * Represents a user.
  *
- * @TODO Implement factory pattern for creating users.
  */
 @Entity
 @Schema(description = "Represents a user in the database")

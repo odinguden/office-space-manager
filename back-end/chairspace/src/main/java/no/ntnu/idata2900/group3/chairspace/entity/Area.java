@@ -70,6 +70,12 @@ public class Area {
 	 */
 	public Area() {}
 
+	/**
+	 * Constructor for Area.
+	 * Uses a builder pattern.
+	 *
+	 * @param builder Builder object
+	 */
 	private Area(Builder builder) {
 		this.name = builder.name;
 		this.description = builder.description;
@@ -96,6 +102,7 @@ public class Area {
 		} else {
 			this.reservations = builder.reservations;
 		}
+
 		if (builder.features == null) {
 			this.features = new HashSet<>();
 		} else {
