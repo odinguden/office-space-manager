@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -47,6 +48,7 @@ public class AreaFeature {
 	public AreaFeature(String name, String description) {
 		setName(name);
 		setDescription(description);
+		areas = new HashSet<>();
 	}
 
 
@@ -100,7 +102,7 @@ public class AreaFeature {
 	 * @param description Description as String
 	 * @throws IllegalArgumentException if description is null or blank
 	 */
-	private void setDescription(String description) {
+	public void setDescription(String description) {
 		if (description == null || description.isBlank()) {
 			throw new IllegalArgumentException("Description cannot be null or blank.");
 		}
@@ -117,6 +119,11 @@ public class AreaFeature {
 		if (areas == null || areas.isEmpty()) {
 			throw new IllegalArgumentException("Areas cannot be null or empty.");
 		}
+
+		if (this.areas == null) {
+			this.areas = new HashSet<>();
+		}
+
 		for (Area area : areas) {
 			addArea(area);
 		}
@@ -128,10 +135,23 @@ public class AreaFeature {
 	 * @param area Area to add
 	 * @throws IllegalArgumentException if area is null
 	 */
-	private void addArea(Area area) {
+	public void addArea(Area area) {
 		if (area == null) {
 			throw new IllegalArgumentException("Area cannot be null.");
 		}
 		areas.add(area);
+	}
+
+	/**
+	 * Removes given area from areas set.
+	 *
+	 * @param area area object to remove
+	 * @throws IllegalArgumentException if given null
+	 */
+	public void removeArea(Area area) {
+		if (area == null) {
+			throw new IllegalArgumentException("Area cannot be null");
+		}
+		areas.remove(area);
 	}
 }
