@@ -1,7 +1,9 @@
 package no.ntnu.idata2900.group3.chairspace.entity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,9 +15,9 @@ import org.junit.jupiter.api.Test;
  * @see AreaType
  * @author Odin Lyngsgård
  * @version 0.1
- * @since 1.0
+ * @since 0.1
  */
-public class AreaTypeTests {
+class AreaTypeTests {
 
 	private AreaType areaType;
 
@@ -29,25 +31,35 @@ public class AreaTypeTests {
 	@DisplayName("Test that name is assigned")
 	@Test
 	void testName() {
-		assertEquals(areaType.getName(), "Test Type", "Name is not assigned correctly");
+		assertEquals("Test Type", areaType.getName(), "Name is not assigned correctly");
 	}
 
 	@DisplayName("Test that description is assigned")
 	@Test
 	void testDescription() {
-		assertEquals(areaType.getDescription(), "Test Description", "Description is not assigned correctly");
+		assertEquals(
+			"Test Description",
+			areaType.getDescription(),
+			"Description is not assigned correctly"
+		);
 	}
 
 	@DisplayName("Test that constructor throws exception when name is null")
 	@Test
 	void testNullName() {
-		assertThrows(IllegalArgumentException.class, () -> new AreaType(null, "Test Description"), "Does not throw exception when name is null");
+		assertThrows(
+			IllegalArgumentException.class, () -> new AreaType(null, "Test Description"),
+			"Does not throw exception when name is null"
+		);
 	}
 
 	@DisplayName("Test that constructor throws exception when description is null")
 	@Test
 	void testNullDescription() {
-		assertThrows(IllegalArgumentException.class, () -> new AreaType("Test Type", null), "Does not throw exception when description is null");
+		assertThrows(
+			IllegalArgumentException.class, () -> new AreaType("Test Type", null),
+			"Does not throw exception when description is null"
+		);
 	}
 
 	/* ---- Test Methods ---- */
@@ -56,12 +68,57 @@ public class AreaTypeTests {
 	@Test
 	void testSetDescription() {
 		areaType.setDescription("New Description");
-		assertEquals(areaType.getDescription(), "New Description");
+		assertEquals("New Description", areaType.getDescription());
 	}
 
 	@DisplayName("Test that setDescription throws exception when null")
 	@Test
 	void testSetNullDescription() {
-		assertThrows(IllegalArgumentException.class, () -> areaType.setDescription(null), "Does not throw exception when description is null");
+		assertThrows(
+			IllegalArgumentException.class, () -> areaType.setDescription(null),
+			"Does not throw exception when description is null"
+		);
+	}
+
+	@DisplayName("❓")
+	@Test
+	void testAddArea() {
+		Area area = new Area.Builder("Test Area", 123, areaType).build();
+		Area area2 = new Area.Builder("Test Area 2", 23, areaType).build();
+		areaType.addArea(area);
+		areaType.addArea(area2);
+		assertTrue(areaType.getAreas().contains(area), "Area type does not contain area");
+		assertTrue(areaType.getAreas().contains(area2), "Area type does not contain area2");
+	}
+
+	@DisplayName("❓")
+	@Test
+	void testAddNullAreaThrows() {
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> areaType.addArea(null)
+		);
+	}
+
+	@DisplayName("❓")
+	@Test
+	void testRemoveArea() {
+		Area area = new Area.Builder("Test Area", 123, areaType).build();
+		Area area2 = new Area.Builder("Test Area 2", 23, areaType).build();
+		areaType.addArea(area);
+		areaType.addArea(area2);
+		areaType.removeArea(area);
+		assertFalse(areaType.getAreas().contains(area));
+		areaType.removeArea(area2);
+		assertFalse(areaType.getAreas().contains(area2));
+	}
+
+	@DisplayName("❓")
+	@Test
+	void testRemoveAreaThrows() {
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> areaType.removeArea(null)
+		);
 	}
 }
