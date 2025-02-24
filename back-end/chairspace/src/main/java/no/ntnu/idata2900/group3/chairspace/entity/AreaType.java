@@ -32,6 +32,18 @@ public class AreaType {
 		setDescription(description);
 	}
 
+	/**
+	 * Constructor for AreaType with areas.
+	 *
+	 * @param name of the area type
+	 * @param description of the area type
+	 */
+	public AreaType(String name, String description, Set<Area> areas) {
+		setName(name);
+		setDescription(description);
+		setAreas(areas);
+	}
+
 
 	/* ---- Getters ---- */
 
@@ -81,7 +93,7 @@ public class AreaType {
 	 *
 	 * @param description of area type as string.
 	 */
-	private void setDescription(String description) {
+	public void setDescription(String description) {
 		if (description == null || description.isEmpty()) {
 			throw new IllegalArgumentException("Description cannot be null or empty");
 		}
