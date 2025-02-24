@@ -19,6 +19,10 @@ import java.util.UUID;
 /**
  * Represents a reservable area in the database.
  * Implements a builder pattern.
+ *
+ * @author Odin Lyngsgård
+ * @version 0.1
+ * @since 0.1
  */
 @Entity
 @Schema(description = "Represents a reservable area in the database")

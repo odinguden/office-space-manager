@@ -10,6 +10,11 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Tests for the User entity.
+ *
+ * @see AreaFeature
+ * @author Odin Lyngsgård
+ * @version 0.1
+ * @since 0.1
  */
 class UserTests {
 	private User user;

@@ -11,7 +11,10 @@ import java.util.UUID;
 /**
  * Represents a reservation of an area.
  *
- * @TODO Consider using factory pattern for creating reservations.
+ *
+ * @author Odin Lyngsgård
+ * @version 0.1
+ * @since 0.1
  */
 @Entity
 public class Reservation {

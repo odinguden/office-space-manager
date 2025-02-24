@@ -9,6 +9,10 @@ import java.util.Set;
 
 /**
  * Represents a type that an area can be.
+ *
+ * @author Odin Lyngsgård
+ * @version 1.0
+ * @since 0.1
  */
 @Entity
 public class AreaType {

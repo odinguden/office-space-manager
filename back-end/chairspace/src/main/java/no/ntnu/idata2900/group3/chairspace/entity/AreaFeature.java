@@ -9,6 +9,10 @@ import java.util.Set;
 
 /**
  * Represents an area feature in the database.
+ *
+ * @author Odin Lyngsgård
+ * @version 1.0
+ * @since 0.1
  */
 @Schema(description = "Represents an area feature in the database")
 @Entity
