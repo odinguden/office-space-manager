@@ -76,11 +76,10 @@ public class User {
 	}
 
 	private User(Builder builder) {
-		setFirstName(builder.firstName);
-		setLastName(builder.lastName);
-		setEmail(builder.email);
-		setPhoneNumber(builder.phoneNumber);
-
+		this.firstName = builder.firstName;
+		this.lastName = builder.lastName;
+		this.email = builder.email;
+		this.phoneNumber = builder.phoneNumber;
 	}
 
 	/* ---- Getters ---- */

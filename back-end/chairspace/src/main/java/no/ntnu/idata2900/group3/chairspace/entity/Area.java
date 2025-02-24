@@ -69,6 +69,9 @@ public class Area {
 	)
 	private Set<AreaFeature> features;
 
+
+	private static String authErrMessage = "User is not an administrator for this area";
+
 	/**
 	 * No args constructor for JPA.
 	 */
@@ -131,7 +134,7 @@ public class Area {
 	 *
 	 * @return Set of administrators
 	 */
-	public Set<User> getAdministrator() {
+	public Set<User> getAdministrators() {
 		return administrators;
 	}
 
@@ -190,6 +193,50 @@ public class Area {
 	}
 
 	/**
+	 * Gets area features.
+	 *
+	 *  @return area features
+	 */
+	public Set<AreaFeature> getFeatures() {
+		return features;
+	}
+
+	/**
+	 * Gets reservations in a set.
+	 *
+	 * @return reservations
+	 */
+	public Set<Reservation> getReservations() {
+		return reservations;
+	}
+
+	/**
+	 * Gets sub areas of this area.
+	 *
+	 * @return sub areas in a set
+	 */
+	public Set<Area> getSubAreas() {
+		return subAreas;
+	}
+
+	/**
+	 * Returns the number of admin users for this area + super areas.
+	 * This method is used to ensure that a area always has a admin user.
+	 *
+	 * @return number of administrators as int
+	 */
+	public int getAdminCount() {
+		int count = administrators.size();
+
+		if (superArea != null) {
+			// Behold Sigve the += operator.
+			// Are you not proud!!
+			count += superArea.getAdminCount();
+		}
+		return count;
+	}
+
+	/**
 	 * Returns the description of the area.
 	 *
 	 * @return Description as String
@@ -202,21 +249,42 @@ public class Area {
 	/* ---- Setters ---- */
 
 	/**
-	 * Sets the id of the area.
+	 * Adds a user to the assigned administrators of this area.
+	 * Can only be done by an existing administrator.
 	 *
-	 * @param id as UUID
+	 * @param newAdmin the new user to be added to admin list
+	 * @param existingAdmin existing admin preforming the operation
 	 */
-	private void setId(UUID id) {
-		this.id = id;
+	public void addAdministrator(User newAdmin, User existingAdmin) {
+		if (newAdmin == null || existingAdmin == null) {
+			throw new IllegalArgumentException();
+		}
+		if (!isAdmin(existingAdmin)) {
+			throw new IllegalStateException(authErrMessage);
+		}
+		administrators.add(newAdmin);
 	}
 
 	/**
-	 * Sets the administrators of the area.
+	 * Removes a administrator from set of administrators.
 	 *
-	 * @param administrators Set of administrators
+	 * @param toRemove User to remove
+	 * @param existingAdmin user preforming operation
+	 * @throws IllegalStateException if user is not administrator, or if user is trying to remove
+	 *     the last administrator of the area
+	 * @throws IllegalArgumentException if any of the provided arguments are null
 	 */
-	private void setAdministrators(Set<User> administrators) {
-		this.administrators = administrators;
+	public void removeAdministrator(User toRemove, User existingAdmin) {
+		if (toRemove == null || existingAdmin == null) {
+			throw new IllegalArgumentException();
+		}
+		if (!isAdmin(existingAdmin)) {
+			throw new IllegalStateException(authErrMessage);
+		}
+		if (getAdminCount() == 1) {
+			throw new IllegalStateException("Cannot remove the last administrator of a area");
+		}
+		administrators.remove(toRemove);
 	}
 
 	/**
@@ -229,16 +297,81 @@ public class Area {
 	}
 
 	/**
-	 * Sets the area type of the area.
+	 * Adds a area feature.
+	 * Must be done by a administrator of the area.
 	 *
-	 * @param areaType Area type
+	 * @param areaFeature The feature to add
+	 * @param user user executing the operation
 	 */
-	private void setAreaType(AreaType areaType) {
-		this.areaType = areaType;
+	public void addAreaFeature(AreaFeature areaFeature, User user) {
+		if (areaFeature == null || user == null) {
+			throw new IllegalArgumentException();
+		}
+		if (!isAdmin(user)) {
+			throw new IllegalStateException(authErrMessage);
+		}
+		if (!features.contains(areaFeature)) {
+			features.add(areaFeature);
+		}
+	}
+
+	/**
+	 * Updates the description.
+	 * Must be done by an administrator of the area.
+	 *
+	 * @param newDescription new description as string.
+	 * @param user user executing the operation.
+	 */
+	public void updateDescription(String newDescription, User user) {
+		if (newDescription == null || newDescription.isBlank() || user == null) {
+			throw new IllegalArgumentException("Null argument provided");
+		}
+		if (!isAdmin(user)) {
+			throw new IllegalStateException(authErrMessage);
+		}
+		description = newDescription;
+	}
+
+	/**
+	 * Updates the capacity if done by a authorized user.
+	 *
+	 * @param newCapacity the updated capacity
+	 * @param user user preforming the action
+	 */
+	public void updateCapacity(int newCapacity, User user) {
+		if (newCapacity <= 0 || user == null) {
+			throw new IllegalArgumentException("Null argument provided");
+		}
+		if (!isAdmin(user)) {
+			throw new IllegalStateException(authErrMessage);
+		}
+		capacity = newCapacity;
+	}
+
+	public void addSubArea(Area area, User user) {
+		//TODO
+	}
+
+	/* ---- Methods ---- */
+
+	/**
+	 * Returns true if user is administrator of this area or this areas super area.
+	 *
+	 * @param user User to check
+	 * @return true if user is administrator of this area or this areas super area
+	 */
+	public boolean isAdmin(User user) {
+		if (user == null) {
+			throw new IllegalArgumentException("User is null when a value was expected");
+		}
+		return administrators.contains(user) || (superArea != null && superArea.isAdmin(user));
 	}
 
 	/**
 	 * Builder class for Area.
+	 *
+	 * @author Odin Lyngsgård
+	 * @version 0.1
 	 */
 	public static class Builder {
 		private String name;
@@ -275,6 +408,7 @@ public class Area {
 			calendarControlled = false;
 
 			administrators = new HashSet<>();
+			features = new HashSet<>();
 			subAreas = new HashSet<>();
 			reservations = new HashSet<>();
 		}
@@ -374,6 +508,21 @@ public class Area {
 					administrators.add(user);
 				}
 			}
+			return this;
+		}
+
+		/**
+		 * Adds a single administrator to the area.
+		 *
+		 * @param administrator Single user
+		 * @return Builder object
+		 * @throws IllegalArgumentException if administrators is null
+		 */
+		public Builder administrator(User administrator) {
+			if (administrator == null) {
+				throw new IllegalArgumentException("Administrator is null");
+			}
+			administrators.add(administrator);
 			return this;
 		}
 
@@ -498,8 +647,12 @@ public class Area {
 		 * Builds the Area object.
 		 *
 		 * @return Area object
+		 * @throws IllegalStateException if build is called without having an assigned administrator
 		 */
 		public Area build() {
+			if (superArea == null && administrators.isEmpty()) {
+				throw new IllegalStateException("Cannot create area without administrator");
+			}
 			return new Area(this);
 		}
 
