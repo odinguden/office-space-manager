@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,16 @@ import org.junit.jupiter.api.Test;
 class AreaFeatureTests {
 
 	private AreaFeature areaFeature;
+	private static Area area;
+	private static Area area2;
+
+	@BeforeAll
+	static void setUpAreas() {
+		AreaType testType = new AreaType("Test Type", "Test Descripton");
+		User user = new User.Builder("Argh", "REah").build();
+		area = new Area.Builder("Test Area", 123, testType).administrator(user).build();
+		area2 = new Area.Builder("Test Area 2", 23, testType).administrator(user).build();
+	}
 
 	@BeforeEach
 	void setUp() {
@@ -83,9 +94,6 @@ class AreaFeatureTests {
 	@DisplayName("❓")
 	@Test
 	void testAddArea() {
-		AreaType testType = new AreaType("Test Type", "Test Descripton");
-		Area area = new Area.Builder("Test Area", 123, testType).build();
-		Area area2 = new Area.Builder("Test Area 2", 23, testType).build();
 		areaFeature.addArea(area);
 		areaFeature.addArea(area2);
 		assertTrue(areaFeature.getAreas().contains(area), "Area type does not contain area");
@@ -104,9 +112,6 @@ class AreaFeatureTests {
 	@DisplayName("❓")
 	@Test
 	void testRemoveArea() {
-		AreaType testType = new AreaType("Test Type", "Test Descripton");
-		Area area = new Area.Builder("Test Area", 123, testType).build();
-		Area area2 = new Area.Builder("Test Area 2", 23, testType).build();
 		areaFeature.addArea(area);
 		areaFeature.addArea(area2);
 		areaFeature.removeArea(area);
