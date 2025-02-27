@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -64,12 +67,29 @@ class AreaTypeTests {
 		);
 	}
 
+	@Test
+	void testBlankName() {
+		assertThrows(
+			IllegalArgumentException.class, () -> new AreaType("", "Test Description"),
+			"Does not throw exception when name is blank"
+		);
+	}
+
 	@DisplayName("Test that constructor throws exception when description is null")
 	@Test
 	void testNullDescription() {
 		assertThrows(
 			IllegalArgumentException.class, () -> new AreaType("Test Type", null),
 			"Does not throw exception when description is null"
+		);
+	}
+
+	@DisplayName("Test that constructor throws exception when description is blank")
+	@Test
+	void testBlankDescription() {
+		assertThrows(
+			IllegalArgumentException.class, () -> new AreaType("Test Type", ""),
+			"Does not throw exception when description is blank"
 		);
 	}
 
@@ -91,7 +111,6 @@ class AreaTypeTests {
 		);
 	}
 
-	@DisplayName("❓")
 	@Test
 	void testAddArea() {
 		areaType.addArea(area);
@@ -100,7 +119,6 @@ class AreaTypeTests {
 		assertTrue(areaType.getAreas().contains(area2), "Area type does not contain area2");
 	}
 
-	@DisplayName("❓")
 	@Test
 	void testAddNullAreaThrows() {
 		assertThrows(
@@ -109,7 +127,25 @@ class AreaTypeTests {
 		);
 	}
 
-	@DisplayName("❓")
+	@Test
+	void addAreas() {
+		Set<Area> areas = new HashSet<>();
+		areas.add(area);
+		areas.add(area2);
+		areaType.addAreas(areas);
+		assertTrue(areaType.getAreas().contains(area), "Area type does not contain area");
+		assertTrue(areaType.getAreas().contains(area2), "Area type does not contain area2");
+	}
+
+	@Test
+	void addNullAreas() {
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> areaType.addAreas(null),
+			"AreaType does not throw when trying to add null areas"
+		);
+	}
+
 	@Test
 	void testRemoveArea() {
 		areaType.addArea(area);
@@ -120,7 +156,6 @@ class AreaTypeTests {
 		assertFalse(areaType.getAreas().contains(area2));
 	}
 
-	@DisplayName("❓")
 	@Test
 	void testRemoveAreaThrows() {
 		assertThrows(
