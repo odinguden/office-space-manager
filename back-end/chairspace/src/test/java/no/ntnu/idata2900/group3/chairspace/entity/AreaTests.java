@@ -806,6 +806,5 @@ class AreaTests {
 			LocalDateTime.now().plusHours(6),
 			"Meeting with mom"
 		);
-		area.
 	}
 }

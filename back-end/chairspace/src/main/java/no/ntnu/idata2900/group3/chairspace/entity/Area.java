@@ -244,12 +244,16 @@ public class Area {
 
 
 	/**
-	 * TODO
-	 * @param reservation
+	 * Adds a reservation if the area is free for the matching time span.
+	 *
+	 * @param reservation the reservation to add
 	 */
 	public void addReservation(Reservation reservation) {
 		if (reservation == null) {
 			throw new IllegalArgumentException("Reservation cannot be null");
+		}
+		if (isFreeBetween(reservation.getStart(), reservation.getEnd())) {
+			reservations.add(reservation);
 		}
 	}
 
@@ -456,22 +460,43 @@ public class Area {
 	/* ---- Methods ---- */
 
 	/**
-	 * TODO
-	 * @param start
-	 * @param end
-	 * @return
+	 * Returns true if the area is free in this block of time. false if not.
+	 *
+	 * @param start start of time block
+	 * @param end end of time block
+	 * @return true or false depending on if reservations exists in this block of time
 	 */
 	public boolean isFreeBetween(LocalDateTime start, LocalDateTime end) {
-
+		for (Reservation reservation : reservations) {
+			if (reservation.getStart().isBefore(start) && reservation.getEnd().isAfter(start)) {
+				return false;
+			}
+			if (reservation.getStart().isBefore(end) && reservation.getEnd().isAfter(end)) {
+				return false;
+			}
+			if (start.isBefore(reservation.getStart()) && end.isAfter(reservation.getStart())) {
+				return false;
+			}
+			if (start.isBefore(reservation.getEnd()) && end.isAfter(reservation.getEnd())) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
-	 * 
-	 * @param time
-	 * @return
+	 * Returns true if the area is free at this time. false if not.
+	 *
+	 * @param time The time to check
+	 * @return True or false depending on if the point of time is free
 	 */
 	public boolean isFree(LocalDateTime time) {
-
+		for (Reservation reservation : reservations) {
+			if (reservation.getStart().isBefore(time) && reservation.getEnd().isAfter(time)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
