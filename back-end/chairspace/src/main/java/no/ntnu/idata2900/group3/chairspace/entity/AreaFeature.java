@@ -33,20 +33,6 @@ public class AreaFeature {
 	 *
 	 * @param name Name of the area feature
 	 * @param description Description of the area feature
-	 * @param areas Areas that have this feature
-	 * @throws IllegalArgumentException if name or description is null or blank
-	 */
-	public AreaFeature(String name, String description, Set<Area> areas) {
-		setName(name);
-		setDescription(description);
-		setAreas(areas);
-	}
-
-	/**
-	 * Constructor for AreaFeature.
-	 *
-	 * @param name Name of the area feature
-	 * @param description Description of the area feature
 	 * @throws IllegalArgumentException if name or description is null or blank
 	 */
 	public AreaFeature(String name, String description) {
@@ -117,17 +103,12 @@ public class AreaFeature {
 	 * Sets the areas that have this feature.
 	 *
 	 * @param areas Areas as Set
-	 * @throws IllegalArgumentException if areas is null or empty
+	 * @throws IllegalArgumentException if areas is null
 	 */
-	private void setAreas(Set<Area> areas) {
-		if (areas == null || areas.isEmpty()) {
-			throw new IllegalArgumentException("Areas cannot be null or empty.");
+	public void addAreas(Set<Area> areas) {
+		if (areas == null) {
+			throw new IllegalArgumentException("Areas cannot be null.");
 		}
-
-		if (this.areas == null) {
-			this.areas = new HashSet<>();
-		}
-
 		for (Area area : areas) {
 			addArea(area);
 		}
