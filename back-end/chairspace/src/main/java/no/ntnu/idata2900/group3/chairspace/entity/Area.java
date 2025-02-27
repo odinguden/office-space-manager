@@ -12,6 +12,8 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -111,10 +113,29 @@ public class Area {
 
 	/**
 	 * Returns the administrators of the area.
+	 * Includes administrators from superArea.
 	 *
 	 * @return Set of administrators
 	 */
 	public Set<User> getAdministrators() {
+		if (getSuperArea() != null) {
+			Set<User> allAdmins = new HashSet<>();
+			allAdmins.addAll(superArea.getAdministrators());
+			allAdmins.addAll(administrators);
+
+			return allAdmins;
+		} else {
+			return administrators;
+		}
+	}
+
+	/**
+	 * Gets the administrators that exist only for this area.
+	 * Does not include administrators from superArea
+	 *
+	 * @return administrators specifically for this area.
+	 */
+	public Set<User> getAreaSpecificAdministrators() {
 		return administrators;
 	}
 
@@ -200,20 +221,13 @@ public class Area {
 	}
 
 	/**
-	 * Returns the number of admin users for this area + super areas.
+	 * Returns the number of admin unique users for this area + super areas.
 	 * This method is used to ensure that a area always has a admin user.
 	 *
 	 * @return number of administrators as int
 	 */
 	public int getAdminCount() {
-		int count = administrators.size();
-
-		if (superArea != null) {
-			// Behold Sigve the += operator.
-			// Are you not proud!!
-			count += superArea.getAdminCount();
-		}
-		return count;
+		return getAdministrators().size();
 	}
 
 	/**
@@ -227,6 +241,17 @@ public class Area {
 
 
 	/* ---- Setters ---- */
+
+
+	/**
+	 * TODO
+	 * @param reservation
+	 */
+	public void addReservation(Reservation reservation) {
+		if (reservation == null) {
+			throw new IllegalArgumentException("Reservation cannot be null");
+		}
+	}
 
 	/**
 	 * Adds a user to the assigned administrators of this area.
@@ -268,6 +293,72 @@ public class Area {
 	}
 
 	/**
+	 * Removes a sub area from this area.
+	 * Will not perform the action if user does not have the correct credentials.
+	 *
+	 * @param subArea The area to remove
+	 * @param user the user preforming the action
+	 * @throws IllegalArgumentException if subArea is null
+	 * @throws IllegalStateException if user is not an administrator of this area
+	 */
+	public void removeSubArea(Area subArea, User user) {
+		if (subArea == null) {
+			throw new IllegalArgumentException("Sub area cannot be null");
+		}
+		if (!isAdmin(user)) {
+			throw new IllegalStateException(authErrMessage);
+		}
+		subAreas.remove(subArea);
+	}
+
+	/**
+	 * Replaces existing super area with a new area.
+	 *
+	 * @param area new area
+	 * @param user user preforming the action
+	 * @throws IllegalArgumentException if subArea is null
+	 * @throws IllegalStateException if user is not an administrator of this area
+	 */
+	public void replaceSuperArea(Area area, User user) {
+		removeSuperArea(user);
+		setSuperArea(area, user);
+	}
+
+	/**
+	 * Removes the existing super area.
+	 *
+	 * @param user the user preforming the action
+	 */
+	public void removeSuperArea(User user) {
+		if (!isAdmin(user)) {
+			throw new IllegalStateException(authErrMessage);
+		}
+		if (getAreaSpecificAdministrators().isEmpty()) {
+			throw new IllegalStateException(
+				"Cannot remove super area as this area has not administrators of it's own"
+			);
+		}
+		this.superArea = null;
+	}
+
+	/**
+	 * Removes reservation if the user preforming the action is either a administrator of this area,
+	 * or the owner of the reservation.
+	 *
+	 * @param reservation the reservation to remove.
+	 * @param user the user preforming the action
+	 */
+	public void removeReservation(Reservation reservation, User user) {
+		if (reservation == null) {
+			throw new IllegalArgumentException("Reservation is null");
+		}
+		if (!isAdmin(user) && reservation.getUser() != user) {
+			throw new IllegalStateException(authErrMessage);
+		}
+		reservations.remove(reservation);
+	}
+
+	/**
 	 * Sets the super area of the area.
 	 *
 	 * @param superArea Super area
@@ -276,6 +367,12 @@ public class Area {
 	public void setSuperArea(Area superArea, User user) {
 		if (!isAdmin(user)) {
 			throw new IllegalStateException("User does not have the necessary privileges");
+		}
+		if (this.superArea != null) {
+			throw new IllegalStateException("This area already has a super area");
+		}
+		if (superArea == null) {
+			throw new IllegalArgumentException("Cannot set super area to null.");
 		}
 		this.superArea = superArea;
 	}
@@ -288,7 +385,7 @@ public class Area {
 	 * @param user user executing the operation
 	 */
 	public void addAreaFeature(AreaFeature areaFeature, User user) {
-		if (areaFeature == null || user == null) {
+		if (areaFeature == null) {
 			throw new IllegalArgumentException();
 		}
 		if (!isAdmin(user)) {
@@ -310,7 +407,7 @@ public class Area {
 		if (newDescription == null || newDescription.isBlank()) {
 			throw new IllegalArgumentException("New description does not contain any information");
 		}
-		if (!isAdmin(user) || user == null) {
+		if (!isAdmin(user)) {
 			throw new IllegalStateException(authErrMessage);
 		}
 		description = newDescription;
@@ -359,6 +456,25 @@ public class Area {
 	/* ---- Methods ---- */
 
 	/**
+	 * TODO
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	public boolean isFreeBetween(LocalDateTime start, LocalDateTime end) {
+
+	}
+
+	/**
+	 * 
+	 * @param time
+	 * @return
+	 */
+	public boolean isFree(LocalDateTime time) {
+
+	}
+
+	/**
 	 * Returns true if user is administrator of this area or this areas super area.
 	 *
 	 * @param user User to check
@@ -368,7 +484,7 @@ public class Area {
 		if (user == null) {
 			throw new IllegalArgumentException("User is null when a value was expected");
 		}
-		return administrators.contains(user) || (superArea != null && superArea.isAdmin(user));
+		return getAdministrators().contains(user);
 	}
 
 	/**
@@ -502,13 +618,11 @@ public class Area {
 		 * @throws IllegalArgumentException if administrators is null
 		 */
 		public Builder administrators(Set<User> administrators) {
-			if (administrators == null || administrators.isEmpty()) {
+			if (administrators == null) {
 				throw new IllegalArgumentException("Administrators is null");
 			}
 			for (User user : administrators) {
-				if (user != null) {
-					administrators.add(user);
-				}
+				administrator(user);
 			}
 			return this;
 		}
@@ -589,7 +703,7 @@ public class Area {
 		 * @throws IllegalArgumentException if features is null
 		 */
 		public Builder features(Set<AreaFeature> features) {
-			if (features == null || features.isEmpty()) {
+			if (features == null) {
 				throw new IllegalArgumentException("Features is null");
 			}
 			for (AreaFeature feature : features) {
@@ -625,6 +739,5 @@ public class Area {
 			}
 			return new Area(this);
 		}
-
 	}
 }
