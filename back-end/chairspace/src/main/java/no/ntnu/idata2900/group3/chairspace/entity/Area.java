@@ -91,30 +91,10 @@ public class Area {
 		this.areaType = builder.areaType;
 		this.calendarControlled = builder.calendarControlled;
 		this.calendarLink = builder.calendarLink;
-
-		if (builder.administrators == null) {
-			this.administrators = new HashSet<>();
-		} else {
-			this.administrators = builder.administrators;
-		}
-
-		if (builder.subAreas == null) {
-			this.subAreas = new HashSet<>();
-		} else {
-			this.subAreas = builder.subAreas;
-		}
-
-		if (builder.reservations == null) {
-			this.reservations = new HashSet<>();
-		} else {
-			this.reservations = builder.reservations;
-		}
-
-		if (builder.features == null) {
-			this.features = new HashSet<>();
-		} else {
-			this.features = builder.features;
-		}
+		this.administrators = builder.administrators;
+		this.subAreas = builder.subAreas;
+		this.features = builder.features;
+		this.reservations = new HashSet<>();
 	}
 
 	/* ---- Getters ---- */
@@ -291,8 +271,12 @@ public class Area {
 	 * Sets the super area of the area.
 	 *
 	 * @param superArea Super area
+	 * @param user Preforming the action
 	 */
-	private void setSuperArea(Area superArea) {
+	public void setSuperArea(Area superArea, User user) {
+		if (!isAdmin(user)) {
+			throw new IllegalStateException("User does not have the necessary privileges");
+		}
 		this.superArea = superArea;
 	}
 
@@ -323,10 +307,10 @@ public class Area {
 	 * @param user user executing the operation.
 	 */
 	public void updateDescription(String newDescription, User user) {
-		if (newDescription == null || newDescription.isBlank() || user == null) {
-			throw new IllegalArgumentException("Null argument provided");
+		if (newDescription == null || newDescription.isBlank()) {
+			throw new IllegalArgumentException("New description does not contain any information");
 		}
-		if (!isAdmin(user)) {
+		if (!isAdmin(user) || user == null) {
 			throw new IllegalStateException(authErrMessage);
 		}
 		description = newDescription;
@@ -348,8 +332,28 @@ public class Area {
 		capacity = newCapacity;
 	}
 
+	/**
+	 * Adds a single sub area to this area.
+	 *
+	 * @param area the area to add
+	 * @param user the user preforming the operation
+	 * @throws IllegalArgumentException if null arguments are provided
+	 * @throws IllegalStateException If user is not a administrator of this area.
+	 *     Or if the area that is being set as sub area already has a sub area
+	 */
 	public void addSubArea(Area area, User user) {
-		//TODO
+		if (area == null || user == null) {
+			throw new IllegalArgumentException("Null argument provided");
+		}
+		if (!isAdmin(user)) {
+			throw new IllegalStateException(authErrMessage);
+		}
+		if (area.getSuperArea() != null) {
+			throw new IllegalStateException(
+				"Cannot add area as sub area if it already has a super area"
+			);
+		}
+		subAreas.add(area);
 	}
 
 	/* ---- Methods ---- */
@@ -383,7 +387,6 @@ public class Area {
 		private Area superArea;
 		private AreaType areaType;
 		private Set<Area> subAreas;
-		private Set<Reservation> reservations;
 		private Set<AreaFeature> features;
 		// Damn this is a lot of fields.
 		// Good im using the builder pattern then 😎
@@ -404,13 +407,12 @@ public class Area {
 			name(name);
 			capacity(capacity);
 			areaType(areaType);
+
 			// Default value
 			calendarControlled = false;
-
 			administrators = new HashSet<>();
 			features = new HashSet<>();
 			subAreas = new HashSet<>();
-			reservations = new HashSet<>();
 		}
 
 		/* ---- Setters ---- */
@@ -547,15 +549,14 @@ public class Area {
 		 * @param subAreas Set of Area objects
 		 * @return Builder object
 		 * @throws IllegalArgumentException if sub areas is null
+		 * @throws IllegalStateException If one of the areas already has a super area
 		 */
 		public Builder subAreas(Set<Area> subAreas) {
-			if (subAreas == null || subAreas.isEmpty()) {
+			if (subAreas == null) {
 				throw new IllegalArgumentException("Sub areas is null");
 			}
 			for (Area area : subAreas) {
-				if (area != null) {
-					subAreas.add(area);
-				}
+				subArea(area);
 			}
 			return this;
 		}
@@ -571,41 +572,12 @@ public class Area {
 			if (subArea == null) {
 				throw new IllegalArgumentException("Sub area is null");
 			}
+			if (subArea.getSuperArea() != null) {
+				throw new IllegalStateException(
+					"Cannot set area as sub area, as it already has a super area"
+				);
+			}
 			subAreas.add(subArea);
-			return this;
-		}
-
-		/**
-		 * Sets the reservations of the area.
-		 *
-		 * @param reservations Set of Reservation objects
-		 * @return Builder object
-		 * @throws IllegalArgumentException if reservations is null
-		 */
-		public Builder reservations(Set<Reservation> reservations) {
-			if (reservations == null || reservations.isEmpty()) {
-				throw new IllegalArgumentException("Reservations is null");
-			}
-			for (Reservation reservation : reservations) {
-				if (reservation != null) {
-					reservations.add(reservation);
-				}
-			}
-			return this;
-		}
-
-		/**
-		 * Adds a single reservation to the area.
-		 *
-		 * @param reservation Reservation object
-		 * @return builder object
-		 * @throws IllegalArgumentException if reservation is null
-		 */
-		public Builder reservation(Reservation reservation) {
-			if (reservation == null) {
-				throw new IllegalArgumentException("Reservation is null");
-			}
-			reservations.add(reservation);
 			return this;
 		}
 
@@ -621,9 +593,7 @@ public class Area {
 				throw new IllegalArgumentException("Features is null");
 			}
 			for (AreaFeature feature : features) {
-				if (feature != null) {
-					features.add(feature);
-				}
+				feature(feature);
 			}
 			return this;
 		}
