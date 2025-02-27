@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -59,8 +62,19 @@ class AreaFeatureTests {
 	@Test
 	void testNullName() {
 		assertThrows(
-			IllegalArgumentException.class, () -> new AreaType(null, "Test Description"),
+			IllegalArgumentException.class,
+			() -> new AreaFeature(null, "Test Description"),
 			"Does not throw exception when name is null"
+		);
+	}
+
+	@DisplayName("Test that constructor throws exception when name is blank")
+	@Test
+	void testBlankName() {
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> new AreaFeature("","Test Description"),
+			"Does not throw exception when name is blank"
 		);
 	}
 
@@ -68,7 +82,8 @@ class AreaFeatureTests {
 	@Test
 	void testNullDescription() {
 		assertThrows(
-			IllegalArgumentException.class, () -> new AreaType("Test Type", null),
+			IllegalArgumentException.class,
+			() -> new AreaType("Test Type", null),
 			"Does not throw exception when description is null"
 		);
 	}
@@ -91,7 +106,15 @@ class AreaFeatureTests {
 		);
 	}
 
-	@DisplayName("❓")
+	@DisplayName("Test that setDescription throws exception when blank")
+	@Test
+	void testSetBlankDescription() {
+		assertThrows(
+			IllegalArgumentException.class, () -> areaFeature.setDescription(""),
+			"Does not throw exception when description is blank"
+		);
+	}
+
 	@Test
 	void testAddArea() {
 		areaFeature.addArea(area);
@@ -100,7 +123,26 @@ class AreaFeatureTests {
 		assertTrue(areaFeature.getAreas().contains(area2), "Area type does not contain area2");
 	}
 
-	@DisplayName("❓")
+
+	@Test
+	void testAddAreas() {
+		Set<Area> areas = new HashSet<>();
+		areas.add(area);
+		areas.add(area2);
+		areaFeature.addAreas(areas);
+		assertTrue(areaFeature.getAreas().contains(area), "Area type does not contain area");
+		assertTrue(areaFeature.getAreas().contains(area2), "Area type does not contain area2");
+	}
+
+	@Test
+	void testAddNullAreas() {
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> areaFeature.addAreas(null),
+			"Area feature does not throw when trying to add null areas"
+			);
+	}
+
 	@Test
 	void testAddNullAreaThrows() {
 		assertThrows(
@@ -109,7 +151,6 @@ class AreaFeatureTests {
 		);
 	}
 
-	@DisplayName("❓")
 	@Test
 	void testRemoveArea() {
 		areaFeature.addArea(area);
@@ -120,7 +161,6 @@ class AreaFeatureTests {
 		assertFalse(areaFeature.getAreas().contains(area2));
 	}
 
-	@DisplayName("❓")
 	@Test
 	void testRemoveAreaThrows() {
 		assertThrows(
