@@ -3,7 +3,6 @@ package no.ntnu.idata2900.group3.chairspace.entity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,19 +37,6 @@ public class AreaType {
 		setDescription(description);
 		areas = new HashSet<>();
 	}
-
-	/**
-	 * Constructor for AreaType with areas.
-	 *
-	 * @param name of the area type
-	 * @param description of the area type
-	 */
-	public AreaType(String name, String description, Set<Area> areas) {
-		setName(name);
-		setDescription(description);
-		setAreas(areas);
-	}
-
 
 	/* ---- Getters ---- */
 
@@ -113,7 +99,7 @@ public class AreaType {
 	 * @param areas as set
 	 * @throws IllegalArgumentException if set is null
 	 */
-	private void setAreas(Set<Area> areas) {
+	public void addAreas(Set<Area> areas) {
 		if (areas == null) {
 			throw new IllegalArgumentException("Areas cannot be null");
 		}
