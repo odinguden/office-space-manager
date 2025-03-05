@@ -116,82 +116,22 @@ public class User {
 
 	/* ---- Setters ---- */
 
-	/**
-	 * Sets the id of the user.
-	 *
-	 * @param id UUID
-	 */
-	private void setId(UUID id) {
-		if (id == null) {
-			throw new IllegalArgumentException("Id is null");
-		}
-		this.userUuid = id;
-	}
-
-	/**
-	 * Sets the first name of the account.
-	 *
-	 * @param firstName First name as string
-	 */
-	private void setFirstName(String firstName) {
-		if (firstName == null || firstName.isEmpty()) {
-			throw new IllegalArgumentException("First name is null");
-		}
-		this.firstName = firstName;
-	}
-
-	/**
-	 * Sets the last name of the account.
-	 *
-	 * @param lastName Last name as string
-	 */
-	private void setLastName(String lastName) {
-		if (lastName == null || lastName.isEmpty()) {
-			throw new IllegalArgumentException("Last name is null");
-		}
-		this.lastName = lastName;
-	}
-
-	/**
-	 * Sets the email of the account.
-	 *
-	 * @param email Email as string
-	 */
-	private void setEmail(String email) {
-		if (email == null || email.isEmpty()) {
-			throw new IllegalArgumentException("Email is null");
-		}
-		this.email = email;
-	}
-
-	/**
-	 * Sets the phone number of the account.
-	 *
-	 * @param phoneNumber Phone number as int
-	 */
-	private void setPhoneNumber(int phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
-
-	/**
-	 * Sets the areas that the account administrates.
-	 *
-	 * @param administrates Set of areas
-	 */
-	private void setAdministrates(Set<Area> administrates) {
-		this.administrates = administrates;
-	}
-
-	/**
-	 * Sets the reservations that the account has.
-	 *
-	 * @param reservations Set of reservations
-	 */
-	private void setReservations(Set<Reservation> reservations) {
-		this.reservations = reservations;
-	}
 
 	/* ---- Reservations ---- */
+
+	/**
+	 * Adds multiple reservations
+	 *
+	 * @param reservations
+	 */
+	public void addReservations(Set<Reservation> reservations) {
+		if (reservations == null) {
+			throw new IllegalArgumentException("Reservations is null");
+		}
+		for (Reservation reservation : reservations) {
+			addReservation(reservation);
+		}
+	}
 
 	/**
 	 * Adds a single reservation to the account.
