@@ -45,7 +45,7 @@ public class Reservation {
 	 */
 	public Reservation(
 		Area area,
-		User account,
+		User user,
 		LocalDateTime start,
 		LocalDateTime end,
 		String comment
@@ -77,6 +77,9 @@ public class Reservation {
 	 * @param area to reserve
 	 */
 	private void setArea(Area area) {
+		if (area == null) {
+			throw new IllegalArgumentException("Area cannot be null");
+		}
 		this.area = area;
 	}
 
@@ -86,6 +89,9 @@ public class Reservation {
 	 * @param user that is reserving the area
 	 */
 	private void setUser(User user) {
+		if (user == null) {
+			throw new IllegalArgumentException("User cannot be null");
+		}
 		this.user = user;
 	}
 
@@ -95,6 +101,12 @@ public class Reservation {
 	 * @param start date and time of reservation
 	 */
 	private void setStart(LocalDateTime start) {
+		if (start == null) {
+			throw new IllegalArgumentException("Start time cannot be null");
+		}
+		if (start.isBefore(LocalDateTime.now())) {
+			throw new IllegalStateException("Cannot create a reservation in the past");
+		}
 		this.startDateTime = start;
 	}
 
@@ -104,6 +116,12 @@ public class Reservation {
 	 * @param end date and time of reservation
 	 */
 	private void setEnd(LocalDateTime end) {
+		if (end == null) {
+			throw new IllegalArgumentException("End time cannot be null");
+		}
+		if (end.isBefore(startDateTime)) {
+			throw new IllegalArgumentException("End time cannot be before start time");
+		}
 		this.endDateTime = end;
 	}
 
@@ -113,6 +131,9 @@ public class Reservation {
 	 * @param comment for the reservation
 	 */
 	private void setComment(String comment) {
+		if (comment == null || comment.isBlank()) {
+			throw new IllegalArgumentException("Comment cannot be blank or null");
+		}
 		this.comment = comment;
 	}
 
