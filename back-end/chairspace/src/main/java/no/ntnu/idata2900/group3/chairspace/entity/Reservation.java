@@ -50,11 +50,11 @@ public class Reservation {
 		LocalDateTime end,
 		String comment
 	) {
-		setArea(area);
 		setUser(user);
 		setStart(start);
 		setEnd(end);
 		setComment(comment);
+		setArea(area);
 	}
 
 
@@ -80,6 +80,10 @@ public class Reservation {
 		if (area == null) {
 			throw new IllegalArgumentException("Area cannot be null");
 		}
+		if (!area.isFreeBetween(startDateTime, endDateTime)) {
+			throw new IllegalStateException("Cannot create reservation, area is not free for the specified timespan");
+		}
+		area.addReservation(this);
 		this.area = area;
 	}
 
@@ -120,7 +124,7 @@ public class Reservation {
 			throw new IllegalArgumentException("End time cannot be null");
 		}
 		if (end.isBefore(startDateTime)) {
-			throw new IllegalArgumentException("End time cannot be before start time");
+			throw new IllegalStateException("End time cannot be before start time");
 		}
 		this.endDateTime = end;
 	}
