@@ -366,44 +366,6 @@ public class User {
 		}
 
 		/**
-		 * Adds a single reservation to the user.
-		 *
-		 * @param reservation Reservation object
-		 * @return UserBuilder object
-		 * @throws IllegalArgumentException if reservation is null
-		 */
-		public Builder reservation(Reservation reservation) {
-			if (reservation == null) {
-				throw new IllegalArgumentException("Reservation is null");
-			}
-			this.reservations.add(reservation);
-
-			return this;
-		}
-
-		/**
-		 * Adds multiple reservations to the user.
-		 * This should only be used for testing purposes.
-		 * If you are creating a new user, then reservations should not be added upon creation.
-		 *
-		 * @param reservations Set of reservations
-		 * @return UserBuilder object
-		 * @throws IllegalArgumentException if reservations is null
-		 */
-		public Builder reservations(Set<Reservation> reservations) {
-			if (reservations == null) {
-				throw new IllegalArgumentException("Reservations is null");
-			}
-			for (Reservation reservation : reservations) {
-				this.reservations.add(reservation);
-			}
-
-			return this;
-		}
-
-
-
-		/**
 		 * Builds the User object.
 		 *
 		 * @return User object
