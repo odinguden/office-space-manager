@@ -144,15 +144,6 @@ public class Reservation {
 	/* ---- Getters ---- */
 
 	/**
-	 * Returns id as UUID.
-	 *
-	 * @return Id as UUID
-	 */
-	public UUID getId() {
-		return reservationUuid;
-	}
-
-	/**
 	 * Returns the area of the reservation.
 	 *
 	 * @return Area to reserve
