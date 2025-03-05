@@ -802,8 +802,8 @@ class AreaTests {
 		Reservation reservation2 = new Reservation(
 			area,
 			adminUser,
-			LocalDateTime.now().plusHours(4),
-			LocalDateTime.now().plusHours(6),
+			LocalDateTime.now().plusHours(7),
+			LocalDateTime.now().plusHours(8),
 			"Meeting with mom"
 		);
 	}
