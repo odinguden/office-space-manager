@@ -60,6 +60,7 @@ public class User {
 		this.email = builder.email;
 		this.phoneNumber = builder.phoneNumber;
 		this.administrates = builder.administrates;
+		reservations = new HashSet<>();
 	}
 
 	/* ---- Getters ---- */
@@ -71,6 +72,15 @@ public class User {
 	 */
 	public UUID getId() {
 		return this.userUuid;
+	}
+
+	/**
+	 * returns the users reservations in a set.
+	 *
+	 * @return reservations in a set
+	 */
+	public Set<Reservation> getReservations() {
+		return reservations;
 	}
 
 	/**
@@ -139,12 +149,10 @@ public class User {
 	 * @param reservation Reservation object
 	 */
 	public void addReservation(Reservation reservation) {
-		if (this.reservations == null) {
-			throw new IllegalArgumentException("Reservations is null");
+		if (reservation == null) {
+			throw new IllegalArgumentException();
 		}
-		if (!this.reservations.contains(reservation)) {
-			this.reservations.add(reservation);
-		}
+		this.reservations.add(reservation);
 	}
 
 	/**
@@ -153,9 +161,6 @@ public class User {
 	 * @param reservation Reservation object
 	 */
 	public void removeReservation(Reservation reservation) {
-		if (this.reservations.isEmpty()) {
-			throw new IllegalStateException("No reservations to remove");
-		}
 		this.reservations.remove(reservation);
 	}
 
@@ -167,12 +172,10 @@ public class User {
 	 * @param area Area object
 	 */
 	public void addArea(Area area) {
-		if (this.administrates == null) {
-			throw new IllegalArgumentException("Administrates is null");
+		if (area == null) {
+			throw new IllegalArgumentException("Area is null");
 		}
-		if (!this.administrates.contains(area)) {
-			this.administrates.add(area);
-		}
+		this.administrates.add(area);
 	}
 
 	/**

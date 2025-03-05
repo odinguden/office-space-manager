@@ -1,10 +1,13 @@
 package no.ntnu.idata2900.group3.chairspace.entity;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -23,17 +26,9 @@ import org.junit.jupiter.api.Test;
 class UserTests {
 	private User user;
 
-	private static AreaType areaType;
-	private static Area area;
-	private static Area area2;
-
-	@BeforeAll
-	static void setUpAreas() {
-		AreaType testType = new AreaType("Test Type", "Test Descripton");
-		User tempUser = new User.Builder("Argh", "REah").build();
-		area = new Area.Builder("Test Area", 123, testType).administrator(tempUser).build();
-		area2 = new Area.Builder("Test Area 2", 23, testType).administrator(tempUser).build();
-	}
+	private AreaType areaType;
+	private Area area;
+	private Area area2;
 
 	@BeforeEach
 	void setUp() {
@@ -41,6 +36,11 @@ class UserTests {
 			.email("test@test.no")
 			.phoneNumber(01234567)
 			.build();
+		areaType = new AreaType("Test Type", "Test Descripton");
+		area = new Area.Builder("Test Area", 123, areaType).administrator(user).build();
+		area2 = new Area.Builder("Test Area 2", 23, areaType).administrator(user).build();
+		user.addArea(area);
+		user.addArea(area2);
 	}
 
 	/* ---- Builder Tests ---- */
@@ -168,13 +168,114 @@ class UserTests {
 	}
 
 	/* ---- Method Tests ---- */
-	//TODO: Add tests for the following methods
 
-	//Add reservation
+	@Test
+	void testAddReservations() {
+		HashSet<Reservation> reservations = new HashSet<>();
+		reservations.add(
+			new Reservation(
+				area,
+				user,
+				LocalDateTime.now().plusHours(1),
+				LocalDateTime.now().plusHours(4),
+				"Hello"
+			)
+		);
+		reservations.add(
+			new Reservation(
+				area,
+				user,
+				LocalDateTime.now().plusHours(5),
+				LocalDateTime.now().plusHours(7),
+				"Hello"
+			)
+		);
 
-	//Remove reservation
+		user.addReservations(reservations);
 
-	//Add area
+		assertEquals(user.getReservations(), reservations);
+	}
 
-	//Remove area
+	@Test
+	void testAddNullReservation() {
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> user.addReservation(null)
+		);
+	}
+
+	@Test
+	void addNullReservations() {
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> user.addReservations(null)
+			);
+	}
+
+	@Test
+	void removeReservation() {
+		HashSet<Reservation> reservations = new HashSet<>();
+		Reservation reservation = new Reservation(
+			area,
+			user,
+			LocalDateTime.now().plusHours(1),
+			LocalDateTime.now().plusHours(4),
+			"Hello"
+		);
+		Reservation reservation2 = new Reservation(
+			area,
+			user,
+			LocalDateTime.now().plusHours(5),
+			LocalDateTime.now().plusHours(7),
+			"Hello"
+		);
+		reservations.add(reservation);
+		reservations.add(reservation2);
+		user.addReservations(reservations);
+
+		assertDoesNotThrow(
+			() -> user.removeReservation(reservation2)
+		);
+		assertFalse(user.getReservations().contains(reservation2));
+	}
+
+	@Test
+	void testAddArea() {
+		Area newArea = new Area.Builder("Name", 234, areaType).administrator(user).build();
+		user.addArea(newArea);
+		assertTrue(user.getAreas().contains(newArea));
+	}
+
+	@Test
+	void testAddNullArea() {
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> user.addArea(null)
+			);
+	}
+
+	@Test
+	void testRemoveArea() {
+		user.removeArea(area);
+		assertFalse(user.getAreas().contains(area));
+	}
+
+	@Test
+	void testRemoveNullArea() {
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> user.removeArea(null)
+			);
+	}
+
+	@Test
+	void testRemoveAllAndOneAreas() {
+		user.removeArea(area);
+		user.removeArea(area2);
+		assertThrows(
+			IllegalStateException.class,
+			() -> user.removeArea(area)
+			);
+	}
 }
+
