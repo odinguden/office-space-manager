@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.nullable;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -807,4 +808,246 @@ class AreaTests {
 			"Meeting with mom"
 		);
 	}
+
+	@Test
+	void testIsFreeReturnsTrue() {
+		LocalDateTime start = LocalDateTime.now().plusMinutes(30);
+		Area area = new Area.Builder("Test", 2, areaType)
+			.administrator(adminUser)
+			.build();
+		Reservation reservation = new Reservation(area, adminUser, start, start.plusHours(3), "This is for testing");
+		assertTrue(area.isFree(start.minusHours(1)), "Area is not free 1 hour before the only reservation");
+		assertTrue(area.isFree(start.minusHours(4)), "Area is not free 1 hour after the only reservation");
+	}
+
+	@Test
+	void testIsFreeReturnsFalse() {
+		LocalDateTime start = LocalDateTime.now().plusMinutes(30);
+		LocalDateTime end = start.plusHours(3);
+		Area area = new Area.Builder("Test", 2, areaType)
+			.administrator(adminUser)
+			.build();
+
+		Reservation reservation = new Reservation(area, adminUser, start, end, "This is a test");
+
+		assertFalse(area.isFree(start.plusHours(2)));
+	}
+
+	@Test
+	void testGetReservations() {
+		LocalDateTime start = LocalDateTime.now().plusMinutes(30);
+		LocalDateTime start2 = start.plusHours(3);
+		Area area = new Area.Builder("Test", 2, areaType)
+		.administrator(adminUser)
+		.build();
+
+		Reservation reservation = new Reservation(area, adminUser, start, start.plusHours(2) , "This is a test");
+		Reservation reservation2 = new Reservation(area, adminUser, start2, start2.plusHours(3) , "This is a test");
+		area.removeReservation(reservation2, adminUser);
+		assertTrue(area.getReservations().contains(reservation), "Reservation was not added");
+		assertFalse(area.getReservations().contains(reservation2), "Returns true for non existing reservation");
+	}
+
+	@Test
+	void testAddingNullReservationThrows() {
+		Area area = new Area.Builder("Test", 34, areaType)
+			.administrator(adminUser)
+			.build();
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> area.addReservation(null)
+			);
+	}
+
+	@Test
+	void addingReservationForInvalidTimeSpanThrows() {
+		LocalDateTime start = LocalDateTime.now().plusMinutes(30);
+		Area area = new Area.Builder("Test", 34, areaType)
+		.administrator(adminUser)
+		.build();
+		Reservation reservation = new Reservation(area, adminUser, start.plusHours(1), start.plusHours(2) , "This is a test");
+		area.removeReservation(reservation, adminUser);
+		Reservation reservation2 = new Reservation(area, adminUser, start, start.plusHours(3) , "This is a test");
+		assertThrows(
+			IllegalStateException.class,
+			() -> area.addReservation(reservation)
+			);
+	}
+
+	@Test
+	void testAddAdmin() {
+		Area area = new Area.Builder("Area", 12, areaType)
+			.administrator(adminUser)
+			.build();
+
+		area.addAdministrator(adminUser2, adminUser);
+		assertTrue(area.getAdministrators().contains(adminUser2), "Admin user was not added");
+	}
+
+	@Test
+	void testAddNullAdmin() {
+		Area area = new Area.Builder("Area", 12, areaType)
+			.administrator(adminUser)
+			.build();
+
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> area.addAdministrator(null, adminUser)
+			);
+	}
+
+	@Test
+	void addAdminWithoutAdminUser() {
+		Area area = new Area.Builder("Area", 12, areaType)
+			.administrator(adminUser)
+			.build();
+		assertThrows(
+			IllegalStateException.class,
+			() -> area.addAdministrator(adminUser2, nonAdminUser)
+		);
+	}
+
+	@Test
+	void addAdminWithoutNullUser() {
+		Area area = new Area.Builder("Area", 12, areaType)
+			.administrator(adminUser)
+			.build();
+
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> area.addAdministrator(adminUser2, null)
+		);
+	}
+
+
+	@Test
+	void isFreeBetweenFalseTests() {
+		LocalDateTime start = LocalDateTime.now().plusHours(1);
+		Area area = new Area.Builder("Test", 2, areaType)
+			.administrator(adminUser)
+			.build();
+		Reservation reservation = new Reservation(area, adminUser, start, start.plusHours(4), "This is for testing");
+
+
+		assertFalse(area.isFreeBetween(start.plusHours(1), start.plusHours(3)), "Area is free during a reservation");
+		assertFalse(area.isFreeBetween(start.plusHours(1), start.plusHours(5)), "Area is free starting in a reservation");
+		assertFalse(area.isFreeBetween(start.minusMinutes(15), start.plusHours(2)), "Area is free ending in a reservation");
+		assertFalse(area.isFreeBetween(start.minusMinutes(15), start.plusHours(5)), "Area is free encompassing a reservation");
+	}
+
+	@Test
+	void testRemoveSubArea() {
+		Area supArea = new Area.Builder("Test", 23, areaType)
+			.administrator(adminUser)
+			.build();
+		Area subArea = new Area.Builder("Test", 23, areaType)
+			.administrator(adminUser)
+			.superArea(supArea)
+			.build();
+		supArea.removeSubArea(subArea, adminUser);
+		assertTrue(supArea.getSubAreas().isEmpty());
+	}
+
+	@Test
+	void testRemoveSubAreaWithNonAdminUser() {
+		Area supArea = new Area.Builder("Test", 23, areaType)
+			.administrator(adminUser)
+			.build();
+		Area subArea = new Area.Builder("Test", 23, areaType)
+			.administrator(adminUser)
+			.superArea(supArea)
+			.build();
+		assertThrows(
+			IllegalStateException.class,
+			() -> supArea.removeSubArea(subArea, nonAdminUser)
+			);
+	}
+
+	@Test
+	void testRemoveNullSubArea() {
+		Area supArea = new Area.Builder("Test", 23, areaType)
+			.administrator(adminUser)
+			.build();
+		Area subArea = new Area.Builder("Test", 23, areaType)
+			.administrator(adminUser)
+			.superArea(supArea)
+			.build();
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> supArea.removeSubArea(null, adminUser)
+			);
+	}
+
+	@Test
+	void testRemoveSubAreaWithNullUser() {
+		Area supArea = new Area.Builder("Test", 23, areaType)
+			.administrator(adminUser)
+			.build();
+		Area subArea = new Area.Builder("Test", 23, areaType)
+			.administrator(adminUser)
+			.superArea(supArea)
+			.build();
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> supArea.removeSubArea(subArea, null)
+			);
+	}
+
+	@Test
+	void removeNullReservationTest() {
+		LocalDateTime start = LocalDateTime.now().plusMinutes(30);
+		LocalDateTime end = start.plusHours(3);
+		Area area = new Area.Builder("Name", 12, areaType)
+			.administrator(adminUser)
+			.build();
+
+		Reservation reservation = new Reservation(area, adminUser, start, end, "More testing");
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> area.removeReservation(null, adminUser)
+			);
+	}
+
+	@Test
+	void removeReservationNotAdmin() {
+		LocalDateTime start = LocalDateTime.now().plusMinutes(30);
+		LocalDateTime end = start.plusHours(3);
+		Area area = new Area.Builder("Name", 12, areaType)
+			.administrator(adminUser)
+			.build();
+			Reservation reservation = new Reservation(area, adminUser, start, end, "More testing");
+			Reservation reservation2 = new Reservation(area, adminUser2, start, end, "More testing");
+			area.removeReservation(reservation2, adminUser2);
+			assertFalse(area.getReservations().contains(reservation2));
+	}
+
+	@Test
+	void removeReservationNotOwner() {
+		LocalDateTime start = LocalDateTime.now().plusMinutes(30);
+		LocalDateTime end = start.plusHours(3);
+		Area area = new Area.Builder("Name", 12, areaType)
+			.administrator(adminUser)
+			.build();
+		//TODO
+		Reservation reservation = new Reservation(area, adminUser, start, end, "More testing");
+		Reservation reservation2 = new Reservation(area, adminUser2, start, end, "More testing");
+		area.removeReservation(reservation2, adminUser);
+		assertFalse(area.getReservations().contains(reservation2));
+	}
+
+	@Test
+	void removeReservationNotOwnerOrAdmin() {
+		LocalDateTime start = LocalDateTime.now().plusMinutes(30);
+		LocalDateTime end = start.plusHours(3);
+		Area area = new Area.Builder("Name", 12, areaType)
+			.administrator(adminUser)
+			.build();
+
+		Reservation reservation = new Reservation(area, adminUser2, start, end, "More testing");
+		assertThrows(
+			IllegalStateException.class,
+			() -> area.removeReservation(reservation, nonAdminUser)
+			);
+	}
+
 }
