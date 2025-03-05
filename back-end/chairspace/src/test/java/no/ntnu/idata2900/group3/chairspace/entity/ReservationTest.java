@@ -21,8 +21,14 @@ public class ReservationTest {
 
 	@BeforeAll
 	static void initialize() {
-		admin = new User("Admin", "User", "Admin@Test", 12345678);
-		nonAdmin = new User("User", "User", "User@user", 3124325);
+		admin = new User.Builder("Admin", "User")
+			.phoneNumber(12345678)
+			.email("Admin@Test")
+			.build();
+		nonAdmin = new User.Builder("User", "User")
+			.phoneNumber(3124325)
+			.email("User@Test")
+			.build();
 		area = new Area.Builder(
 			"Area",
 			10,
