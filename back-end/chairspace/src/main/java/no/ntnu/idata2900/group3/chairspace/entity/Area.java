@@ -252,9 +252,10 @@ public class Area {
 		if (reservation == null) {
 			throw new IllegalArgumentException("Reservation cannot be null");
 		}
-		if (isFreeBetween(reservation.getStart(), reservation.getEnd())) {
-			reservations.add(reservation);
+		if (!isFreeBetween(reservation.getStart(), reservation.getEnd())) {
+			throw new IllegalStateException("Area is not free for the reservations timespan");
 		}
+		reservations.add(reservation);
 	}
 
 	/**
@@ -468,16 +469,14 @@ public class Area {
 	 */
 	public boolean isFreeBetween(LocalDateTime start, LocalDateTime end) {
 		for (Reservation reservation : reservations) {
-			if (reservation.getStart().isBefore(start) && reservation.getEnd().isAfter(start)) {
+			if (end.isBefore(reservation.getEnd()) && end.isAfter(reservation.getStart())) {
+				//Timespan ends during reservation
 				return false;
-			}
-			if (reservation.getStart().isBefore(end) && reservation.getEnd().isAfter(end)) {
+			} else if (start.isAfter(reservation.getStart()) && start.isBefore(reservation.getEnd())) {
+				//Timespan starts during reservation
 				return false;
-			}
-			if (start.isBefore(reservation.getStart()) && end.isAfter(reservation.getStart())) {
-				return false;
-			}
-			if (start.isBefore(reservation.getEnd()) && end.isAfter(reservation.getEnd())) {
+			} else if (reservation.getStart().isAfter(start) && reservation.getEnd().isBefore(end)) {
+				//Reservation is during timespan
 				return false;
 			}
 		}
@@ -492,7 +491,7 @@ public class Area {
 	 */
 	public boolean isFree(LocalDateTime time) {
 		for (Reservation reservation : reservations) {
-			if (reservation.getStart().isBefore(time) && reservation.getEnd().isAfter(time)) {
+			if (time.isBefore(reservation.getEnd()) && time.isAfter(reservation.getStart())) {
 				return false;
 			}
 		}
