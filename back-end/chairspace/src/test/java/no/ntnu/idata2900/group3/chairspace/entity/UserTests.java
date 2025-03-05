@@ -2,7 +2,10 @@ package no.ntnu.idata2900.group3.chairspace.entity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.HashSet;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,33 +48,124 @@ class UserTests {
 	@DisplayName("TODO")
 	@Test
 	void testCreation() {
-		assertNotNull(user);
+		HashSet<Area> areas = new HashSet<>();
+		String email = "Jon@test.no";
+		String firstName = "Jon";
+		String lastName = "Test";
+		int phoneNumber = 12345678;
+		areas.add(area);
+		areas.add(area2);
+		User newUser = new User.Builder(firstName, lastName)
+			.email(email)
+			.phoneNumber(phoneNumber)
+			.areas(areas)
+			.build();
+
+		assertEquals(firstName, newUser.getFirstName());
+		assertEquals(lastName, newUser.getLastName());
+		assertEquals(email, newUser.getEmail());
+		assertEquals(phoneNumber, newUser.getPhoneNumber());
+		assertEquals(areas, newUser.getAreas());
+
 	}
 
-	@DisplayName("Test that first name is assigned")
 	@Test
-	void testFirstName() {
-		assertEquals("John", user.getFirstName());
+	void testNullFirstNameThrows() {
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> new User.Builder(null, "Test")
+			);
 	}
 
-	@DisplayName("Test that last name is assigned")
 	@Test
-	void testLastName() {
-		assertEquals("Test", user.getLastName());
+	void testBlankFirstNameThrows() {
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> new User.Builder("", "Test")
+			);
 	}
 
-	@DisplayName("Test that email is assigned")
 	@Test
-	void testEmail() {
-		assertEquals("test@test.no", user.getEmail());
+	void testNullLastNameThrows() {
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> new User.Builder("Hello", null)
+			);
 	}
 
-	@DisplayName("Test that phone number is assigned")
 	@Test
-	void testPhoneNumber() {
-		assertEquals(01234567, user.getPhoneNumber());
+	void testBlankLastNameThrows() {
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> new User.Builder("Test", "")
+			);
 	}
 
+	@Test
+	void testAddSingleAreaThroughBuilder() {
+		String firstName = "Jon";
+		String lastName = "Test";
+		User newUser = new User.Builder(firstName, lastName)
+			.area(area)
+			.build();
+
+		assertTrue(newUser.getAreas().contains(area));
+	}
+
+	@Test
+	void testAddSingleNullAreaThroughBuilder() {
+		String firstName = "Jon";
+		String lastName = "Test";
+
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> new User.Builder(firstName, lastName).area(null)
+			);
+	}
+
+	@Test
+	void testAddNullEmailThroughBuilder() {
+		String firstName = "Jon";
+		String lastName = "Test";
+
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> new User.Builder(firstName, lastName).email(null)
+			);
+	}
+
+	@Test
+	void testAddBlankEmailThroughBuilder() {
+		String firstName = "Jon";
+		String lastName = "Test";
+
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> new User.Builder(firstName, lastName).email("")
+			);
+	}
+
+	@Test
+	void testAddNullPhoneNumberThroughBuilder() {
+		String firstName = "Jon";
+		String lastName = "Test";
+
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> new User.Builder(firstName, lastName).phoneNumber(0)
+			);
+	}
+
+	@Test
+	void testAddNullAreasThroughBuilder() {
+		String firstName = "Jon";
+		String lastName = "Test";
+
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> new User.Builder(firstName, lastName).areas(null)
+			);
+	}
 
 	/* ---- Method Tests ---- */
 	//TODO: Add tests for the following methods

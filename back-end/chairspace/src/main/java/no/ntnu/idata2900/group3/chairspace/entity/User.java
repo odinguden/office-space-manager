@@ -80,6 +80,7 @@ public class User {
 		this.lastName = builder.lastName;
 		this.email = builder.email;
 		this.phoneNumber = builder.phoneNumber;
+		this.administrates = builder.administrates;
 	}
 
 	/* ---- Getters ---- */
@@ -128,6 +129,10 @@ public class User {
 	 */
 	public int getPhoneNumber() {
 		return this.phoneNumber;
+	}
+
+	public Set<Area> getAreas() {
+		return administrates;
 	}
 
 	/* ---- Setters ---- */
@@ -276,7 +281,6 @@ public class User {
 		private String email;
 		private int phoneNumber;
 		private Set<Area> administrates;
-		private Set<Reservation> reservations;
 		// Im sure you're wondering why there are private variables, and no getters.
 		// If a class that is not the userBuilder or the user needs the values, then they are using
 		// the builder pattern wrong.
@@ -295,11 +299,9 @@ public class User {
 			if (lastName == null || lastName.isEmpty()) {
 				throw new IllegalArgumentException("Last name is null");
 			}
-			
 			this.lastName = lastName;
 			this.firstName = firstName;
 			this.administrates = new HashSet<>();
-			this.reservations = new HashSet<>();
 		}
 
 		/**
@@ -359,7 +361,7 @@ public class User {
 				throw new IllegalArgumentException("Areas is null");
 			}
 			for (Area area : areas) {
-				this.administrates.add(area);
+				area(area);
 			}
 
 			return this;
