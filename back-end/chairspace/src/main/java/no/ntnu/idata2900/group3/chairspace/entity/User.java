@@ -54,27 +54,6 @@ public class User {
 	 */
 	public User() {}
 
-	/**
-	 * Account constructor with arguments.
-	 *
-	 * @param firstName First name as string
-	 * @param lastName Last name as string
-	 * @param email Email as string
-	 * @param phoneNumber Phone number as int
-	 */
-	public User(String firstName, String lastName, String email, int phoneNumber) {
-		setFirstName(firstName);
-		setLastName(lastName);
-		setEmail(email);
-		setPhoneNumber(phoneNumber);
-		setAdministrates(
-			new HashSet<>()
-		);
-		setReservations(
-			new HashSet<>()
-		);
-	}
-
 	private User(Builder builder) {
 		this.firstName = builder.firstName;
 		this.lastName = builder.lastName;
