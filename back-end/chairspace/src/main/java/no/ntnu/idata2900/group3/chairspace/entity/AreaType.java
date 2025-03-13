@@ -8,10 +8,12 @@ import java.util.Set;
 
 /**
  * Represents a type that an area can be.
+ * Contains the name and description of the area type.
  *
  * @author Odin Lyngsgård
  * @version 1.0
  * @since 0.1
+ * @see Area
  */
 @Entity
 public class AreaType {
@@ -31,8 +33,9 @@ public class AreaType {
 	 *
 	 * @param name of the area type
 	 * @param description of the area type
+	 * @throws IllegalArgumentException if name or description is null or blank
 	 */
-	public AreaType(String name, String description) {
+	public AreaType(String name, String description) throws IllegalArgumentException {
 		setName(name);
 		setDescription(description);
 		areas = new HashSet<>();
@@ -41,27 +44,27 @@ public class AreaType {
 	/* ---- Getters ---- */
 
 	/**
-	 * Gets the name of the area type.
+	 * Gets the name of the area type as a string.
 	 *
-	 * @return name as string
+	 * @return the name of the area type as string
 	 */
 	public String getName() {
 		return name;
 	}
 
 	/**
-	 * Gets the description of the area type.
+	 * Gets the description of the area type as a string.
 	 *
-	 * @return description as string
+	 * @return the description of the area type
 	 */
 	public String getDescription() {
 		return description;
 	}
 
 	/**
-	 * Gets the areas of the area type.
+	 * Gets the areas that are of this type.
 	 *
-	 * @return areas as set
+	 * @return the areas that have this area type in a set
 	 */
 	public Set<Area> getAreas() {
 		return areas;
@@ -73,20 +76,16 @@ public class AreaType {
 	 * Gets the name of the area type as string.
 	 *
 	 * @param name of the area type
+	 * @throws IllegalArgumentException if name is null or empty
 	 */
-	private void setName(String name) {
+	private void setName(String name) throws IllegalArgumentException {
 		if (name == null || name.isEmpty()) {
 			throw new IllegalArgumentException("Name cannot be null or empty");
 		}
 		this.name = name;
 	}
 
-	/**
-	 * Gets description as string.
-	 *
-	 * @param description of area type as string.
-	 */
-	public void setDescription(String description) {
+	private void setDescription(String description) {
 		if (description == null || description.isEmpty()) {
 			throw new IllegalArgumentException("Description cannot be null or empty");
 		}
@@ -94,12 +93,22 @@ public class AreaType {
 	}
 
 	/**
-	 * Sets the areas of the area type.
+	 * Updates the description .
+	 *
+	 * @param description the new description of the area type.
+	 * @throws IllegalArgumentException if description is null or empty
+	 */
+	public void updateDescription(String description) throws IllegalArgumentException {
+		setDescription(description);
+	}
+
+	/**
+	 * Adds multiple areas to the area type.
 	 *
 	 * @param areas as set
 	 * @throws IllegalArgumentException if set is null
 	 */
-	public void addAreas(Set<Area> areas) {
+	public void addAreas(Set<Area> areas) throws IllegalArgumentException {
 		if (areas == null) {
 			throw new IllegalArgumentException("Areas cannot be null");
 		}
@@ -111,9 +120,10 @@ public class AreaType {
 	/**
 	 * Adds an area to the area type.
 	 *
-	 * @param area to add
+	 * @param area the area to add
+	 * @throws IllegalArgumentException if area is null
 	 */
-	public void addArea(Area area) {
+	public void addArea(Area area) throws IllegalArgumentException {
 		if (area == null) {
 			throw new IllegalArgumentException("Area cannot be null");
 		}
@@ -123,9 +133,10 @@ public class AreaType {
 	/**
 	 * Removes an area from the area type.
 	 *
-	 * @param area to remove
+	 * @param area the area to remove
+	 * @throws IllegalArgumentException if area is null
 	 */
-	public void removeArea(Area area) {
+	public void removeArea(Area area) throws IllegalArgumentException {
 		if (area == null) {
 			throw new IllegalArgumentException("Area cannot be null");
 		}

@@ -92,25 +92,25 @@ class AreaFeatureTests {
 
 	@DisplayName("Test that setDescription works")
 	@Test
-	void testSetDescription() {
-		areaFeature.setDescription("New Description");
+	void testUpdateDescription() {
+		areaFeature.updateDescription("New Description");
 		assertEquals("New Description", areaFeature.getDescription());
 	}
 
 	@DisplayName("Test that setDescription throws exception when null")
 	@Test
-	void testSetNullDescription() {
+	void testUpdateNullDescription() {
 		assertThrows(
-			IllegalArgumentException.class, () -> areaFeature.setDescription(null),
+			IllegalArgumentException.class, () -> areaFeature.updateDescription(null),
 			"Does not throw exception when description is null"
 		);
 	}
 
 	@DisplayName("Test that setDescription throws exception when blank")
 	@Test
-	void testSetBlankDescription() {
+	void testUpdateBlankDescription() {
 		assertThrows(
-			IllegalArgumentException.class, () -> areaFeature.setDescription(""),
+			IllegalArgumentException.class, () -> areaFeature.updateDescription(""),
 			"Does not throw exception when description is blank"
 		);
 	}

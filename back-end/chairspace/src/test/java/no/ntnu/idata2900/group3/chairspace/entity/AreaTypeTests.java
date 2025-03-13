@@ -97,7 +97,7 @@ class AreaTypeTests {
 	@DisplayName("Test that setDescription works")
 	@Test
 	void testSetDescription() {
-		areaType.setDescription("New Description");
+		areaType.updateDescription("New Description");
 		assertEquals("New Description", areaType.getDescription());
 	}
 
@@ -105,7 +105,7 @@ class AreaTypeTests {
 	@Test
 	void testSetNullDescription() {
 		assertThrows(
-			IllegalArgumentException.class, () -> areaType.setDescription(null),
+			IllegalArgumentException.class, () -> areaType.updateDescription(null),
 			"Does not throw exception when description is null"
 		);
 	}
