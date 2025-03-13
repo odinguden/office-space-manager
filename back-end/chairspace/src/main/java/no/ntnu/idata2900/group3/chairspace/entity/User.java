@@ -19,6 +19,8 @@ import java.util.regex.Pattern;
 
 /**
  * Represents a user.
+ * implements the builder pattern.
+ * 
  *
  * @author Odin Lyngsgård
  * @version 0.1
@@ -37,8 +39,6 @@ public class User {
 	private String lastName;
 	@Column(nullable = false)
 	private String email;
-	@Column(name = "phone_number", nullable = false)
-	private String phoneNumber;
 	@ManyToMany(mappedBy = "administrators")
 	@Column(nullable = true)
 	private Set<Area> administrates;
@@ -109,15 +109,6 @@ public class User {
 	 */
 	public String getEmail() {
 		return this.email;
-	}
-
-	/**
-	 * Returns the phone number of the account as an int.
-	 *
-	 * @return Phone number as int
-	 */
-	public String getPhoneNumber() {
-		return this.phoneNumber;
 	}
 
 	/**
