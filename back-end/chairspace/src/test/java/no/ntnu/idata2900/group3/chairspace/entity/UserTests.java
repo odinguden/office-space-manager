@@ -6,10 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.time.LocalDateTime;
 import java.util.HashSet;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +32,6 @@ class UserTests {
 	void setUp() {
 		user = new User.Builder("John", "Test")
 			.email("test@test.no")
-			.phoneNumber(01234567)
 			.build();
 		areaType = new AreaType("Test Type", "Test Descripton");
 		area = new Area.Builder("Test Area", 123, areaType).administrator(user).build();
@@ -52,19 +49,16 @@ class UserTests {
 		String email = "Jon@test.no";
 		String firstName = "Jon";
 		String lastName = "Test";
-		int phoneNumber = 12345678;
 		areas.add(area);
 		areas.add(area2);
 		User newUser = new User.Builder(firstName, lastName)
 			.email(email)
-			.phoneNumber(phoneNumber)
 			.areas(areas)
 			.build();
 
 		assertEquals(firstName, newUser.getFirstName());
 		assertEquals(lastName, newUser.getLastName());
 		assertEquals(email, newUser.getEmail());
-		assertEquals(phoneNumber, newUser.getPhoneNumber());
 		assertEquals(areas, newUser.getAreas());
 
 	}
@@ -142,17 +136,6 @@ class UserTests {
 		assertThrows(
 			IllegalArgumentException.class,
 			() -> new User.Builder(firstName, lastName).email("")
-			);
-	}
-
-	@Test
-	void testAddNullPhoneNumberThroughBuilder() {
-		String firstName = "Jon";
-		String lastName = "Test";
-
-		assertThrows(
-			IllegalArgumentException.class,
-			() -> new User.Builder(firstName, lastName).phoneNumber(0)
 			);
 	}
 

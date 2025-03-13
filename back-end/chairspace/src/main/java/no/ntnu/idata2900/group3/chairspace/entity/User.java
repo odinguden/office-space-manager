@@ -14,6 +14,8 @@ import jakarta.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Represents a user.
@@ -36,7 +38,7 @@ public class User {
 	@Column(nullable = false)
 	private String email;
 	@Column(name = "phone_number", nullable = false)
-	private int phoneNumber;
+	private String phoneNumber;
 	@ManyToMany(mappedBy = "administrators")
 	@Column(nullable = true)
 	private Set<Area> administrates;
@@ -58,7 +60,6 @@ public class User {
 		this.firstName = builder.firstName;
 		this.lastName = builder.lastName;
 		this.email = builder.email;
-		this.phoneNumber = builder.phoneNumber;
 		this.administrates = builder.administrates;
 		reservations = new HashSet<>();
 	}
@@ -112,14 +113,18 @@ public class User {
 
 	/**
 	 * Returns the phone number of the account as an int.
-	 * TODO: Should this be a string? or some other type?
 	 *
 	 * @return Phone number as int
 	 */
-	public int getPhoneNumber() {
+	public String getPhoneNumber() {
 		return this.phoneNumber;
 	}
 
+	/**
+	 * Returns areas that the user administrates in a set.
+	 *
+	 * @return areas in a set
+	 */
 	public Set<Area> getAreas() {
 		return administrates;
 	}
@@ -130,9 +135,9 @@ public class User {
 	/* ---- Reservations ---- */
 
 	/**
-	 * Adds multiple reservations
+	 * Adds multiple reservations.
 	 *
-	 * @param reservations
+	 * @param reservations reservations in a set
 	 */
 	public void addReservations(Set<Reservation> reservations) {
 		if (reservations == null) {
@@ -201,7 +206,6 @@ public class User {
 		private String firstName;
 		private String lastName;
 		private String email;
-		private int phoneNumber;
 		private Set<Area> administrates;
 		// Im sure you're wondering why there are private variables, and no getters.
 		// If a class that is not the userBuilder or the user needs the values, then they are using
@@ -237,21 +241,6 @@ public class User {
 				throw new IllegalArgumentException("Email is null");
 			}
 			this.email = email;
-			return this;
-		}
-
-		/**
-		 * Sets the phone number of the user.
-		 *
-		 * @param phoneNumber Phone number as int
-		 * @return UserBuilder object
-		 * @throws IllegalArgumentException if phone number is null
-		 */
-		public Builder phoneNumber(int phoneNumber) {
-			if (phoneNumber == 0) {
-				throw new IllegalArgumentException("Phone number is null");
-			}
-			this.phoneNumber = phoneNumber;
 			return this;
 		}
 
