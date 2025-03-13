@@ -4,17 +4,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDateTime;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
+ * Test for the Reservation entity.
+ * The tests in this class covers creation and basic methods of a reservation.
+ * Both negative tests and positive tests are included.
+ *
  * @author Odin Lyngsgård
  * @version 0.1
  * @since 0.1
  * @see Reservation
  */
-public class ReservationTest {
+class ReservationTest {
 	private static User admin;
 	private static User nonAdmin;
 	private static Area area;
@@ -22,10 +25,10 @@ public class ReservationTest {
 	@BeforeAll
 	static void initialize() {
 		admin = new User.Builder("Admin", "User")
-			.email("Admin@Test")
+			.email("Admin@Test.tt")
 			.build();
 		nonAdmin = new User.Builder("User", "User")
-			.email("User@Test")
+			.email("User@Test.tt")
 			.build();
 		area = new Area.Builder(
 			"Area",
@@ -63,7 +66,7 @@ public class ReservationTest {
 		assertThrows(
 			IllegalArgumentException.class,
 			() -> new Reservation(null, admin, start, end, comment)
-			);
+		);
 	}
 
 	@Test
@@ -74,7 +77,7 @@ public class ReservationTest {
 		assertThrows(
 			IllegalArgumentException.class,
 			() -> new Reservation(area, null, start, end, comment)
-			);
+		);
 	}
 
 	@Test
@@ -84,7 +87,7 @@ public class ReservationTest {
 		assertThrows(
 			IllegalArgumentException.class,
 			() -> new Reservation(area, admin, null, end, comment)
-			);
+		);
 	}
 
 	@Test
@@ -94,7 +97,7 @@ public class ReservationTest {
 		assertThrows(
 			IllegalArgumentException.class,
 			() -> new Reservation(area, admin, start, null, comment)
-			);
+		);
 	}
 
 	@Test
@@ -104,7 +107,7 @@ public class ReservationTest {
 		assertThrows(
 			IllegalArgumentException.class,
 			() -> new Reservation(area, admin, start, end, null)
-			);
+		);
 	}
 
 	@Test
@@ -115,7 +118,7 @@ public class ReservationTest {
 		assertThrows(
 			IllegalArgumentException.class,
 			() -> new Reservation(area, admin, start, end, comment)
-			);
+		);
 	}
 
 	@Test
@@ -123,23 +126,25 @@ public class ReservationTest {
 		LocalDateTime start = LocalDateTime.now().plusDays(1);
 		LocalDateTime end = LocalDateTime.now().plusDays(1).plusHours(3);
 		String comment = "Writing tests";
-		Reservation reservation = new Reservation(
+		new Reservation(
 			area,
 			nonAdmin,
 			start,
 			end,
 			comment
-			);
+		);
+		LocalDateTime newStart = start.plusHours(2);
+		LocalDateTime newEnd = end.plusHours(2);
 		assertThrows(
 			IllegalStateException.class,
 			() -> new Reservation(
 				area,
 				nonAdmin,
-				start.plusHours(2),
-				end.plusHours(2),
+				newStart,
+				newEnd,
 				comment
 				)
-			);
+		);
 	}
 
 	@Test
@@ -156,7 +161,7 @@ public class ReservationTest {
 				end,
 				comment
 				)
-			);
+		);
 	}
 
 	@Test
@@ -164,15 +169,17 @@ public class ReservationTest {
 		LocalDateTime start = LocalDateTime.now().plusDays(1);
 		LocalDateTime end = LocalDateTime.now().plusDays(1).minusHours(3);
 		String comment = "Finding out what the fox says";
+		LocalDateTime newStart = start.plusHours(2);
+		LocalDateTime newEnd = end.plusHours(2);
 		assertThrows(
 			IllegalStateException.class,
 			() -> new Reservation(
 				area,
 				nonAdmin,
-				start.plusHours(2),
-				end.plusHours(2),
+				newStart,
+				newEnd,
 				comment
 				)
-			);
+		);
 	}
 }
