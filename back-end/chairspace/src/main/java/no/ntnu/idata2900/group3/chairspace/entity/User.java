@@ -19,8 +19,11 @@ import java.util.regex.Pattern;
 
 /**
  * Represents a user.
+ * Contains information about the user, such as name,
+ * email,areas they administrate and reservations.
+ *
+ * <p>
  * implements the builder pattern.
- * 
  *
  * @author Odin Lyngsgård
  * @version 0.1
@@ -69,7 +72,7 @@ public class User {
 	/**
 	 * Returns the id of the user as a string.
 	 *
-	 * @return Id as string
+	 * @return The id of the user
 	 */
 	public UUID getId() {
 		return this.userUuid;
@@ -78,7 +81,7 @@ public class User {
 	/**
 	 * returns the users reservations in a set.
 	 *
-	 * @return reservations in a set
+	 * @return reservations made by the user
 	 */
 	public Set<Reservation> getReservations() {
 		return reservations;
@@ -87,7 +90,7 @@ public class User {
 	/**
 	 * Returns the first name of the account as a string.
 	 *
-	 * @return First name as string
+	 * @return The first name of the user
 	 */
 	public String getFirstName() {
 		return this.firstName;
@@ -96,7 +99,7 @@ public class User {
 	/**
 	 * Returns last name of the account as a string.
 	 *
-	 * @return Last name as string
+	 * @return The last name of the user
 	 */
 	public String getLastName() {
 		return this.lastName;
@@ -105,7 +108,7 @@ public class User {
 	/**
 	 * Returns the email of the account as a string.
 	 *
-	 * @return Email as string
+	 * @return The email of the user
 	 */
 	public String getEmail() {
 		return this.email;
@@ -114,23 +117,21 @@ public class User {
 	/**
 	 * Returns areas that the user administrates in a set.
 	 *
-	 * @return areas in a set
+	 * @return Areas administrated by the user
 	 */
 	public Set<Area> getAreas() {
 		return administrates;
 	}
 
-	/* ---- Setters ---- */
-
-
 	/* ---- Reservations ---- */
 
 	/**
-	 * Adds multiple reservations.
+	 * Adds multiple reservations to the user.
 	 *
 	 * @param reservations reservations in a set
+	 * @throws IllegalArgumentException if reservations is null
 	 */
-	public void addReservations(Set<Reservation> reservations) {
+	public void addReservations(Set<Reservation> reservations) throws IllegalArgumentException {
 		if (reservations == null) {
 			throw new IllegalArgumentException("Reservations is null");
 		}
@@ -140,11 +141,12 @@ public class User {
 	}
 
 	/**
-	 * Adds a single reservation to the account.
+	 * Adds a single reservation to the user.
 	 *
 	 * @param reservation Reservation object
+	 * @throws IllegalArgumentException if reservation is null
 	 */
-	public void addReservation(Reservation reservation) {
+	public void addReservation(Reservation reservation) throws IllegalArgumentException {
 		if (reservation == null) {
 			throw new IllegalArgumentException();
 		}
@@ -155,19 +157,21 @@ public class User {
 	 * Removes a single reservation from the account.
 	 *
 	 * @param reservation Reservation object
+	 * @throws IllegalArgumentException if reservation is null
 	 */
-	public void removeReservation(Reservation reservation) {
+	public void removeReservation(Reservation reservation) throws IllegalArgumentException {
 		this.reservations.remove(reservation);
 	}
 
 	/* ---- Area permissions ---- */
 
 	/**
-	 * Adds an area to the account.
+	 * Adds an area to administrate.
 	 *
 	 * @param area Area object
+	 * @throws IllegalArgumentException if area is null
 	 */
-	public void addArea(Area area) {
+	public void addArea(Area area) throws IllegalArgumentException {
 		if (area == null) {
 			throw new IllegalArgumentException("Area is null");
 		}
@@ -178,8 +182,10 @@ public class User {
 	 * Removes an area from the account.
 	 *
 	 * @param area Area object
+	 * @throws IllegalStateException if there are no areas to remove
+	 * @throws IllegalArgumentException if area is not found
 	 */
-	public void removeArea(Area area) {
+	public void removeArea(Area area) throws IllegalStateException, IllegalArgumentException {
 		if (this.administrates.isEmpty()) {
 			throw new IllegalStateException("No areas to remove");
 		}
@@ -191,6 +197,12 @@ public class User {
 
 	/**
 	 * Builder class for User.
+	 * Implements the builder pattern.
+	 *
+	 * <p>
+	 * first name and last name are required fields.
+	 * email is optional.
+	 * areas are optional.
 	 */
 	public static class Builder {
 
@@ -209,7 +221,7 @@ public class User {
 		 * @param lastName Last name as string
 		 * @throws IllegalArgumentException if first name or last name is null
 		 */
-		public Builder(String firstName, String lastName) {
+		public Builder(String firstName, String lastName) throws IllegalArgumentException {
 			if (firstName == null || firstName.isEmpty()) {
 				throw new IllegalArgumentException("First name is null");
 			}
@@ -226,8 +238,10 @@ public class User {
 		 *
 		 * @param email Email as string
 		 * @return UserBuilder object
+		 * @throws IllegalArgumentException if email is null or blank
+		 * @throws IllegalArgumentException if email is not valid
 		 */
-		public Builder email(String email) {
+		public Builder email(String email) throws IllegalArgumentException {
 			if (email == null || email.isBlank()) {
 				throw new IllegalArgumentException("Email is null or blank");
 			}
@@ -249,7 +263,7 @@ public class User {
 		 * @return UserBuilder object
 		 * @throws IllegalArgumentException if area is null
 		 */
-		public Builder area(Area area) {
+		public Builder area(Area area) throws IllegalArgumentException {
 			if (area == null) {
 				throw new IllegalArgumentException("Area is null");
 			}
@@ -265,7 +279,7 @@ public class User {
 		 * @return UserBuilder object
 		 * @throws IllegalArgumentException if areas is null
 		 */
-		public Builder areas(Set<Area> areas) {
+		public Builder areas(Set<Area> areas) throws IllegalArgumentException {
 			if (areas == null) {
 				throw new IllegalArgumentException("Areas is null");
 			}
