@@ -237,10 +237,14 @@ public class User {
 		 * @return UserBuilder object
 		 */
 		public Builder email(String email) {
+			if (email == null || email.isBlank()) {
+				throw new IllegalArgumentException("Email is null or blank");
+			}
+			// Regex written by Sigve Bjørkedal
 			String patternString = "^[^@\\s]+@[^@\\s]+\\..{1,4}$";
 			Pattern pattern = Pattern.compile(patternString);
 			Matcher matcher = pattern.matcher(email);
-			if (email == null || !matcher.matches()) {
+			if (!matcher.matches()) {
 				throw new IllegalArgumentException("Email is not valid");
 			}
 			this.email = email;
