@@ -3,12 +3,11 @@ package no.ntnu.idata2900.group3.chairspace.entity;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -68,7 +67,7 @@ class UserTests {
 		assertThrows(
 			IllegalArgumentException.class,
 			() -> new User.Builder(null, "Test")
-			);
+		);
 	}
 
 	@Test
@@ -76,7 +75,7 @@ class UserTests {
 		assertThrows(
 			IllegalArgumentException.class,
 			() -> new User.Builder("", "Test")
-			);
+		);
 	}
 
 	@Test
@@ -84,7 +83,7 @@ class UserTests {
 		assertThrows(
 			IllegalArgumentException.class,
 			() -> new User.Builder("Hello", null)
-			);
+		);
 	}
 
 	@Test
@@ -92,7 +91,7 @@ class UserTests {
 		assertThrows(
 			IllegalArgumentException.class,
 			() -> new User.Builder("Test", "")
-			);
+		);
 	}
 
 	@Test
@@ -110,44 +109,45 @@ class UserTests {
 	void testAddSingleNullAreaThroughBuilder() {
 		String firstName = "Jon";
 		String lastName = "Test";
-
+		User.Builder builder = new User.Builder(firstName, lastName);
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> new User.Builder(firstName, lastName).area(null)
-			);
+			() -> builder.area(null)
+		);
 	}
 
 	@Test
 	void testAddNullEmailThroughBuilder() {
 		String firstName = "Jon";
 		String lastName = "Test";
+		User.Builder builder = new User.Builder(firstName, lastName);
 
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> new User.Builder(firstName, lastName).email(null)
-			);
+			() -> builder.email(null)
+		);
 	}
 
 	@Test
 	void testAddBlankEmailThroughBuilder() {
 		String firstName = "Jon";
 		String lastName = "Test";
-
+		User.Builder builder = new User.Builder(firstName, lastName);
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> new User.Builder(firstName, lastName).email("")
-			);
+			() -> builder.email("")
+		);
 	}
 
 	@Test
 	void testAddNullAreasThroughBuilder() {
 		String firstName = "Jon";
 		String lastName = "Test";
-
+		User.Builder builder = new User.Builder(firstName, lastName);
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> new User.Builder(firstName, lastName).areas(null)
-			);
+			() -> builder.areas(null)
+		);
 	}
 
 	/* ---- Method Tests ---- */
@@ -192,7 +192,7 @@ class UserTests {
 		assertThrows(
 			IllegalArgumentException.class,
 			() -> user.addReservations(null)
-			);
+		);
 	}
 
 	@Test
@@ -234,7 +234,7 @@ class UserTests {
 		assertThrows(
 			IllegalArgumentException.class,
 			() -> user.addArea(null)
-			);
+		);
 	}
 
 	@Test
@@ -248,7 +248,7 @@ class UserTests {
 		assertThrows(
 			IllegalArgumentException.class,
 			() -> user.removeArea(null)
-			);
+		);
 	}
 
 	@Test
@@ -258,7 +258,7 @@ class UserTests {
 		assertThrows(
 			IllegalStateException.class,
 			() -> user.removeArea(area)
-			);
+		);
 	}
 }
 
