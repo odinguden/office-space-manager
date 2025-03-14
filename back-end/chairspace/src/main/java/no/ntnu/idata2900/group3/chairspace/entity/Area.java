@@ -121,15 +121,12 @@ public class Area {
 	 * @return Administrators of area, including super area.
 	 */
 	public Set<User> getAdministrators() {
+		Set<User> allAdmins = new HashSet<>();
+		allAdmins.addAll(administrators);
 		if (getSuperArea() != null) {
-			Set<User> allAdmins = new HashSet<>();
 			allAdmins.addAll(superArea.getAdministrators());
-			allAdmins.addAll(administrators);
-
-			return allAdmins;
-		} else {
-			return administrators;
 		}
+		return allAdmins;
 	}
 
 	/**
