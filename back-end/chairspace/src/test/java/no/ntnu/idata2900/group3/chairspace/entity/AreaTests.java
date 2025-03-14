@@ -8,8 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Iterator;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
+import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 
 /**
  * Tests for the area class.
@@ -358,7 +363,7 @@ class AreaTests {
 			.administrator(nonAdminUser)
 			.build();
 
-		area.removeAdministrator(nonAdminUser, adminUser);
+		area.removeAdministrator(nonAdminUser);
 
 		assertFalse(area.getAdministrators().contains(nonAdminUser));
 	}
@@ -370,7 +375,7 @@ class AreaTests {
 			.build();
 		assertThrows(
 			IllegalStateException.class,
-			() -> area.removeAdministrator(adminUser, adminUser),
+			() -> area.removeAdministrator(adminUser),
 			"Area lets you remove last user"
 		);
 	}
@@ -383,21 +388,8 @@ class AreaTests {
 			.build();
 		assertThrows(
 			IllegalStateException.class,
-			() -> area.removeAdministrator(adminUser, nonAdminUser),
+			() -> area.removeAdministrator(adminUser),
 			"Area lets you remove user without being admin"
-		);
-	}
-
-	@Test
-	void testRemoveAdminWithNullUser() {
-		Area area = new Area.Builder("Test", 1234, areaType)
-			.administrator(adminUser)
-			.administrator(adminUser2)
-			.build();
-		assertThrows(
-			IllegalArgumentException.class,
-			() -> area.removeAdministrator(adminUser, null),
-			"Area lets you remove user with null admin"
 		);
 	}
 
@@ -409,7 +401,7 @@ class AreaTests {
 			.build();
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> area.removeAdministrator(null, adminUser),
+			() -> area.removeAdministrator(null),
 			"Area lets you remove null admin"
 		);
 	}
@@ -518,7 +510,9 @@ class AreaTests {
 		Area area = new Area.Builder("Test", 123, areaType)
 			.administrator(adminUser)
 			.build();
-		area.updateCapacity(420, adminUser);
+		assertDoesNotThrow(
+			() -> area.updateCapacity(420)
+		);
 		assertEquals(420, area.getCapacity());
 	}
 
@@ -528,32 +522,8 @@ class AreaTests {
 			.administrator(adminUser)
 			.build();
 		assertThrows(
-			IllegalArgumentException.class,
-			() -> area.updateCapacity(-3, adminUser),
-			"Does not throw exception when invalid capacity is given"
-		);
-	}
-
-	@Test
-	void testUpdateCapacityNullUser() {
-		Area area = new Area.Builder("Test", 123, areaType)
-			.administrator(adminUser)
-			.build();
-		assertThrows(
-			IllegalArgumentException.class,
-			() -> area.updateCapacity(3, null),
-			"Does not throw exception when invalid capacity is given"
-		);
-	}
-
-	@Test
-	void testUpdateCapacityNonAdminUser() {
-		Area area = new Area.Builder("Test", 123, areaType)
-			.administrator(adminUser)
-			.build();
-		assertThrows(
-			IllegalStateException.class,
-			() -> area.updateCapacity(4, nonAdminUser),
+			InvalidArgumentCheckedException.class,
+			() -> area.updateCapacity(-3),
 			"Does not throw exception when invalid capacity is given"
 		);
 	}
@@ -566,36 +536,8 @@ class AreaTests {
 			.build();
 		String newText = "Testing is fun";
 
-		area.updateDescription(newText, adminUser);
+		area.updateDescription(newText);
 		assertEquals(newText, area.getDescription(), "New description is not assigned");
-	}
-
-	@Test
-	void testUpdateDescriptionNonAdminUser() {
-		Area area = new Area.Builder("Test", 123, areaType)
-			.administrator(adminUser)
-			.description("Coding is fun")
-			.build();
-		String newText = "Testing is fun";
-		assertThrows(
-			IllegalStateException.class,
-			() -> area.updateDescription(newText, nonAdminUser),
-			"Does not throw exception when non admin user is given"
-		);
-	}
-
-	@Test
-	void testUpdateDescriptionNullUser() {
-		Area area = new Area.Builder("Test", 123, areaType)
-			.administrator(adminUser)
-			.description("Coding is fun")
-			.build();
-		String newText = "Testing is fun";
-		assertThrows(
-			IllegalArgumentException.class,
-			() -> area.updateDescription(newText, null),
-			"Does not throw exception when null user is given"
-		);
 	}
 
 	@Test
@@ -606,7 +548,7 @@ class AreaTests {
 			.build();
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> area.updateDescription(null, nonAdminUser),
+			() -> area.updateDescription(null),
 			"Does not throw exception when null text is given"
 		);
 	}
@@ -619,7 +561,7 @@ class AreaTests {
 			.build();
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> area.updateDescription("", nonAdminUser),
+			() -> area.updateDescription(""),
 			"Does not throw exception when blank test is given"
 		);
 	}
@@ -631,7 +573,7 @@ class AreaTests {
 			.description("Coding is fun")
 			.build();
 
-		area.addAreaFeature(areaFeature, adminUser);
+		area.addAreaFeature(areaFeature);
 
 		assertTrue(area.getFeatures().contains(areaFeature), "AreaFeature was not added");
 	}
@@ -645,22 +587,8 @@ class AreaTests {
 
 		assertThrows(
 			IllegalStateException.class,
-			() -> area.addAreaFeature(areaFeature, nonAdminUser),
+			() -> area.addAreaFeature(areaFeature),
 			"Area did not throw when feature was added by non admin user"
-		);
-	}
-
-	@Test
-	void testAddAreaFeatureWithNullUser() {
-		Area area = new Area.Builder("Test", 123, areaType)
-			.administrator(adminUser)
-			.description("Coding is fun")
-			.build();
-
-		assertThrows(
-			IllegalArgumentException.class,
-			() -> area.addAreaFeature(areaFeature, null),
-			"Area did not throw when feature was added by null user"
 		);
 	}
 
@@ -673,7 +601,7 @@ class AreaTests {
 
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> area.addAreaFeature(null, adminUser),
+			() -> area.addAreaFeature(null),
 			"Area did not throw when adding null feature"
 		);
 	}
@@ -687,7 +615,7 @@ class AreaTests {
 			.build();
 
 		assertDoesNotThrow(
-			() -> area.addAreaFeature(areaFeature, adminUser),
+			() -> area.addAreaFeature(areaFeature),
 			"Area did throw when adding existing feature"
 		);
 		assertEquals(1, area.getFeatures().size(), "Multiple of same area feature exist");
@@ -701,7 +629,7 @@ class AreaTests {
 		Area superArea = new Area.Builder("Test", 123, areaType)
 			.administrator(adminUser)
 			.build();
-		area.replaceSuperArea(superArea, adminUser);
+		area.replaceSuperArea(superArea);
 		assertEquals(superArea, area.getSuperArea());
 	}
 
@@ -715,7 +643,7 @@ class AreaTests {
 			.build();
 		assertThrows(
 			IllegalStateException.class,
-			() -> area.replaceSuperArea(superArea, nonAdminUser),
+			() -> area.replaceSuperArea(superArea),
 			"Area did not throw when trying to set superArea using non admin user"
 		);
 	}
@@ -728,7 +656,7 @@ class AreaTests {
 			.build();
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> area.replaceSuperArea(null, adminUser),
+			() -> area.replaceSuperArea(null),
 			"Area did not throw when trying to set superArea to null"
 		);
 	}
@@ -747,7 +675,7 @@ class AreaTests {
 			.build();
 		assertThrows(
 			IllegalStateException.class,
-			() -> areaWithSuper.setSuperArea(newArea, adminUser),
+			() -> areaWithSuper.setSuperArea(newArea),
 			"Area does not throw when setting sub area with existing super area"
 		);
 	}
@@ -763,7 +691,7 @@ class AreaTests {
 
 		assertThrows(
 			IllegalStateException.class,
-			() -> area.setSuperArea(superArea, nonAdminUser),
+			() -> area.setSuperArea(superArea),
 			"Area does not throw when setting sub area with non admin user"
 		);
 	}
@@ -779,7 +707,7 @@ class AreaTests {
 
 		assertThrows(
 			IllegalStateException.class,
-			() -> area.removeSuperArea(adminUser),
+			() -> area.removeSuperArea(),
 			"Area does not throw when removing super area with only admins"
 		);
 	}
@@ -789,23 +717,35 @@ class AreaTests {
 		Area area = new Area.Builder("Test", 123, areaType)
 			.administrator(adminUser)
 			.build();
-		Reservation reservation = new Reservation(
-			area,
-			adminUser,
-			LocalDateTime.now().plusHours(4),
-			LocalDateTime.now().plusHours(6),
-			"Meeting with mom"
-		);
 
-		Reservation reservation2 = new Reservation(
-			area,
-			adminUser,
-			LocalDateTime.now().plusHours(7),
-			LocalDateTime.now().plusHours(8),
-			"Meeting with mom"
-		);
-		area.removeReservation(reservation, adminUser);
-		assertTrue(area.getReservations().contains(reservation2), "Reservation was not removed");
+			try {
+			Reservation reservation;
+			reservation = new Reservation(
+				area,
+				adminUser,
+				LocalDateTime.now().plusHours(4),
+				LocalDateTime.now().plusHours(6),
+				"Meeting with mom"
+			);
+			new Reservation(
+					area,
+					adminUser,
+					LocalDateTime.now().plusHours(7),
+					LocalDateTime.now().plusHours(8),
+					"Meeting with mom"
+			);
+		} catch (ReservedException e) {
+			e.printStackTrace();
+		}
+		area.removeReservation(reservation);
+		Iterator<Reservation> iterator = area.getReservations();
+		boolean contains = false;
+		while (iterator.hasNext() && !contains) {
+			if (iterator.next().equals(reservation)) {
+				contains = true;
+			}
+		}
+		assertFalse(contains, "Reservation was not removed");
 	}
 
 	@Test
@@ -814,12 +754,14 @@ class AreaTests {
 		Area area = new Area.Builder("Test", 2, areaType)
 			.administrator(adminUser)
 			.build();
-		new Reservation(
-			area,
-			adminUser,
-			start,
-			start.plusHours(3),
-			"This is for testing"
+		assertDoesNotThrow(
+			() -> new Reservation(
+				area,
+				adminUser,
+				start,
+				start.plusHours(3),
+				"This is for testing"
+			)
 		);
 		assertTrue(
 			area.isFree(start.minusHours(1)),
@@ -838,7 +780,9 @@ class AreaTests {
 		Area area = new Area.Builder("Test", 2, areaType)
 			.administrator(adminUser)
 			.build();
-		new Reservation(area, adminUser, start, end, "This is a test");
+		assertDoesNotThrow(
+			() -> new Reservation(area, adminUser, start, end, "This is a test")
+		);
 		assertFalse(area.isFree(start.plusHours(2)));
 	}
 
@@ -850,22 +794,40 @@ class AreaTests {
 			.administrator(adminUser)
 			.build();
 
-		Reservation reservation = new Reservation(
-			area,
-			adminUser,
-			start,
-			start.plusHours(2),
-			"This is a test");
-		Reservation reservation2 = new Reservation(
-			area,
-			adminUser,
-			start2,
-			start2.plusHours(3),
-			"This is a test");
-		area.removeReservation(reservation2, adminUser);
-		assertTrue(area.getReservations().contains(reservation), "Reservation was not added");
+		Reservation reservation = null;
+		Reservation reservation2 = null;
+		try {
+			reservation = new Reservation(
+				area,
+				adminUser,
+				start,
+				start.plusHours(2),
+				"This is a test");
+			reservation2 = new Reservation(
+				area,
+				adminUser,
+				start2,
+				start2.plusHours(3),
+				"This is a test");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		area.removeReservation(reservation2);
+
+		Iterator<Reservation> iterator = area.getReservations();
+		boolean contains = false;
+		boolean contain2 = false;
+		while (iterator.hasNext() && !contains && !contain2) {
+			if (iterator.next().equals(reservation)) {
+				contains = true;
+			}
+			if (iterator.next().equals(reservation2)) {
+				contain2 = true;
+			}
+		}
+		assertTrue(contains, "Reservation was not added");
 		assertFalse(
-			area.getReservations().contains(reservation2),
+			contain2,
 			"Returns true for non existing reservation"
 		);
 	}
@@ -887,15 +849,23 @@ class AreaTests {
 		Area area = new Area.Builder("Test", 34, areaType)
 			.administrator(adminUser)
 			.build();
-		Reservation reservation = new Reservation(
-			area,
-			adminUser,
-			start.plusHours(1),
-			start.plusHours(2),
-			"This is a test"
+		Reservation reservation = null;
+		try {
+			reservation = new Reservation(
+				area,
+				adminUser,
+				start.plusHours(1),
+				start.plusHours(2),
+				"This is a test"
+			);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		area.removeReservation(reservation);
+		assertDoesNotThrow(
+			() -> new Reservation(area, adminUser, start, start.plusHours(3), "This is a test")
 		);
-		area.removeReservation(reservation, adminUser);
-		new Reservation(area, adminUser, start, start.plusHours(3), "This is a test");
 		assertThrows(
 			IllegalStateException.class,
 			() -> area.addReservation(reservation)
@@ -908,7 +878,7 @@ class AreaTests {
 			.administrator(adminUser)
 			.build();
 
-		area.addAdministrator(adminUser2, adminUser);
+		area.addAdministrator(adminUser2);
 		assertTrue(area.getAdministrators().contains(adminUser2), "Admin user was not added");
 	}
 
@@ -920,33 +890,9 @@ class AreaTests {
 
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> area.addAdministrator(null, adminUser)
+			() -> area.addAdministrator(null)
 		);
 	}
-
-	@Test
-	void addAdminWithoutAdminUser() {
-		Area area = new Area.Builder("Area", 12, areaType)
-			.administrator(adminUser)
-			.build();
-		assertThrows(
-			IllegalStateException.class,
-			() -> area.addAdministrator(adminUser2, nonAdminUser)
-		);
-	}
-
-	@Test
-	void addAdminWithoutNullUser() {
-		Area area = new Area.Builder("Area", 12, areaType)
-			.administrator(adminUser)
-			.build();
-
-		assertThrows(
-			IllegalArgumentException.class,
-			() -> area.addAdministrator(adminUser2, null)
-		);
-	}
-
 
 	@Test
 	void isFreeBetweenFalseTests() {
@@ -989,7 +935,7 @@ class AreaTests {
 			.administrator(adminUser)
 			.superArea(supArea)
 			.build();
-		supArea.removeSubArea(subArea, adminUser);
+		supArea.removeSubArea(subArea);
 		assertTrue(supArea.getSubAreas().isEmpty());
 	}
 
@@ -1004,7 +950,7 @@ class AreaTests {
 			.build();
 		assertThrows(
 			IllegalStateException.class,
-			() -> supArea.removeSubArea(subArea, nonAdminUser)
+			() -> supArea.removeSubArea(subArea)
 		);
 	}
 
@@ -1019,22 +965,7 @@ class AreaTests {
 			.build();
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> supArea.removeSubArea(null, adminUser)
-		);
-	}
-
-	@Test
-	void testRemoveSubAreaWithNullUser() {
-		Area supArea = new Area.Builder("Test", 23, areaType)
-			.administrator(adminUser)
-			.build();
-		Area subArea = new Area.Builder("Test", 23, areaType)
-			.administrator(adminUser)
-			.superArea(supArea)
-			.build();
-		assertThrows(
-			IllegalArgumentException.class,
-			() -> supArea.removeSubArea(subArea, null)
+			() -> supArea.removeSubArea(null)
 		);
 	}
 
@@ -1046,10 +977,12 @@ class AreaTests {
 			.administrator(adminUser)
 			.build();
 
-		new Reservation(area, adminUser, start, end, "More testing");
+		assertDoesNotThrow(
+			() -> new Reservation(area, adminUser, start, end, "More testing")
+		);
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> area.removeReservation(null, adminUser)
+			() -> area.removeReservation(null)
 		);
 	}
 
@@ -1060,10 +993,23 @@ class AreaTests {
 		Area area = new Area.Builder("Name", 12, areaType)
 			.administrator(adminUser)
 			.build();
-		new Reservation(area, adminUser, start, end, "More testing");
-		Reservation reservation2 = new Reservation(area, adminUser2, start, end, "More testing");
-		area.removeReservation(reservation2, adminUser2);
-		assertFalse(area.getReservations().contains(reservation2));
+		assertDoesNotThrow(
+			() -> new Reservation(area, adminUser, start, end, "More testing")
+		);
+		Reservation reservation2;
+		assertDoesNotThrow(
+			() ->reservation2 = new Reservation(area, adminUser2, start, end, "More testing");
+		);
+		area.removeReservation(reservation2);
+
+		Iterator<Reservation> iterator = area.getReservations();
+		boolean contains = false;
+		while (iterator.hasNext() && !contains) {
+			if (iterator.next().equals(reservation2)) {
+				contains = true;
+			}
+		}
+		assertFalse(contains);
 	}
 
 	@Test
@@ -1073,10 +1019,23 @@ class AreaTests {
 		Area area = new Area.Builder("Name", 12, areaType)
 			.administrator(adminUser)
 			.build();
-		new Reservation(area, adminUser, start, end, "More testing");
-		Reservation reservation2 = new Reservation(area, adminUser2, start, end, "More testing");
-		area.removeReservation(reservation2, adminUser);
-		assertFalse(area.getReservations().contains(reservation2));
+		assertDoesNotThrow(
+			() -> new Reservation(area, adminUser, start, end, "More testing")
+		);
+		Reservation reservation2;
+		assertDoesNotThrow(
+			() -> reservation2 = new Reservation(area, adminUser2, start, end, "More testing");
+		)
+		area.removeReservation(reservation2);
+
+		boolean contains = false;
+		Iterator<Reservation> iterator = area.getReservations();
+		while (iterator.hasNext() && !contains) {
+			if (iterator.next().equals(reservation2)) {
+				contains = true;
+			}
+		}
+		assertFalse(contains);
 	}
 
 	@Test
@@ -1086,11 +1045,13 @@ class AreaTests {
 		Area area = new Area.Builder("Name", 12, areaType)
 			.administrator(adminUser)
 			.build();
-
-		Reservation reservation = new Reservation(area, adminUser2, start, end, "More testing");
+		Reservation reservation;
+		assertDoesNotThrow(
+			() -> reservation = new Reservation(area, adminUser2, start, end, "More testing");
+		);
 		assertThrows(
 			IllegalStateException.class,
-			() -> area.removeReservation(reservation, nonAdminUser)
+			() -> area.removeReservation(reservation)
 		);
 	}
 

@@ -1,9 +1,11 @@
 package no.ntnu.idata2900.group3.chairspace.entity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDateTime;
+import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -43,19 +45,25 @@ class ReservationTest {
 		LocalDateTime start = LocalDateTime.now().plusDays(1);
 		LocalDateTime end = LocalDateTime.now().plusDays(1).plusHours(3);
 		String comment = "Writing tests";
-		Reservation reservation = new Reservation(
-			area,
-			nonAdmin,
-			start,
-			end,
-			comment
-			);
+		Reservation reservation = null;
+		try {
+			reservation = new Reservation(
+				area,
+				nonAdmin,
+				start,
+				end,
+				comment
+				);
+		} catch (ReservedException e) {
+			e.printStackTrace();
+		}
+		assertNotNull(reservation);
 		assertEquals(area, reservation.getArea(), "Area was not assigned correctly");
 		assertEquals(nonAdmin, reservation.getUser(), "User was not assigned correctly");
 		assertEquals(start, reservation.getStart(), "Start time was not assigned correctly");
 		assertEquals(end, reservation.getEnd(), "End time was not assigned correctly");
 		assertEquals(comment, reservation.getComment(), "comment was not assigned correctly");
-		area.removeReservation(reservation, admin);
+		area.removeReservation(reservation);
 	}
 
 	@Test
@@ -126,13 +134,17 @@ class ReservationTest {
 		LocalDateTime start = LocalDateTime.now().plusDays(1);
 		LocalDateTime end = LocalDateTime.now().plusDays(1).plusHours(3);
 		String comment = "Writing tests";
-		new Reservation(
-			area,
-			nonAdmin,
-			start,
-			end,
-			comment
-		);
+		try {
+			new Reservation(
+				area,
+				nonAdmin,
+				start,
+				end,
+				comment
+			);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		LocalDateTime newStart = start.plusHours(2);
 		LocalDateTime newEnd = end.plusHours(2);
 		assertThrows(

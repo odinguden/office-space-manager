@@ -3,6 +3,7 @@ package no.ntnu.idata2900.group3.chairspace.entity;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -155,24 +156,28 @@ class UserTests {
 	@Test
 	void testAddReservations() {
 		HashSet<Reservation> reservations = new HashSet<>();
-		reservations.add(
-			new Reservation(
-				area,
-				user,
-				LocalDateTime.now().plusHours(1),
-				LocalDateTime.now().plusHours(4),
-				"Hello"
-			)
-		);
-		reservations.add(
-			new Reservation(
-				area,
-				user,
-				LocalDateTime.now().plusHours(5),
-				LocalDateTime.now().plusHours(7),
-				"Hello"
-			)
-		);
+		try {
+			reservations.add(
+				new Reservation(
+					area,
+					user,
+					LocalDateTime.now().plusHours(1),
+					LocalDateTime.now().plusHours(4),
+					"Hello"
+				)
+			);
+			reservations.add(
+				new Reservation(
+					area,
+					user,
+					LocalDateTime.now().plusHours(5),
+					LocalDateTime.now().plusHours(7),
+					"Hello"
+				)
+			);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		user.addReservations(reservations);
 
@@ -197,21 +202,31 @@ class UserTests {
 
 	@Test
 	void removeReservation() {
+		Reservation reservation = null;
+		Reservation reservation2 = null;
+		try {
+			reservation = new Reservation(
+				area,
+				user,
+				LocalDateTime.now().plusHours(1),
+				LocalDateTime.now().plusHours(4),
+				"Hello"
+			);
+			reservation2 = new Reservation(
+				area,
+				user,
+				LocalDateTime.now().plusHours(5),
+				LocalDateTime.now().plusHours(7),
+				"Hello"
+				);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		assertNotNull(reservation2);
+		assertNotNull(reservation);
+
 		HashSet<Reservation> reservations = new HashSet<>();
-		Reservation reservation = new Reservation(
-			area,
-			user,
-			LocalDateTime.now().plusHours(1),
-			LocalDateTime.now().plusHours(4),
-			"Hello"
-		);
-		Reservation reservation2 = new Reservation(
-			area,
-			user,
-			LocalDateTime.now().plusHours(5),
-			LocalDateTime.now().plusHours(7),
-			"Hello"
-		);
 		reservations.add(reservation);
 		reservations.add(reservation2);
 		user.addReservations(reservations);
