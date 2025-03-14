@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 
 /**
  * Represents a reservation of an area.
@@ -56,7 +57,7 @@ public class Reservation {
 	 * @param end end date and time of reservation
 	 * @param comment comment for the reservation
 	 * @throws IllegalArgumentException if any of the parameters are null or blank
-	 * @throws IllegalStateException if the area is not free for the specified timespan
+	 * @throws ReservedException if the area is not free for the specified timespan
 	 * @throws IllegalStateException if the end time is before the start time
 	 * @throws IllegalStateException if the start time is before the current time
 	 */
@@ -66,7 +67,7 @@ public class Reservation {
 		LocalDateTime start,
 		LocalDateTime end,
 		String comment
-	) throws IllegalArgumentException, IllegalStateException {
+	) throws IllegalArgumentException, ReservedException {
 		setUser(user);
 		setStart(start);
 		setEnd(end);
@@ -88,9 +89,9 @@ public class Reservation {
 	 *
 	 * @param area to reserve
 	 * @throws IllegalArgumentException if area is null
-	 * @throws IllegalStateException if area is not free for the specified timespan
+	 * @throws ReservedException if area is not free for the specified timespan
 	 */
-	private void setArea(Area area) throws IllegalArgumentException, IllegalStateException {
+	private void setArea(Area area) throws IllegalArgumentException, ReservedException {
 		if (area == null) {
 			throw new IllegalArgumentException("Area cannot be null");
 		}
