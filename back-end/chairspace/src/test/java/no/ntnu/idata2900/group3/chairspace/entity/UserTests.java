@@ -10,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+
+import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,14 +34,19 @@ class UserTests {
 
 	@BeforeEach
 	void setUp() {
-		user = new User.Builder("John", "Test")
-			.email("test@test.no")
-			.build();
-		areaType = new AreaType("Test Type", "Test Descripton");
-		area = new Area.Builder("Test Area", 123, areaType).administrator(user).build();
-		area2 = new Area.Builder("Test Area 2", 23, areaType).administrator(user).build();
-		user.addArea(area);
-		user.addArea(area2);
+		try {
+			user = new User.Builder("John", "Test")
+				.email("test@test.no")
+				.build();
+			areaType = new AreaType("Test Type", "Test Descripton");
+			area = new Area.Builder("Test Area", 123, areaType).administrator(user).build();
+			area2 = new Area.Builder("Test Area 2", 23, areaType).administrator(user).build();
+			user.addArea(area);
+			user.addArea(area2);
+		} catch (Exception e) {
+			fail("Failed to set up variables: " + e.getMessage(), e);
+			return;
+		}
 	}
 
 	/* ---- Builder Tests ---- */
@@ -53,10 +60,16 @@ class UserTests {
 		String lastName = "Test";
 		areas.add(area);
 		areas.add(area2);
-		User newUser = new User.Builder(firstName, lastName)
-			.email(email)
-			.areas(areas)
-			.build();
+		User newUser;
+		try {
+			newUser = new User.Builder(firstName, lastName)
+				.email(email)
+				.areas(areas)
+				.build();
+		} catch (Exception e) {
+			fail("Failed to create user" + e.getMessage(), e);
+			return;
+		}
 
 		assertEquals(firstName, newUser.getFirstName());
 		assertEquals(lastName, newUser.getLastName());
@@ -68,7 +81,7 @@ class UserTests {
 	@Test
 	void testNullFirstNameThrows() {
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> new User.Builder(null, "Test")
 		);
 	}
@@ -76,7 +89,7 @@ class UserTests {
 	@Test
 	void testBlankFirstNameThrows() {
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> new User.Builder("", "Test")
 		);
 	}
@@ -84,7 +97,7 @@ class UserTests {
 	@Test
 	void testNullLastNameThrows() {
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> new User.Builder("Hello", null)
 		);
 	}
@@ -92,7 +105,7 @@ class UserTests {
 	@Test
 	void testBlankLastNameThrows() {
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> new User.Builder("Test", "")
 		);
 	}
@@ -101,9 +114,15 @@ class UserTests {
 	void testAddSingleAreaThroughBuilder() {
 		String firstName = "Jon";
 		String lastName = "Test";
-		User newUser = new User.Builder(firstName, lastName)
-			.area(area)
-			.build();
+		User newUser;
+		try {
+			newUser = new User.Builder(firstName, lastName)
+				.area(area)
+				.build();
+		} catch (Exception e) {
+			fail("Failed to create user" + e.getMessage(), e);
+			return;
+		}
 
 		assertTrue(newUser.getAreas().contains(area));
 	}
@@ -112,9 +131,15 @@ class UserTests {
 	void testAddSingleNullAreaThroughBuilder() {
 		String firstName = "Jon";
 		String lastName = "Test";
-		User.Builder builder = new User.Builder(firstName, lastName);
+		User.Builder builder;
+		try {
+			builder = new User.Builder(firstName, lastName);
+		} catch (Exception e) {
+			fail("Failed to create builder: " + e.getMessage(), e);
+			return;
+		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> builder.area(null)
 		);
 	}
@@ -123,10 +148,15 @@ class UserTests {
 	void testAddNullEmailThroughBuilder() {
 		String firstName = "Jon";
 		String lastName = "Test";
-		User.Builder builder = new User.Builder(firstName, lastName);
-
+		User.Builder builder;
+		try {
+			builder = new User.Builder(firstName, lastName);
+		} catch (Exception e) {
+			fail("Failed to create builder: " + e.getMessage(), e);
+			return;
+		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> builder.email(null)
 		);
 	}
@@ -135,9 +165,15 @@ class UserTests {
 	void testAddBlankEmailThroughBuilder() {
 		String firstName = "Jon";
 		String lastName = "Test";
-		User.Builder builder = new User.Builder(firstName, lastName);
+		User.Builder builder;
+		try {
+			builder = new User.Builder(firstName, lastName);
+		} catch (Exception e) {
+			fail("Failed to create builder: " + e.getMessage(), e);
+			return;
+		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> builder.email("")
 		);
 	}
@@ -146,9 +182,15 @@ class UserTests {
 	void testAddNullAreasThroughBuilder() {
 		String firstName = "Jon";
 		String lastName = "Test";
-		User.Builder builder = new User.Builder(firstName, lastName);
+		User.Builder builder;
+		try {
+			builder = new User.Builder(firstName, lastName);
+		} catch (Exception e) {
+			fail("Failed to create builder: " + e.getMessage(), e);
+			return;
+		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> builder.areas(null)
 		);
 	}
@@ -181,7 +223,12 @@ class UserTests {
 			e.printStackTrace();
 		}
 
-		user.addReservations(reservations);
+		try {
+			user.addReservations(reservations);
+		} catch (Exception e) {
+			fail("Failed to add reservations" + e.getMessage(), e);
+			return;
+		}
 
 		assertEquals(user.getReservations(), reservations);
 	}
@@ -189,7 +236,7 @@ class UserTests {
 	@Test
 	void testAddNullReservation() {
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> user.addReservation(null)
 		);
 	}
@@ -197,7 +244,7 @@ class UserTests {
 	@Test
 	void addNullReservations() {
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> user.addReservations(null)
 		);
 	}
@@ -224,6 +271,9 @@ class UserTests {
 		} catch (ReservedException e) {
 			fail("Failed to create reservation" + e.getMessage());
 			return;
+		} catch (InvalidArgumentCheckedException e) {
+			fail("Failed to create reservation" + e.getMessage());
+			return;
 		}
 
 		assertNotNull(reservation2);
@@ -232,7 +282,12 @@ class UserTests {
 		HashSet<Reservation> reservations = new HashSet<>();
 		reservations.add(reservation);
 		reservations.add(reservation2);
-		user.addReservations(reservations);
+		try {
+			user.addReservations(reservations);
+		} catch (Exception e) {
+			fail("Failed to add reservations" + e.getMessage(), e);
+			return;
+		}
 
 		assertDoesNotThrow(
 			() -> user.removeReservation(reservation2)
@@ -242,37 +297,53 @@ class UserTests {
 
 	@Test
 	void testAddArea() {
-		Area newArea = new Area.Builder("Name", 234, areaType).administrator(user).build();
-		user.addArea(newArea);
+		Area newArea;
+		try {
+			newArea = new Area.Builder("Name", 234, areaType).administrator(user).build();
+			user.addArea(newArea);
+		} catch (Exception e) {
+			fail("Failed to add area" + e.getMessage(), e);
+			return;
+		}
 		assertTrue(user.getAreas().contains(newArea));
 	}
 
 	@Test
 	void testAddNullArea() {
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> user.addArea(null)
 		);
 	}
 
 	@Test
 	void testRemoveArea() {
-		user.removeArea(area);
+		try {
+			user.removeArea(area);
+		} catch (Exception e) {
+			fail("Failed to remove area" + e.getMessage(), e);
+			return;
+		}
 		assertFalse(user.getAreas().contains(area));
 	}
 
 	@Test
 	void testRemoveNullArea() {
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> user.removeArea(null)
 		);
 	}
 
 	@Test
 	void testRemoveAllAndOneAreas() {
-		user.removeArea(area);
-		user.removeArea(area2);
+		try {
+			user.removeArea(area);
+			user.removeArea(area2);
+		} catch (Exception e) {
+			fail("Failed to remove areas: " + e.getMessage(), e);
+			return;
+		}
 		assertThrows(
 			IllegalStateException.class,
 			() -> user.removeArea(area)
