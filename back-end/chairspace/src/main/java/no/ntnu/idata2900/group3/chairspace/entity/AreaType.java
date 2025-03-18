@@ -122,25 +122,21 @@ public class AreaType {
 	 * Adds an area to the area type.
 	 *
 	 * @param area the area to add
-	 * @throws InvalidArgumentCheckedException if area is null
 	 */
-	public void addArea(Area area) throws InvalidArgumentCheckedException {
-		if (area == null) {
-			throw new InvalidArgumentCheckedException("Area cannot be null");
+	public void addArea(Area area) {
+		if (area != null) {
+			areas.add(area);
 		}
-		areas.add(area);
 	}
 
 	/**
 	 * Removes an area from the area type.
 	 *
 	 * @param area the area to remove
-	 * @throws InvalidArgumentCheckedException if area is null
 	 */
-	public void removeArea(Area area) throws InvalidArgumentCheckedException {
-		if (area == null) {
-			throw new InvalidArgumentCheckedException("Area cannot be null");
+	public void removeArea(Area area) {
+		if (area != null) {
+			areas.remove(area);
 		}
-		areas.remove(area);
 	}
 }
