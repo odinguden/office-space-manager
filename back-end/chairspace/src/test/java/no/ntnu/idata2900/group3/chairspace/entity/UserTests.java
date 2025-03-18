@@ -6,9 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -202,8 +204,8 @@ class UserTests {
 
 	@Test
 	void removeReservation() {
-		Reservation reservation = null;
-		Reservation reservation2 = null;
+		final Reservation reservation;
+		final Reservation reservation2;
 		try {
 			reservation = new Reservation(
 				area,
@@ -219,8 +221,9 @@ class UserTests {
 				LocalDateTime.now().plusHours(7),
 				"Hello"
 				);
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (ReservedException e) {
+			fail("Failed to create reservation" + e.getMessage());
+			return;
 		}
 
 		assertNotNull(reservation2);
