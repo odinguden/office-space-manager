@@ -8,6 +8,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
+import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 
 /**
  * Represents a reservation of an area.
@@ -56,7 +57,7 @@ public class Reservation {
 	 * @param start start date and time of reservation
 	 * @param end end date and time of reservation
 	 * @param comment comment for the reservation
-	 * @throws IllegalArgumentException if any of the parameters are null or blank
+	 * @throws InvalidArgumentCheckedException if any of the parameters are null or blank
 	 * @throws ReservedException if the area is not free for the specified timespan
 	 * @throws IllegalStateException if the end time is before the start time
 	 * @throws IllegalStateException if the start time is before the current time
@@ -67,7 +68,7 @@ public class Reservation {
 		LocalDateTime start,
 		LocalDateTime end,
 		String comment
-	) throws IllegalArgumentException, ReservedException {
+	) throws InvalidArgumentCheckedException, ReservedException {
 		setUser(user);
 		setStart(start);
 		setEnd(end);
@@ -88,12 +89,12 @@ public class Reservation {
 	 * Also adds the reservation to the area's reservation list.
 	 *
 	 * @param area to reserve
-	 * @throws IllegalArgumentException if area is null
+	 * @throws InvalidArgumentCheckedException if area is null
 	 * @throws ReservedException if area is not free for the specified timespan
 	 */
-	private void setArea(Area area) throws IllegalArgumentException, ReservedException {
+	private void setArea(Area area) throws InvalidArgumentCheckedException, ReservedException {
 		if (area == null) {
-			throw new IllegalArgumentException("Area cannot be null");
+			throw new InvalidArgumentCheckedException("Area cannot be null");
 		}
 		if (!area.isFreeBetween(startDateTime, endDateTime)) {
 			throw new IllegalStateException(
@@ -109,11 +110,11 @@ public class Reservation {
 	 * Also adds the reservation to the user's reservation list.
 	 *
 	 * @param user that is reserving the area
-	 * @throws IllegalArgumentException if user is null
+	 * @throws InvalidArgumentCheckedException if user is null
 	 */
-	private void setUser(User user) throws IllegalArgumentException {
+	private void setUser(User user) throws InvalidArgumentCheckedException {
 		if (user == null) {
-			throw new IllegalArgumentException("User cannot be null");
+			throw new InvalidArgumentCheckedException("User cannot be null");
 		}
 		this.user = user;
 		user.addReservation(this);
@@ -123,13 +124,13 @@ public class Reservation {
 	 * Sets the start date and time of the reservation.
 	 *
 	 * @param start date and time of reservation start
-	 * @throws IllegalArgumentException if start is null
+	 * @throws InvalidArgumentCheckedException if start is null
 	 * @throws IllegalStateException if start is before the current time
 	 */
 	private void setStart(LocalDateTime start)
-		throws IllegalArgumentException, IllegalStateException {
+		throws InvalidArgumentCheckedException, IllegalStateException {
 		if (start == null) {
-			throw new IllegalArgumentException("Start time cannot be null");
+			throw new InvalidArgumentCheckedException("Start time cannot be null");
 		}
 		if (start.isBefore(LocalDateTime.now())) {
 			throw new IllegalStateException("Cannot create a reservation in the past");
@@ -141,12 +142,12 @@ public class Reservation {
 	 * Sets the end date and time of the reservation.
 	 *
 	 * @param end date and time of reservation
-	 * @throws IllegalArgumentException if end is null
+	 * @throws InvalidArgumentCheckedException if end is null
 	 * @throws IllegalStateException if end is before the start time
 	 */
-	private void setEnd(LocalDateTime end) throws IllegalArgumentException, IllegalStateException {
+	private void setEnd(LocalDateTime end) throws InvalidArgumentCheckedException, IllegalStateException {
 		if (end == null) {
-			throw new IllegalArgumentException("End time cannot be null");
+			throw new InvalidArgumentCheckedException("End time cannot be null");
 		}
 		if (end.isBefore(startDateTime)) {
 			throw new IllegalStateException("End time cannot be before start time");
@@ -158,11 +159,11 @@ public class Reservation {
 	 * Sets the comment for the reservation.
 	 *
 	 * @param comment for the reservation
-	 * @throws IllegalArgumentException if comment is null or blank
+	 * @throws InvalidArgumentCheckedException if comment is null or blank
 	 */
-	private void setComment(String comment) throws IllegalArgumentException {
+	private void setComment(String comment) throws InvalidArgumentCheckedException {
 		if (comment == null || comment.isBlank()) {
-			throw new IllegalArgumentException("Comment cannot be blank or null");
+			throw new InvalidArgumentCheckedException("Comment cannot be blank or null");
 		}
 		this.comment = comment;
 	}

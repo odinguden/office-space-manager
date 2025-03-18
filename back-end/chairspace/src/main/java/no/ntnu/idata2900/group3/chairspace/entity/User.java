@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 
 /**
  * Represents a user.
@@ -129,11 +130,11 @@ public class User {
 	 * Adds multiple reservations to the user.
 	 *
 	 * @param reservations reservations in a set
-	 * @throws IllegalArgumentException if reservations is null
+	 * @throws InvalidArgumentCheckedException if reservations is null
 	 */
-	public void addReservations(Set<Reservation> reservations) throws IllegalArgumentException {
+	public void addReservations(Set<Reservation> reservations) throws InvalidArgumentCheckedException {
 		if (reservations == null) {
-			throw new IllegalArgumentException("Reservations is null");
+			throw new InvalidArgumentCheckedException("Reservations is null");
 		}
 		for (Reservation reservation : reservations) {
 			addReservation(reservation);
@@ -144,11 +145,11 @@ public class User {
 	 * Adds a single reservation to the user.
 	 *
 	 * @param reservation Reservation object
-	 * @throws IllegalArgumentException if reservation is null
+	 * @throws InvalidArgumentCheckedException if reservation is null
 	 */
-	public void addReservation(Reservation reservation) throws IllegalArgumentException {
+	public void addReservation(Reservation reservation) throws InvalidArgumentCheckedException {
 		if (reservation == null) {
-			throw new IllegalArgumentException();
+			throw new InvalidArgumentCheckedException();
 		}
 		this.reservations.add(reservation);
 	}
@@ -157,9 +158,9 @@ public class User {
 	 * Removes a single reservation from the account.
 	 *
 	 * @param reservation Reservation object
-	 * @throws IllegalArgumentException if reservation is null
+	 * @throws InvalidArgumentCheckedException if reservation is null
 	 */
-	public void removeReservation(Reservation reservation) throws IllegalArgumentException {
+	public void removeReservation(Reservation reservation) throws InvalidArgumentCheckedException {
 		this.reservations.remove(reservation);
 	}
 
@@ -169,11 +170,11 @@ public class User {
 	 * Adds an area to administrate.
 	 *
 	 * @param area Area object
-	 * @throws IllegalArgumentException if area is null
+	 * @throws InvalidArgumentCheckedException if area is null
 	 */
-	public void addArea(Area area) throws IllegalArgumentException {
+	public void addArea(Area area) throws InvalidArgumentCheckedException {
 		if (area == null) {
-			throw new IllegalArgumentException("Area is null");
+			throw new InvalidArgumentCheckedException("Area is null");
 		}
 		this.administrates.add(area);
 	}
@@ -183,14 +184,14 @@ public class User {
 	 *
 	 * @param area Area object
 	 * @throws IllegalStateException if there are no areas to remove
-	 * @throws IllegalArgumentException if area is not found
+	 * @throws InvalidArgumentCheckedException if area is not found
 	 */
-	public void removeArea(Area area) throws IllegalStateException, IllegalArgumentException {
+	public void removeArea(Area area) throws IllegalStateException, InvalidArgumentCheckedException {
 		if (this.administrates.isEmpty()) {
 			throw new IllegalStateException("No areas to remove");
 		}
 		if (!this.administrates.contains(area)) {
-			throw new IllegalArgumentException("Area not found");
+			throw new InvalidArgumentCheckedException("Area not found");
 		}
 		this.administrates.remove(area);
 	}
@@ -219,14 +220,14 @@ public class User {
 		 *
 		 * @param firstName First name as string
 		 * @param lastName Last name as string
-		 * @throws IllegalArgumentException if first name or last name is null
+		 * @throws InvalidArgumentCheckedException if first name or last name is null
 		 */
-		public Builder(String firstName, String lastName) throws IllegalArgumentException {
+		public Builder(String firstName, String lastName) throws InvalidArgumentCheckedException {
 			if (firstName == null || firstName.isEmpty()) {
-				throw new IllegalArgumentException("First name is null");
+				throw new InvalidArgumentCheckedException("First name is null");
 			}
 			if (lastName == null || lastName.isEmpty()) {
-				throw new IllegalArgumentException("Last name is null");
+				throw new InvalidArgumentCheckedException("Last name is null");
 			}
 			this.lastName = lastName;
 			this.firstName = firstName;
@@ -238,19 +239,19 @@ public class User {
 		 *
 		 * @param email Email as string
 		 * @return UserBuilder object
-		 * @throws IllegalArgumentException if email is null or blank
-		 * @throws IllegalArgumentException if email is not valid
+		 * @throws InvalidArgumentCheckedException if email is null or blank
+		 * @throws InvalidArgumentCheckedException if email is not valid
 		 */
-		public Builder email(String email) throws IllegalArgumentException {
+		public Builder email(String email) throws InvalidArgumentCheckedException {
 			if (email == null || email.isBlank()) {
-				throw new IllegalArgumentException("Email is null or blank");
+				throw new InvalidArgumentCheckedException("Email is null or blank");
 			}
 			// Regex written by Sigve Bjørkedal
 			String patternString = "^[^@\\s]+@[^@\\s]+\\..{1,4}$";
 			Pattern pattern = Pattern.compile(patternString);
 			Matcher matcher = pattern.matcher(email);
 			if (!matcher.matches()) {
-				throw new IllegalArgumentException("Email is not valid");
+				throw new InvalidArgumentCheckedException("Email is not valid");
 			}
 			this.email = email;
 			return this;
@@ -261,11 +262,11 @@ public class User {
 		 *
 		 * @param area Area object
 		 * @return UserBuilder object
-		 * @throws IllegalArgumentException if area is null
+		 * @throws InvalidArgumentCheckedException if area is null
 		 */
-		public Builder area(Area area) throws IllegalArgumentException {
+		public Builder area(Area area) throws InvalidArgumentCheckedException {
 			if (area == null) {
-				throw new IllegalArgumentException("Area is null");
+				throw new InvalidArgumentCheckedException("Area is null");
 			}
 			this.administrates.add(area);
 
@@ -277,11 +278,11 @@ public class User {
 		 *
 		 * @param areas Set of areas
 		 * @return UserBuilder object
-		 * @throws IllegalArgumentException if areas is null
+		 * @throws InvalidArgumentCheckedException if areas is null
 		 */
-		public Builder areas(Set<Area> areas) throws IllegalArgumentException {
+		public Builder areas(Set<Area> areas) throws InvalidArgumentCheckedException {
 			if (areas == null) {
-				throw new IllegalArgumentException("Areas is null");
+				throw new InvalidArgumentCheckedException("Areas is null");
 			}
 			for (Area area : areas) {
 				area(area);
