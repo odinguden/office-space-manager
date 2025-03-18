@@ -9,8 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Represents a type that an area can be.
- * Contains the name and description of the area type.
+ * Represents a type that an area can be such as "office" or "meeting room".
  *
  * @author Odin Lyngsgård
  * @version 1.0

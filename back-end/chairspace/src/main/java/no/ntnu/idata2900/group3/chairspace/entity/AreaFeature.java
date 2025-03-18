@@ -9,8 +9,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Represents an area feature in the database.
- * Contains the name and description of the area feature.
+ * An area feature is a feature that an area can have, such as "wheelchair accessible" or "outdoor".
+ * The area feature object contains the name and description of the feature.
+ * And can relate to multiple areas. An area can also have multiple features.
  *
  * <p>
  * Is used by the {@link Area} class to represent the features of an area.
