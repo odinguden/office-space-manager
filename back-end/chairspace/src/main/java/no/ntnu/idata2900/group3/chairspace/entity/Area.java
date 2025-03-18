@@ -490,12 +490,12 @@ public class Area {
 	 *
 	 * @param time The time to check
 	 * @return True or false depending on if the point of time is free
-	 * @throws InvalidArgumentCheckedException if time is null
+	 * @throws IllegalArgumentException if time is null
 	 */
 	public boolean isFree(LocalDateTime time)
-		throws InvalidArgumentCheckedException {
+		throws IllegalArgumentException {
 		if (time == null) {
-			throw new InvalidArgumentCheckedException("Null argument provided");
+			throw new IllegalArgumentException("Null argument provided");
 		}
 		boolean isFree = true;
 		Iterator<Reservation> it = getReservations();
@@ -513,12 +513,12 @@ public class Area {
 	 *
 	 * @param user User to check
 	 * @return true if user is administrator of this area or this areas super area
-	 * @throws InvalidArgumentCheckedException if user is null
+	 * @throws IllegalArgumentException if user is null
 	 */
 	public boolean isAdmin(User user)
-		throws InvalidArgumentCheckedException {
+		throws IllegalArgumentException {
 		if (user == null) {
-			throw new InvalidArgumentCheckedException("User is null when a value was expected");
+			throw new IllegalArgumentException("User is null when a value was expected");
 		}
 		return getAdministrators().contains(user);
 	}
