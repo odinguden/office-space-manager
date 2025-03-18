@@ -3,6 +3,8 @@ package no.ntnu.idata2900.group3.chairspace.entity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,9 +35,9 @@ public class AreaType {
 	 *
 	 * @param name of the area type
 	 * @param description of the area type
-	 * @throws IllegalArgumentException if name or description is null or blank
+	 * @throws InvalidArgumentCheckedException if name or description is null or blank
 	 */
-	public AreaType(String name, String description) throws IllegalArgumentException {
+	public AreaType(String name, String description) throws InvalidArgumentCheckedException {
 		setName(name);
 		setDescription(description);
 		areas = new HashSet<>();
@@ -76,19 +78,16 @@ public class AreaType {
 	 * Gets the name of the area type as string.
 	 *
 	 * @param name of the area type
-	 * @throws IllegalArgumentException if name is null or empty
+	 * @throws InvalidArgumentCheckedException if name is null or empty
 	 */
-	private void setName(String name) throws IllegalArgumentException {
+	private void setName(String name) throws InvalidArgumentCheckedException {
 		if (name == null || name.isEmpty()) {
-			throw new IllegalArgumentException("Name cannot be null or empty");
+			throw new InvalidArgumentCheckedException("Name cannot be null or empty");
 		}
 		this.name = name;
 	}
 
 	private void setDescription(String description) {
-		if (description == null || description.isEmpty()) {
-			throw new IllegalArgumentException("Description cannot be null or empty");
-		}
 		this.description = description;
 	}
 
@@ -96,9 +95,12 @@ public class AreaType {
 	 * Updates the description .
 	 *
 	 * @param description the new description of the area type.
-	 * @throws IllegalArgumentException if description is null or empty
+	 * @throws InvalidArgumentCheckedException if description is null or empty
 	 */
-	public void updateDescription(String description) throws IllegalArgumentException {
+	public void updateDescription(String description) throws InvalidArgumentCheckedException {
+		if (description == null || description.isEmpty()) {
+			throw new InvalidArgumentCheckedException("Description cannot be null or empty");
+		}
 		setDescription(description);
 	}
 
@@ -106,11 +108,11 @@ public class AreaType {
 	 * Adds multiple areas to the area type.
 	 *
 	 * @param areas as set
-	 * @throws IllegalArgumentException if set is null
+	 * @throws InvalidArgumentCheckedException if set is null
 	 */
-	public void addAreas(Set<Area> areas) throws IllegalArgumentException {
+	public void addAreas(Set<Area> areas) throws InvalidArgumentCheckedException {
 		if (areas == null) {
-			throw new IllegalArgumentException("Areas cannot be null");
+			throw new InvalidArgumentCheckedException("Areas cannot be null");
 		}
 		for (Area area : areas) {
 			addArea(area);
@@ -121,11 +123,11 @@ public class AreaType {
 	 * Adds an area to the area type.
 	 *
 	 * @param area the area to add
-	 * @throws IllegalArgumentException if area is null
+	 * @throws InvalidArgumentCheckedException if area is null
 	 */
-	public void addArea(Area area) throws IllegalArgumentException {
+	public void addArea(Area area) throws InvalidArgumentCheckedException {
 		if (area == null) {
-			throw new IllegalArgumentException("Area cannot be null");
+			throw new InvalidArgumentCheckedException("Area cannot be null");
 		}
 		areas.add(area);
 	}
@@ -134,11 +136,11 @@ public class AreaType {
 	 * Removes an area from the area type.
 	 *
 	 * @param area the area to remove
-	 * @throws IllegalArgumentException if area is null
+	 * @throws InvalidArgumentCheckedException if area is null
 	 */
-	public void removeArea(Area area) throws IllegalArgumentException {
+	public void removeArea(Area area) throws InvalidArgumentCheckedException {
 		if (area == null) {
-			throw new IllegalArgumentException("Area cannot be null");
+			throw new InvalidArgumentCheckedException("Area cannot be null");
 		}
 		areas.remove(area);
 	}
