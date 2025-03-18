@@ -3,9 +3,11 @@ package no.ntnu.idata2900.group3.chairspace.entity;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.time.LocalDateTime;
-import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
+
+import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -26,18 +28,23 @@ class ReservationTest {
 
 	@BeforeAll
 	static void initialize() {
-		admin = new User.Builder("Admin", "User")
-			.email("Admin@Test.tt")
-			.build();
-		nonAdmin = new User.Builder("User", "User")
-			.email("User@Test.tt")
-			.build();
-		area = new Area.Builder(
-			"Area",
-			10,
-			new AreaType("Test type", "This is for testing")
-			).administrator(admin)
-			.build();
+		try {
+			admin = new User.Builder("Admin", "User")
+				.email("Admin@Test.tt")
+				.build();
+			nonAdmin = new User.Builder("User", "User")
+				.email("User@Test.tt")
+				.build();
+			area = new Area.Builder(
+				"Area",
+				10,
+				new AreaType("Test type", "This is for testing")
+				).administrator(admin)
+				.build();
+		} catch (Exception e) {
+			fail("Failed to initialize variables" + e.getMessage(), e);
+			return;
+		}
 	}
 
 	@Test
@@ -54,8 +61,9 @@ class ReservationTest {
 				end,
 				comment
 				);
-		} catch (ReservedException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			fail("Failed to create reservation" + e.getMessage(), e);
+			return;
 		}
 		assertNotNull(reservation);
 		assertEquals(area, reservation.getArea(), "Area was not assigned correctly");
@@ -63,7 +71,11 @@ class ReservationTest {
 		assertEquals(start, reservation.getStart(), "Start time was not assigned correctly");
 		assertEquals(end, reservation.getEnd(), "End time was not assigned correctly");
 		assertEquals(comment, reservation.getComment(), "comment was not assigned correctly");
-		area.removeReservation(reservation);
+		try {
+			area.removeReservation(reservation);
+		} catch (Exception e) {
+			fail("Failed to remove reservation" + e.getMessage(), e);
+		}
 	}
 
 	@Test
@@ -72,7 +84,7 @@ class ReservationTest {
 		LocalDateTime end = LocalDateTime.now().plusDays(1).plusHours(3);
 		String comment = "Writing tests";
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> new Reservation(null, admin, start, end, comment)
 		);
 	}
@@ -83,7 +95,7 @@ class ReservationTest {
 		LocalDateTime end = LocalDateTime.now().plusDays(1).plusHours(3);
 		String comment = "Writing tests";
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> new Reservation(area, null, start, end, comment)
 		);
 	}
@@ -93,7 +105,7 @@ class ReservationTest {
 		LocalDateTime end = LocalDateTime.now().plusDays(1).plusHours(3);
 		String comment = "Writing tests";
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> new Reservation(area, admin, null, end, comment)
 		);
 	}
@@ -103,7 +115,7 @@ class ReservationTest {
 		LocalDateTime start = LocalDateTime.now().plusDays(1);
 		String comment = "Writing tests";
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> new Reservation(area, admin, start, null, comment)
 		);
 	}
@@ -113,7 +125,7 @@ class ReservationTest {
 		LocalDateTime start = LocalDateTime.now().plusDays(1);
 		LocalDateTime end = LocalDateTime.now().plusDays(1).plusHours(3);
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> new Reservation(area, admin, start, end, null)
 		);
 	}
@@ -124,7 +136,7 @@ class ReservationTest {
 		LocalDateTime end = LocalDateTime.now().plusDays(1).plusHours(3);
 		String comment = "";
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> new Reservation(area, admin, start, end, comment)
 		);
 	}
