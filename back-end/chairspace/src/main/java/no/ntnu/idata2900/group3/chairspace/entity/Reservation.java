@@ -139,7 +139,6 @@ public class Reservation {
 			throw new IllegalArgumentException("User was null when value was expected");
 		}
 		this.user = user;
-		user.addReservation(this);
 	}
 
 	/**
