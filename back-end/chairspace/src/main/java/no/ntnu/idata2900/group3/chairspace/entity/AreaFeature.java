@@ -94,7 +94,7 @@ public class AreaFeature {
 	 * @throws InvalidArgumentCheckedException if the name is blank
 	 */
 	private void setName(String name) throws InvalidArgumentCheckedException {
-		if (name == null || name.isBlank()) {
+		if (name == null) {
 			throw new IllegalArgumentException("Name is null when value was expected.");
 		}
 		if (name.isBlank()) {
@@ -112,6 +112,6 @@ public class AreaFeature {
 		if (description == null) {
 			throw new IllegalArgumentException("Description is null when value was expected");
 		}
-		setDescription(description);
+		this.description = description;
 	}
 }

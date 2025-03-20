@@ -76,7 +76,7 @@ public class AreaType {
 	 */
 	private void setName(String name) throws InvalidArgumentCheckedException {
 		if (name == null) {
-			throw new InvalidArgumentCheckedException("Name is null when a value was expected");
+			throw new IllegalArgumentException("Name is null when a value was expected");
 		}
 		if (name.isEmpty()) {
 			throw new InvalidArgumentCheckedException("Name cannot be empty");
@@ -93,6 +93,6 @@ public class AreaType {
 		if (description == null) {
 			throw new IllegalArgumentException("Description is null when value was expected");
 		}
-		setDescription(description);
+		this.description = description;
 	}
 }
