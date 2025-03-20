@@ -6,13 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,7 +15,7 @@ import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedExce
 /**
  * Represents a user.
  * Contains information about the user, such as name,
- * email,areas they administrate and reservations.
+ * email,
  *
  * <p>
  * implements the builder pattern.
@@ -43,29 +37,27 @@ public class User {
 	private String lastName;
 	@Column(nullable = false)
 	private String email;
-	@ManyToMany(mappedBy = "administrators")
-	@Column(nullable = true)
-	private Set<Area> administrates;
-	@OneToMany
-	@Column(nullable = true)
-	@JoinTable(
-		name = "account_reservations",
-		joinColumns = @JoinColumn(name = "user_id"),
-		inverseJoinColumns = @JoinColumn(name = "reservation_id")
-	)
-	private Set<Reservation> reservations;
 
 	/**
 	 * No args constructor for JPA.
 	 */
 	public User() {}
 
-	private User(Builder builder) {
-		this.firstName = builder.firstName;
-		this.lastName = builder.lastName;
-		this.email = builder.email;
-		this.administrates = builder.administrates;
-		reservations = new HashSet<>();
+	/**
+	 * Constructs a instance of user with first and last name and a email.
+	 * 
+	 *
+	 * @param firstName the first name of the user
+	 * @param lastName the last name of the user
+	 * @param email the email of the user
+	 * @throws InvalidArgumentCheckedException if any of the parameters are empty
+	 */
+	public User(String firstName, String lastName, String email)
+		throws InvalidArgumentCheckedException {
+		setFirstName(firstName);
+		setLastName(lastName);
+		setEmail(email);
+
 	}
 
 	/* ---- Getters ---- */
@@ -77,15 +69,6 @@ public class User {
 	 */
 	public UUID getId() {
 		return this.userUuid;
-	}
-
-	/**
-	 * returns the users reservations in a set.
-	 *
-	 * @return reservations made by the user
-	 */
-	public Set<Reservation> getReservations() {
-		return reservations;
 	}
 
 	/**
@@ -115,190 +98,61 @@ public class User {
 		return this.email;
 	}
 
-	/**
-	 * Returns areas that the user administrates in a set.
-	 *
-	 * @return Areas administrated by the user
-	 */
-	public Set<Area> getAreas() {
-		return administrates;
-	}
-
-	/* ---- Reservations ---- */
+	/* ---- Setters ---- */
 
 	/**
-	 * Adds multiple reservations to the user.
+	 * Sets email for user.
 	 *
-	 * @param reservations reservations in a set
-	 * @throws InvalidArgumentCheckedException if reservations is null
+	 * @param email email string.
+	 * @throws InvalidArgumentCheckedException if email string is blank
+	 * @throws InvalidArgumentCheckedException if email string does not mach email format
 	 */
-	public void addReservations(Set<Reservation> reservations) throws InvalidArgumentCheckedException {
-		if (reservations == null) {
-			throw new InvalidArgumentCheckedException("Reservations is null");
+	public void setEmail(String email) throws InvalidArgumentCheckedException {
+		if (email == null) {
+			throw new IllegalArgumentException("Email is null when value was expected");
 		}
-		for (Reservation reservation : reservations) {
-			addReservation(reservation);
+		if (email.isBlank()) {
+			throw new InvalidArgumentCheckedException("Email is blank");
 		}
-	}
-
-	/**
-	 * Adds a single reservation to the user.
-	 *
-	 * @param reservation Reservation object
-	 * @throws InvalidArgumentCheckedException if reservation is null
-	 */
-	public void addReservation(Reservation reservation) throws InvalidArgumentCheckedException {
-		if (reservation == null) {
-			throw new InvalidArgumentCheckedException();
+		// Regex written by Sigve Bjørkedal
+		String patternString = "^[^@\\s]+@[^@\\s]+\\..{1,4}$";
+		Pattern pattern = Pattern.compile(patternString);
+		Matcher matcher = pattern.matcher(email);
+		if (!matcher.matches()) {
+			throw new InvalidArgumentCheckedException("Email is not valid");
 		}
-		this.reservations.add(reservation);
+		this.email = email;
 	}
 
 	/**
-	 * Removes a single reservation from the account.
+	 * Sets the first name of the user.
 	 *
-	 * @param reservation Reservation object
-	 * @throws InvalidArgumentCheckedException if reservation is null
+	 * @param firstName the first name of the user
+	 * @throws InvalidArgumentCheckedException if first name is null
 	 */
-	public void removeReservation(Reservation reservation) throws InvalidArgumentCheckedException {
-		this.reservations.remove(reservation);
-	}
-
-	/* ---- Area permissions ---- */
-
-	/**
-	 * Adds an area to administrate.
-	 *
-	 * @param area Area object
-	 * @throws InvalidArgumentCheckedException if area is null
-	 */
-	public void addArea(Area area) throws InvalidArgumentCheckedException {
-		if (area == null) {
-			throw new InvalidArgumentCheckedException("Area is null");
+	public void setFirstName(String firstName)  throws InvalidArgumentCheckedException {
+		if (firstName == null) {
+			throw new IllegalArgumentException("firstName is null when value was expected");
 		}
-		this.administrates.add(area);
+		if (firstName.isBlank()) {
+			throw new InvalidArgumentCheckedException("firstName is blank");
+		}
+		this.firstName = firstName;
 	}
 
 	/**
-	 * Removes an area from the account.
+	 * Sets the last name string of the user.
 	 *
-	 * @param area Area object
-	 * @throws IllegalStateException if there are no areas to remove
-	 * @throws InvalidArgumentCheckedException if area is not found
+	 * @param lastName the last name of the user
+	 * @throws InvalidArgumentCheckedException if the last name string is blank
 	 */
-	public void removeArea(Area area) throws IllegalStateException, InvalidArgumentCheckedException {
-		if (this.administrates.isEmpty()) {
-			throw new IllegalStateException("No areas to remove");
+	public void setLastName(String lastName) throws InvalidArgumentCheckedException {
+		if (lastName == null) {
+			throw new IllegalArgumentException("lastName is null when value was expected");
 		}
-		if (!this.administrates.contains(area)) {
-			throw new InvalidArgumentCheckedException("Area not found");
+		if (lastName.isBlank()) {
+			throw new InvalidArgumentCheckedException("lastName is blank");
 		}
-		this.administrates.remove(area);
-	}
-
-	/**
-	 * Builder class for User.
-	 * Implements the builder pattern.
-	 *
-	 * <p>
-	 * first name and last name are required fields.
-	 * email is optional.
-	 * areas are optional.
-	 */
-	public static class Builder {
-
-		private String firstName;
-		private String lastName;
-		private String email;
-		private Set<Area> administrates;
-		// Im sure you're wondering why there are private variables, and no getters.
-		// If a class that is not the userBuilder or the user needs the values, then they are using
-		// the builder pattern wrong.
-
-		/**
-		 * Constructor for UserBuilder.
-		 *
-		 * @param firstName First name as string
-		 * @param lastName Last name as string
-		 * @throws InvalidArgumentCheckedException if first name or last name is null
-		 */
-		public Builder(String firstName, String lastName) throws InvalidArgumentCheckedException {
-			if (firstName == null || firstName.isEmpty()) {
-				throw new InvalidArgumentCheckedException("First name is null");
-			}
-			if (lastName == null || lastName.isEmpty()) {
-				throw new InvalidArgumentCheckedException("Last name is null");
-			}
-			this.lastName = lastName;
-			this.firstName = firstName;
-			this.administrates = new HashSet<>();
-		}
-
-		/**
-		 * Sets the email of the user.
-		 *
-		 * @param email Email as string
-		 * @return UserBuilder object
-		 * @throws InvalidArgumentCheckedException if email is null or blank
-		 * @throws InvalidArgumentCheckedException if email is not valid
-		 */
-		public Builder email(String email) throws InvalidArgumentCheckedException {
-			if (email == null || email.isBlank()) {
-				throw new InvalidArgumentCheckedException("Email is null or blank");
-			}
-			// Regex written by Sigve Bjørkedal
-			String patternString = "^[^@\\s]+@[^@\\s]+\\..{1,4}$";
-			Pattern pattern = Pattern.compile(patternString);
-			Matcher matcher = pattern.matcher(email);
-			if (!matcher.matches()) {
-				throw new InvalidArgumentCheckedException("Email is not valid");
-			}
-			this.email = email;
-			return this;
-		}
-
-		/**
-		 * Adds an area to the user.
-		 *
-		 * @param area Area object
-		 * @return UserBuilder object
-		 * @throws InvalidArgumentCheckedException if area is null
-		 */
-		public Builder area(Area area) throws InvalidArgumentCheckedException {
-			if (area == null) {
-				throw new InvalidArgumentCheckedException("Area is null");
-			}
-			this.administrates.add(area);
-
-			return this;
-		}
-
-		/**
-		 * Adds multiple areas to the user.
-		 *
-		 * @param areas Set of areas
-		 * @return UserBuilder object
-		 * @throws InvalidArgumentCheckedException if areas is null
-		 */
-		public Builder areas(Set<Area> areas) throws InvalidArgumentCheckedException {
-			if (areas == null) {
-				throw new InvalidArgumentCheckedException("Areas is null");
-			}
-			for (Area area : areas) {
-				area(area);
-			}
-
-			return this;
-		}
-
-		/**
-		 * Builds the User object.
-		 *
-		 * @return User object
-		 */
-		public User build() {
-			return new User(this);
-		}
-
+		this.lastName = lastName;
 	}
 }
