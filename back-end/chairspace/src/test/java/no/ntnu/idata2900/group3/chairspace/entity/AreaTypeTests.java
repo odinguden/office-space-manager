@@ -35,6 +35,19 @@ class AreaTypeTests {
 
 	/* ---- Test Constructor ---- */
 
+	@Test
+	void testSingleArgConstructor() {
+		AreaType singleArgAreaType;
+		try {
+			singleArgAreaType = new AreaType(name);
+		} catch (InvalidArgumentCheckedException e) {
+			fail("Failed to create area type", e);
+			return;
+		}
+		assertEquals(name, singleArgAreaType.getName());
+		assertEquals("", singleArgAreaType.getDescription());
+	}
+
 	@DisplayName("Test that name is assigned")
 	@Test
 	void testName() {

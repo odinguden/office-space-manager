@@ -45,6 +45,34 @@ class ReservationTest {
 	}
 
 	@Test
+	void testCreationWithoutComment() {
+		LocalDateTime start = LocalDateTime.now().plusDays(10);
+		LocalDateTime end = LocalDateTime.now().plusDays(10).plusHours(3);
+		Reservation reservation = null;
+		try {
+			reservation = new Reservation(
+				area,
+				nonAdmin,
+				start,
+				end
+				);
+		} catch (Exception e) {
+			fail("Failed to create reservation" + e.getMessage(), e);
+			return;
+		}
+		assertNotNull(reservation);
+		assertEquals(area, reservation.getArea(), "Area was not assigned correctly");
+		assertEquals(nonAdmin, reservation.getUser(), "User was not assigned correctly");
+		assertEquals(start, reservation.getStart(), "Start time was not assigned correctly");
+		assertEquals(end, reservation.getEnd(), "End time was not assigned correctly");
+		try {
+			area.removeReservation(reservation);
+		} catch (Exception e) {
+			fail("Failed to remove reservation" + e.getMessage(), e);
+		}
+	}
+
+	@Test
 	void testCreation() {
 		LocalDateTime start = LocalDateTime.now().plusDays(1);
 		LocalDateTime end = LocalDateTime.now().plusDays(1).plusHours(3);
@@ -139,8 +167,8 @@ class ReservationTest {
 
 	@Test
 	void testThatCreatingOverlappingReservationsThrows() {
-		LocalDateTime start = LocalDateTime.now().plusDays(1);
-		LocalDateTime end = LocalDateTime.now().plusDays(1).plusHours(3);
+		LocalDateTime start = LocalDateTime.now().plusDays(5);
+		LocalDateTime end = LocalDateTime.now().plusDays(5).plusHours(3);
 		String comment = "Writing tests";
 		try {
 			new Reservation(
@@ -200,6 +228,42 @@ class ReservationTest {
 				newEnd,
 				comment
 				)
+		);
+	}
+
+	@Test
+	void testNullArgsForDoesCollideThrows() {
+		LocalDateTime start = LocalDateTime.now().plusDays(23432);
+		LocalDateTime end = LocalDateTime.now().plusDays(23432).plusHours(3);
+		String comment = "Finding out what the fox says";
+		Reservation reservation;
+		try {
+			reservation = new Reservation(
+				area,
+				nonAdmin,
+				start,
+				end,
+				comment
+			);
+		} catch (InvalidArgumentCheckedException | ReservedException e) {
+			fail("Failed to create reservation", e);
+			return;
+		}
+		LocalDateTime time = LocalDateTime.now().plusDays(1);
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> reservation.doesCollide(null, time),
+			"DoesCollide throws when start is null"
+		);
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> reservation.doesCollide(time, null),
+			"DoesCollide throws when end is null"
+		);
+		assertThrows(
+			IllegalArgumentException.class,
+			() -> reservation.doesCollide(null),
+			"DoesCollide throws when timePoint is null"
 		);
 	}
 }

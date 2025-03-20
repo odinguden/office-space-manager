@@ -37,6 +37,19 @@ class AreaFeatureTests {
 
 	/* ---- Test Constructor ---- */
 
+	@Test
+	void testSingeArgsConstructor() {
+		AreaFeature newAreaFeature;
+		try {
+			newAreaFeature = new AreaFeature(name);
+		} catch (InvalidArgumentCheckedException e) {
+			fail("Failed to create area feature", e);
+			return;
+		}
+		assertEquals(name, newAreaFeature.getName());
+		assertEquals("", newAreaFeature.getDescription());
+	}
+
 	@DisplayName("Test that name is assigned")
 	@Test
 	void testName() {
