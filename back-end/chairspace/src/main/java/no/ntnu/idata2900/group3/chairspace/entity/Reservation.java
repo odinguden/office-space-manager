@@ -57,10 +57,9 @@ public class Reservation {
 	 * @param start start date and time of reservation
 	 * @param end end date and time of reservation
 	 * @param comment comment for the reservation
-	 * @throws InvalidArgumentCheckedException if any of the parameters are null or blank
 	 * @throws ReservedException if the area is not free for the specified timespan
-	 * @throws IllegalStateException if the end time is before the start time
-	 * @throws IllegalStateException if the start time is before the current time
+	 * @throws InvalidArgumentCheckedException if the end time is before the start time
+	 * @throws InvalidArgumentCheckedException if the start time is before the current time
 	 */
 	public Reservation(
 		Area area,
@@ -88,10 +87,9 @@ public class Reservation {
 	 * @param user that is reserving the area
 	 * @param start start date and time of reservation
 	 * @param end end date and time of reservation
-	 * @throws InvalidArgumentCheckedException if any of the parameters are null or blank
 	 * @throws ReservedException if the area is not free for the specified timespan
-	 * @throws IllegalStateException if the end time is before the start time
-	 * @throws IllegalStateException if the start time is before the current time
+	 * @throws InvalidArgumentCheckedException if the end time is before the start time
+	 * @throws InvalidArgumentCheckedException if the start time is before the current time
 	 */
 	public Reservation(
 		Area area,
@@ -115,15 +113,14 @@ public class Reservation {
 	 * Also adds the reservation to the area's reservation list.
 	 *
 	 * @param area to reserve
-	 * @throws InvalidArgumentCheckedException if area is null
 	 * @throws ReservedException if area is not free for the specified timespan
 	 */
-	private void setArea(Area area) throws InvalidArgumentCheckedException, ReservedException {
+	private void setArea(Area area) throws ReservedException {
 		if (area == null) {
-			throw new InvalidArgumentCheckedException("Area cannot be null");
+			throw new IllegalArgumentException("Area was null when value was expected");
 		}
 		if (!area.isFreeBetween(startDateTime, endDateTime)) {
-			throw new IllegalStateException(
+			throw new ReservedException(
 				"Cannot create reservation, area is not free for the specified timespan"
 			);
 		}
@@ -136,11 +133,10 @@ public class Reservation {
 	 * Also adds the reservation to the user's reservation list.
 	 *
 	 * @param user that is reserving the area
-	 * @throws InvalidArgumentCheckedException if user is null
 	 */
-	private void setUser(User user) throws InvalidArgumentCheckedException {
+	private void setUser(User user) {
 		if (user == null) {
-			throw new InvalidArgumentCheckedException("User cannot be null");
+			throw new IllegalArgumentException("User was null when value was expected");
 		}
 		this.user = user;
 		user.addReservation(this);
@@ -148,11 +144,13 @@ public class Reservation {
 
 	/**
 	 * Sets start and end time for the reservation.
-	 * Start time must be before end time.
+	 * Start time must be after current time and before end time.
 	 *
 	 * @param start start time of the reservation
 	 * @param end end time of the reservation
 	 * @throws InvalidArgumentCheckedException if the start time is after the end time
+	 * @throws InvalidArgumentCheckedException if the start time is before current time
+
 	 */
 	private void setTimes(LocalDateTime start, LocalDateTime end)
 		throws InvalidArgumentCheckedException {
@@ -164,6 +162,11 @@ public class Reservation {
 		}
 		if (end.isBefore(start)) {
 			throw new InvalidArgumentCheckedException("Start time is before end time");
+		}
+		if (start.isBefore(LocalDateTime.now())) {
+			throw new InvalidArgumentCheckedException(
+				"Start time for the reservation is before current time"
+			);
 		}
 		this.startDateTime = start;
 		this.endDateTime = end;
@@ -252,8 +255,8 @@ public class Reservation {
 			//Timespan ends or starts during reservation
 			doesCollide = true;
 		}
-		if (start.isAfter(startDateTime) && end.isBefore(endDateTime)) {
-			//Reservation is during timespan
+		if (start.isBefore(startDateTime) && end.isAfter(endDateTime)) {
+			//Timespan encompasses reservation
 			doesCollide = true;
 		}
 		return doesCollide;
