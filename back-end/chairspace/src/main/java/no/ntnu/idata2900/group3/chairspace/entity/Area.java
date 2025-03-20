@@ -503,10 +503,14 @@ public class Area {
 		 *
 		 * @param name The name of the object
 		 * @return Builder object
+		 * @throws InvalidArgumentCheckedException when name is empty
 		 */
-		private Builder name(String name)  {
-			if (name == null || name.isEmpty()) {
+		private Builder name(String name) throws InvalidArgumentCheckedException {
+			if (name == null) {
 				throw new IllegalArgumentException("Name is null when value was expected");
+			}
+			if (name.isBlank()) {
+				throw new InvalidArgumentCheckedException("Name Cannot be empty");
 			}
 			this.name = name;
 			return this;
@@ -563,7 +567,7 @@ public class Area {
 		 * @throws InvalidArgumentCheckedException if calendar link is null
 		 */
 		public Builder calendarLink(String calendarLink) throws InvalidArgumentCheckedException {
-			if (calendarLink == null || calendarLink.isEmpty()) {
+			if (calendarLink == null ) {
 				throw new IllegalArgumentException("Calendar link is null when value was expected");
 			}
 			if (calendarLink.isEmpty()) {
