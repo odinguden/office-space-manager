@@ -350,7 +350,7 @@ public class Area {
 		if (area == null) {
 			throw new IllegalArgumentException("Cannot set super area to null.");
 		}
-		if (area.isSuperArea(this)) {
+		if (area.isSuperArea(this) || area == this) {
 			throw new InvalidArgumentCheckedException("Cannot assign area to be a super of itself");
 		}
 

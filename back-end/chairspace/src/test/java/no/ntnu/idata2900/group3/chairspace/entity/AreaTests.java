@@ -1112,4 +1112,21 @@ class AreaTests {
 			() -> area.isFree(null)
 		);
 	}
+
+	@Test
+	void testNotAbleToAssignSelfAsSuperArea() {
+		Area area;
+		try {
+			area = new Area.Builder("Name", 12, areaType)
+				.administrator(adminUser)
+				.build();
+		} catch (Exception e) {
+			fail("Failed to create areas: " + e.getMessage(), e);
+			return;
+		}
+		assertThrows(
+			InvalidArgumentCheckedException.class,
+			() -> area.setSuperArea(area)
+		);
+	}
 }
