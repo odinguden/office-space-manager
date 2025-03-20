@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
+import no.ntnu.idata2900.group3.chairspace.exceptions.AdminCountException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 
@@ -28,7 +29,7 @@ import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
  * Implements a builder pattern.
  *
  * @author Odin Lyngsgård
- * @version 0.1
+ * @version 0.2
  * @since 0.1
  */
 @Entity
@@ -55,8 +56,6 @@ public class Area {
 	private Area superArea;
 	@ManyToOne
 	private AreaType areaType;
-	@OneToMany(mappedBy = "superArea")
-	private Set<Area> subAreas;
 	@OneToMany(mappedBy = "area")
 	private Set<Reservation> reservations;
 	private int capacity;
@@ -75,8 +74,6 @@ public class Area {
 		}
 	)
 	private Set<AreaFeature> features;
-
-	private static String authErrMessage = "User is not an administrator for this area";
 
 	/**
 	 * No args constructor for JPA.
@@ -98,7 +95,6 @@ public class Area {
 		this.calendarControlled = builder.calendarControlled;
 		this.calendarLink = builder.calendarLink;
 		this.administrators = builder.administrators;
-		this.subAreas = builder.subAreas;
 		this.features = builder.features;
 		this.reservations = new HashSet<>();
 	}
@@ -154,6 +150,7 @@ public class Area {
 		return superArea;
 	}
 
+
 	/**
 	 * Returns the area type of the area. (e.g. Meeting room, office space)
 	 *
@@ -206,8 +203,8 @@ public class Area {
 	 * @return The features of this area
 	 * @see AreaFeature
 	 */
-	public Set<AreaFeature> getFeatures() {
-		return features;
+	public Iterator<AreaFeature> getFeatures() {
+		return features.iterator();
 	}
 
 	/**
@@ -218,15 +215,6 @@ public class Area {
 	 */
 	public Iterator<Reservation> getReservations() {
 		return reservations.iterator();
-	}
-
-	/**
-	 * Returns the sub areas of this area in a set.
-	 *
-	 * @return the sub areas of this area
-	 */
-	public Set<Area> getSubAreas() {
-		return subAreas;
 	}
 
 	/**
@@ -248,6 +236,24 @@ public class Area {
 		return description;
 	}
 
+	/**
+	 * Checks if a area exists as a super area of this area.
+	 *
+	 * @param area Area to check
+	* @return true if area exists as super of this area
+	 */
+	public boolean isSuperArea(Area area) {
+		boolean isSuper;
+		if (superArea != null && superArea == area) {
+			isSuper = true;
+		} else if (superArea != null) {
+			isSuper = superArea.isSuperArea(area);
+		} else {
+			isSuper = false;
+		}
+		return isSuper;
+	}
+
 
 	/* ---- Setters ---- */
 
@@ -256,13 +262,12 @@ public class Area {
 	 * Adds a reservation if the area is free for the matching time span.
 	 *
 	 * @param reservation the reservation to add
-	 * @throws InvalidArgumentCheckedException if reservation is null
 	 * @throws ReservedException if area is not free for the reservations timespan
 	 */
 	public void addReservation(Reservation reservation)
-		throws InvalidArgumentCheckedException, ReservedException {
+		throws  ReservedException {
 		if (reservation == null) {
-			throw new InvalidArgumentCheckedException("Reservation cannot be null");
+			throw new IllegalArgumentException("Reservation is null when value was expected ");
 		}
 		if (!isFreeBetween(reservation.getStart(), reservation.getEnd())) {
 			throw new ReservedException("Area is not free for the reservations timespan");
@@ -274,11 +279,10 @@ public class Area {
 	 * Adds a user to the assigned administrators of this area.
 	 *
 	 * @param newAdmin the new user to be added to admin list
-	 * @throws InvalidArgumentCheckedException if any of the provided arguments are null
 	 */
-	public void addAdministrator(User newAdmin)	throws InvalidArgumentCheckedException {
+	public void addAdministrator(User newAdmin) {
 		if (newAdmin == null) {
-			throw new InvalidArgumentCheckedException();
+			throw new IllegalArgumentException("Administrator is null when value was expected");
 		}
 		administrators.add(newAdmin);
 	}
@@ -287,51 +291,16 @@ public class Area {
 	 * Removes a administrator from the set of administrators.
 	 *
 	 * @param toRemove User to remove
-	 * @throws IllegalStateException If you are trying to remove the last user of the area.
-	 * @throws InvalidArgumentCheckedException if any of the provided arguments are null
+	 * @throws AdminCountException If you are trying to remove the last user of the area.
 	 */
-	public void removeAdministrator(User toRemove)
-		throws IllegalStateException, InvalidArgumentCheckedException {
+	public void removeAdministrator(User toRemove) throws AdminCountException {
 		if (toRemove == null) {
-			throw new InvalidArgumentCheckedException();
+			throw new IllegalArgumentException("User to remove is null when value was expected");
 		}
-		//TODO: Better exceptions
-		if (getAdminCount() == 1) {
-			throw new IllegalStateException("Cannot remove the last administrator of a area");
+		if (getAdminCount() <= 1) {
+			throw new AdminCountException("Cannot remove the last administrator of a area");
 		}
 		administrators.remove(toRemove);
-	}
-
-	/**
-	 * Removes a sub area from this area.
-	 *
-	 * @param subArea The area to remove
-	 * @throws InvalidArgumentCheckedException if subArea is null
-	 */
-	public void removeSubArea(Area subArea)
-		throws InvalidArgumentCheckedException {
-		if (subArea == null) {
-			throw new InvalidArgumentCheckedException("Sub area cannot be null");
-		}
-		subAreas.remove(subArea);
-	}
-
-	/**
-	 * Replaces existing super area with a new area.
-	 *
-	 * @param area new area
-	 * @throws InvalidArgumentCheckedException if subArea is null
-	 */
-	public void replaceSuperArea(Area area)
-		throws InvalidArgumentCheckedException {
-		if (area == null) {
-			throw new InvalidArgumentCheckedException("Super area cannot be null");
-		}
-		if (area.getAdminCount() == 0) {
-			throw new InvalidArgumentCheckedException("Cannot set area as super area as it has no administrators");
-		}
-		removeSuperArea();
-		setSuperArea(area);
 	}
 
 	/**
@@ -339,12 +308,11 @@ public class Area {
 	 * Will not perform the action if the area has no administrators of it's own.
 	 * This is to ensure that a area always has a administrator.
 	 *
-	 * @throws IllegalStateException if area has no administrators of it's own
+	 * @throws AdminCountException if area has no administrators of it's own
 	 */
-	public void removeSuperArea() throws IllegalStateException {
+	public void removeSuperArea() throws AdminCountException {
 		if (getAreaSpecificAdministrators().isEmpty()) {
-			//TODO: Better exception
-			throw new IllegalStateException(
+			throw new AdminCountException(
 				"Cannot remove super area as this area has not administrators of it's own"
 			);
 		}
@@ -355,12 +323,12 @@ public class Area {
 	 * Removes reservation from the area.
 	 *
 	 * @param reservation the reservation to remove.
-	 * @throws InvalidArgumentCheckedException if reservation is null
+	 * @throws IllegalArgumentException if reservation is null
 	 */
 	public void removeReservation(Reservation reservation)
-		throws InvalidArgumentCheckedException, IllegalStateException {
+		throws IllegalArgumentException {
 		if (reservation == null) {
-			throw new InvalidArgumentCheckedException("Reservation is null");
+			throw new IllegalArgumentException("Reservation is null");
 		}
 		reservations.remove(reservation);
 	}
@@ -368,45 +336,47 @@ public class Area {
 	/**
 	 * Sets the super area of the area.
 	 *
-	 * @param superArea Super area
-	 * @throws IllegalStateException if this area already has a super area
-	 * @throws InvalidArgumentCheckedException if super area is null
+	 * @param area Super area
+	 * @throws InvalidArgumentCheckedException if this area already has a super area
+	 * @throws InvalidArgumentCheckedException If you are trying to assign a area to become
+	 *     a super area of itself
+
 	 */
-	public void setSuperArea(Area superArea)
-		throws InvalidArgumentCheckedException, IllegalStateException {
+	public void setSuperArea(Area area)
+		throws InvalidArgumentCheckedException {
 		if (this.superArea != null) {
 			throw new IllegalStateException("This area already has a super area");
 		}
-		if (superArea == null) {
-			throw new InvalidArgumentCheckedException("Cannot set super area to null.");
+		if (area == null) {
+			throw new IllegalArgumentException("Cannot set super area to null.");
 		}
-		this.superArea = superArea;
+		if (area.isSuperArea(this)) {
+			throw new InvalidArgumentCheckedException("Cannot assign area to be a super of itself");
+		}
+
+		this.superArea = area;
 	}
 
 	/**
 	 * Adds a area feature.
 	 *
 	 * @param areaFeature The feature to add
-	 * @throws InvalidArgumentCheckedException if areaFeature is null
 	 */
-	public void addAreaFeature(AreaFeature areaFeature) throws InvalidArgumentCheckedException {
+	public void addAreaFeature(AreaFeature areaFeature) {
 		if (areaFeature == null) {
-			throw new InvalidArgumentCheckedException();
+			throw new IllegalArgumentException("Area feature is null when value is expected");
 		}
-		if (!features.contains(areaFeature)) {
-			features.add(areaFeature);
-		}
+		features.add(areaFeature);
 	}
 
 	/**
 	 * Updates the description.
 	 *
 	 * @param newDescription new description as string.
-	 * @throws InvalidArgumentCheckedException if newDescription is null or blank
 	 */
-	public void updateDescription(String newDescription) throws InvalidArgumentCheckedException {
-		if (newDescription == null || newDescription.isBlank()) {
-			throw new InvalidArgumentCheckedException("New description does not contain any information");
+	public void updateDescription(String newDescription) {
+		if (newDescription == null) {
+			throw new IllegalArgumentException("newDescription is null when value was expected");
 		}
 		description = newDescription;
 	}
@@ -425,31 +395,6 @@ public class Area {
 		capacity = newCapacity;
 	}
 
-	/**
-	 * Adds a single sub area to this area.
-	 *
-	 * @param area the area to add
-	 * @param user the user preforming the operation
-	 * @throws InvalidArgumentCheckedException if null arguments are provided
-	 * @throws IllegalStateException If user is not a administrator of this area.
-	 *     Or if the area that is being set as sub area already has a sub area
-	 */
-	public void addSubArea(Area area, User user)
-		throws InvalidArgumentCheckedException, IllegalStateException {
-		if (area == null || user == null) {
-			throw new InvalidArgumentCheckedException("Null argument provided");
-		}
-		if (!isAdmin(user)) {
-			throw new IllegalStateException(authErrMessage);
-		}
-		if (area.getSuperArea() != null) {
-			throw new IllegalStateException(
-				"Cannot add area as sub area if it already has a super area"
-			);
-		}
-		subAreas.add(area);
-	}
-
 	/* ---- Methods ---- */
 
 	/**
@@ -458,10 +403,15 @@ public class Area {
 	 * @param start start of time block
 	 * @param end end of time block
 	 * @return true or false depending on if reservations exists in this block of time
-	 * @throws InvalidArgumentCheckedException if start or end is null
 	 */
 	public boolean isFreeBetween(LocalDateTime start, LocalDateTime end)
-		throws InvalidArgumentCheckedException {
+		throws IllegalArgumentException {
+		if (start == null) {
+			throw new IllegalArgumentException("Start is null when value was expected");
+		}
+		if (end == null) {
+			throw new IllegalArgumentException("End is null when value was expected");
+		}
 		// Thanks Sigve
 		return reservations.stream()
 			.noneMatch(r -> r.doesCollide(start, end));
@@ -477,7 +427,7 @@ public class Area {
 	public boolean isFree(LocalDateTime time)
 		throws IllegalArgumentException {
 		if (time == null) {
-			throw new IllegalArgumentException("Null argument provided");
+			throw new IllegalArgumentException("Time is null when value was expected");
 		}
 		return reservations.stream()
 			.noneMatch(r -> r.doesCollide(time));
@@ -519,7 +469,6 @@ public class Area {
 		private Set<User> administrators;
 		private Area superArea;
 		private AreaType areaType;
-		private Set<Area> subAreas;
 		private Set<AreaFeature> features;
 		// Damn this is a lot of fields.
 		// Good im using the builder pattern then 😎
@@ -532,9 +481,7 @@ public class Area {
 		 * @param name as String
 		 * @param capacity int
 		 * @param areaType AreaType object
-		 * @throws InvalidArgumentCheckedException if name is null or empty
 		 * @throws InvalidArgumentCheckedException if capacity is less than 1
-		 * @throws InvalidArgumentCheckedException if areaType is null
 		 */
 		public Builder(String name, int capacity, AreaType areaType)
 			throws InvalidArgumentCheckedException {
@@ -543,10 +490,10 @@ public class Area {
 			areaType(areaType);
 
 			// Default value
+			description = "";
 			calendarControlled = false;
 			administrators = new HashSet<>();
 			features = new HashSet<>();
-			subAreas = new HashSet<>();
 		}
 
 		/* ---- Setters ---- */
@@ -556,11 +503,10 @@ public class Area {
 		 *
 		 * @param name The name of the object
 		 * @return Builder object
-		 * @throws InvalidArgumentCheckedException if name is null or empty
 		 */
-		private Builder name(String name) throws InvalidArgumentCheckedException {
+		private Builder name(String name)  {
 			if (name == null || name.isEmpty()) {
-				throw new InvalidArgumentCheckedException("Name is null");
+				throw new IllegalArgumentException("Name is null when value was expected");
 			}
 			this.name = name;
 			return this;
@@ -586,11 +532,10 @@ public class Area {
 		 *
 		 * @param areaType AreaType object
 		 * @return Builder object
-		 * @throws InvalidArgumentCheckedException if areaType is null
 		 */
-		private Builder areaType(AreaType areaType) throws InvalidArgumentCheckedException {
+		private Builder areaType(AreaType areaType) {
 			if (areaType == null) {
-				throw new InvalidArgumentCheckedException("AreaType is null");
+				throw new IllegalArgumentException("AreaType is null when value was expected");
 			}
 			this.areaType = areaType;
 			return this;
@@ -601,11 +546,10 @@ public class Area {
 		 *
 		 * @param description as String
 		 * @return Builder object
-		 * @throws InvalidArgumentCheckedException if description is null
 		 */
-		public Builder description(String description) throws InvalidArgumentCheckedException {
-			if (description == null || description.isEmpty()) {
-				throw new InvalidArgumentCheckedException("Description is null");
+		public Builder description(String description) {
+			if (description == null) {
+				throw new IllegalArgumentException("Description is null when value was expected");
 			}
 			this.description = description;
 			return this;
@@ -620,8 +564,12 @@ public class Area {
 		 */
 		public Builder calendarLink(String calendarLink) throws InvalidArgumentCheckedException {
 			if (calendarLink == null || calendarLink.isEmpty()) {
-				throw new InvalidArgumentCheckedException("Calendar link is null");
+				throw new IllegalArgumentException("Calendar link is null when value was expected");
 			}
+			if (calendarLink.isEmpty()) {
+				throw new InvalidArgumentCheckedException("Calendar link cannot be blank");
+			}
+			//TODO When implementing proper calendar handling, include link format check here :)
 			this.calendarLink = calendarLink;
 			this.calendarControlled = true;
 			return this;
@@ -633,11 +581,12 @@ public class Area {
 		 *
 		 * @param administrators Set of User objects
 		 * @return Builder object
-		 * @throws InvalidArgumentCheckedException if administrators is null
 		 */
-		public Builder administrators(Set<User> administrators) throws InvalidArgumentCheckedException {
+		public Builder administrators(Set<User> administrators) {
 			if (administrators == null) {
-				throw new InvalidArgumentCheckedException("Administrators is null");
+				throw new IllegalArgumentException(
+					"Administrators is null when value was expected"
+				);
 			}
 			for (User user : administrators) {
 				administrator(user);
@@ -654,11 +603,10 @@ public class Area {
 		 *
 		 * @param administrator Single user
 		 * @return Builder object
-		 * @throws InvalidArgumentCheckedException if administrators is null
 		 */
-		public Builder administrator(User administrator) throws InvalidArgumentCheckedException {
+		public Builder administrator(User administrator)  {
 			if (administrator == null) {
-				throw new InvalidArgumentCheckedException("Administrator is null");
+				throw new IllegalArgumentException("Administrator is null when value was expected");
 			}
 			administrators.add(administrator);
 			return this;
@@ -669,51 +617,12 @@ public class Area {
 		 *
 		 * @param superArea Area object
 		 * @return Builder object
-		 * @throws InvalidArgumentCheckedException if super area is null
 		 */
-		public Builder superArea(Area superArea) throws InvalidArgumentCheckedException {
+		public Builder superArea(Area superArea) {
 			if (superArea == null) {
-				throw new InvalidArgumentCheckedException("Super area is null");
+				throw new IllegalArgumentException("Super area is null when value was expected");
 			}
 			this.superArea = superArea;
-			return this;
-		}
-
-		/**
-		 * Sets the sub areas of the area.
-		 *
-		 * @param subAreas Set of Area objects
-		 * @return Builder object
-		 * @throws InvalidArgumentCheckedException if sub areas is null
-		 * @throws IllegalStateException If one of the areas already has a super area
-		 */
-		public Builder subAreas(Set<Area> subAreas) throws InvalidArgumentCheckedException {
-			if (subAreas == null) {
-				throw new InvalidArgumentCheckedException("Sub areas is null");
-			}
-			for (Area area : subAreas) {
-				subArea(area);
-			}
-			return this;
-		}
-
-		/**
-		 * Adds a single sub area to the area.
-		 *
-		 * @param subArea Area object
-		 * @return Builder object
-		 * @throws InvalidArgumentCheckedException if sub area is null
-		 */
-		public Builder subArea(Area subArea) throws InvalidArgumentCheckedException {
-			if (subArea == null) {
-				throw new InvalidArgumentCheckedException("Sub area is null");
-			}
-			if (subArea.getSuperArea() != null) {
-				throw new IllegalStateException(
-					"Cannot set area as sub area, as it already has a super area"
-				);
-			}
-			subAreas.add(subArea);
 			return this;
 		}
 
@@ -722,11 +631,10 @@ public class Area {
 		 *
 		 * @param features Set of AreaFeature objects
 		 * @return Builder object
-		 * @throws InvalidArgumentCheckedException if features is null
 		 */
-		public Builder features(Set<AreaFeature> features) throws InvalidArgumentCheckedException {
+		public Builder features(Set<AreaFeature> features) {
 			if (features == null) {
-				throw new InvalidArgumentCheckedException("Features is null");
+				throw new IllegalArgumentException("Features is null when value was expected");
 			}
 			for (AreaFeature feature : features) {
 				feature(feature);
@@ -739,11 +647,10 @@ public class Area {
 		 *
 		 * @param feature AreaFeature object
 		 * @return Builder object
-		 * @throws InvalidArgumentCheckedException if feature is null
 		 */
-		public Builder feature(AreaFeature feature) throws InvalidArgumentCheckedException {
+		public Builder feature(AreaFeature feature) {
 			if (feature == null) {
-				throw new InvalidArgumentCheckedException("Feature is null");
+				throw new IllegalArgumentException("Feature is null when value was expected");
 			}
 			features.add(feature);
 			return this;
@@ -753,12 +660,12 @@ public class Area {
 		 * Builds the Area object.
 		 *
 		 * @return Area object
-		 * @throws IllegalStateException if build is called without having an assigned administrator
+		 * @throws AdminCountException if build is called without having an assigned administrator
 		 * @see Area.Builder#administrator(User)
 		 */
-		public Area build() throws IllegalStateException {
+		public Area build() throws AdminCountException {
 			if (superArea == null && administrators.isEmpty()) {
-				throw new IllegalStateException("Cannot create area without administrator");
+				throw new AdminCountException("Cannot create area without administrator");
 			}
 			return new Area(this);
 		}
