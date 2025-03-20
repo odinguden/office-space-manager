@@ -45,7 +45,6 @@ public class User {
 
 	/**
 	 * Constructs a instance of user with first and last name and a email.
-	 * 
 	 *
 	 * @param firstName the first name of the user
 	 * @param lastName the last name of the user
