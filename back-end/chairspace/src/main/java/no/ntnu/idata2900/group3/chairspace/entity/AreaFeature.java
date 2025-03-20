@@ -3,10 +3,7 @@ package no.ntnu.idata2900.group3.chairspace.entity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * An area feature is a feature that an area can have, such as "wheelchair accessible" or "outdoor".
@@ -27,8 +24,6 @@ public class AreaFeature {
 	@Id
 	private String name;
 	private String description;
-	@ManyToMany(mappedBy = "features")
-	private Set<Area> areas;
 
 	/**
 	 * No args constructor for JPA.
@@ -38,37 +33,33 @@ public class AreaFeature {
 	/**
 	 * Constructor for AreaFeature.
 	 * Initializes the name and description of the area feature.
-	 * throws IllegalArgumentException if name is null or blank.
 	 *
 	 * <p>
 	 * also initializes an empty area set to save the areas that have this feature.
 	 *
 	 * @param name Name of the area feature
 	 * @param description Description of the area feature
-	 * @throws InvalidArgumentCheckedException if name or description is null or blank
+	 * @throws InvalidArgumentCheckedException if name is blank
 	 */
 	public AreaFeature(String name, String description) throws InvalidArgumentCheckedException {
 		setName(name);
 		setDescription(description);
-		areas = new HashSet<>();
 	}
 
 	/**
 	 * Constructor for AreaFeature.
 	 * Initializes the name and description of the area feature.
-	 * throws IllegalArgumentException if name or description is null or blank.
+	 * throws IllegalArgumentException if name is null
 	 *
 	 * <p>
 	 * also initializes an empty area set to save the areas that have this feature.
 	 *
 	 * @param name Name of the area feature
-	 * @param description Description of the area feature
-	 * @throws InvalidArgumentCheckedException if name or description is null or blank
+	 * @throws InvalidArgumentCheckedException if name is  blank
 	 */
 	public AreaFeature(String name) throws InvalidArgumentCheckedException {
 		setName(name);
 		setDescription("");
-		areas = new HashSet<>();
 	}
 
 
@@ -92,14 +83,7 @@ public class AreaFeature {
 		return description;
 	}
 
-	/**
-	 * Returns the areas that have this feature.
-	 *
-	 * @return The areas that have this feature in a set
-	 */
-	public Set<Area> getAreas() {
-		return areas;
-	}
+
 
 	/* ---- Setters ---- */
 
@@ -107,70 +91,27 @@ public class AreaFeature {
 	 * Sets the name of the area feature.
 	 *
 	 * @param name Name as String
-	 * @throws InvalidArgumentCheckedException if the name is null or blank
+	 * @throws InvalidArgumentCheckedException if the name is blank
 	 */
 	private void setName(String name) throws InvalidArgumentCheckedException {
 		if (name == null || name.isBlank()) {
-			throw new InvalidArgumentCheckedException("Name cannot be null or blank.");
+			throw new IllegalArgumentException("Name is null when value was expected.");
+		}
+		if (name.isBlank()) {
+			throw new InvalidArgumentCheckedException("Name cannot be blank");
 		}
 		this.name = name;
-	}
-
-	private void setDescription(String description) {
-		this.description = description;
 	}
 
 	/**
 	 * Updates the description of the area feature.
 	 *
 	 * @param description Description as String
-	 * @throws InvalidArgumentCheckedException if the description is null or blank
 	 */
-	public void updateDescription(String description) throws InvalidArgumentCheckedException {
-		if (description == null || description.isBlank()) {
-			throw new InvalidArgumentCheckedException("Updated description cannot be null or blank.");
+	public void setDescription(String description) {
+		if (description == null) {
+			throw new IllegalArgumentException("Description is null when value was expected");
 		}
 		setDescription(description);
-	}
-
-	/**
-	 * Sets the areas that have this feature.
-	 *
-	 * @param areas Areas as Set
-	 * @throws InvalidArgumentCheckedException if areas is null
-	 */
-	public void addAreas(Set<Area> areas) throws InvalidArgumentCheckedException {
-		if (areas == null) {
-			throw new InvalidArgumentCheckedException("Areas cannot be null.");
-		}
-		for (Area area : areas) {
-			addArea(area);
-		}
-	}
-
-	/**
-	 * Adds an area to the list of areas that have this feature.
-	 *
-	 * @param area Area to add
-	 * @throws InvalidArgumentCheckedException if area is null
-	 */
-	public void addArea(Area area) throws InvalidArgumentCheckedException {
-		if (area == null) {
-			throw new InvalidArgumentCheckedException("Area cannot be null.");
-		}
-		areas.add(area);
-	}
-
-	/**
-	 * Removes given area from areas set.
-	 *
-	 * @param area area object to remove
-	 * @throws InvalidArgumentCheckedException area to remove is null
-	 */
-	public void removeArea(Area area) throws InvalidArgumentCheckedException {
-		if (area == null) {
-			throw new InvalidArgumentCheckedException("Area cannot be null");
-		}
-		areas.remove(area);
 	}
 }
