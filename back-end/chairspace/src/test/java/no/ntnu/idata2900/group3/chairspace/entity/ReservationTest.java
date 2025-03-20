@@ -1,13 +1,14 @@
 package no.ntnu.idata2900.group3.chairspace.entity;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.time.LocalDateTime;
-
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
+import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -29,12 +30,8 @@ class ReservationTest {
 	@BeforeAll
 	static void initialize() {
 		try {
-			admin = new User.Builder("Admin", "User")
-				.email("Admin@Test.tt")
-				.build();
-			nonAdmin = new User.Builder("User", "User")
-				.email("User@Test.tt")
-				.build();
+			admin = new User("Admin", "User", "Admin@Email.no");
+			nonAdmin = new User("User", "User", "User@Test.tt");
 			area = new Area.Builder(
 				"Area",
 				10,
@@ -84,7 +81,7 @@ class ReservationTest {
 		LocalDateTime end = LocalDateTime.now().plusDays(1).plusHours(3);
 		String comment = "Writing tests";
 		assertThrows(
-			InvalidArgumentCheckedException.class,
+			IllegalArgumentException.class,
 			() -> new Reservation(null, admin, start, end, comment)
 		);
 	}
@@ -95,7 +92,7 @@ class ReservationTest {
 		LocalDateTime end = LocalDateTime.now().plusDays(1).plusHours(3);
 		String comment = "Writing tests";
 		assertThrows(
-			InvalidArgumentCheckedException.class,
+			IllegalArgumentException.class,
 			() -> new Reservation(area, null, start, end, comment)
 		);
 	}
@@ -105,7 +102,7 @@ class ReservationTest {
 		LocalDateTime end = LocalDateTime.now().plusDays(1).plusHours(3);
 		String comment = "Writing tests";
 		assertThrows(
-			InvalidArgumentCheckedException.class,
+			IllegalArgumentException.class,
 			() -> new Reservation(area, admin, null, end, comment)
 		);
 	}
@@ -115,7 +112,7 @@ class ReservationTest {
 		LocalDateTime start = LocalDateTime.now().plusDays(1);
 		String comment = "Writing tests";
 		assertThrows(
-			InvalidArgumentCheckedException.class,
+			IllegalArgumentException.class,
 			() -> new Reservation(area, admin, start, null, comment)
 		);
 	}
@@ -125,18 +122,17 @@ class ReservationTest {
 		LocalDateTime start = LocalDateTime.now().plusDays(1);
 		LocalDateTime end = LocalDateTime.now().plusDays(1).plusHours(3);
 		assertThrows(
-			InvalidArgumentCheckedException.class,
+			IllegalArgumentException.class,
 			() -> new Reservation(area, admin, start, end, null)
 		);
 	}
 
 	@Test
-	void testThatBlankCommentThrows() {
+	void testThatBlankCommentDoesNotThrows() {
 		LocalDateTime start = LocalDateTime.now().plusDays(1);
 		LocalDateTime end = LocalDateTime.now().plusDays(1).plusHours(3);
 		String comment = "";
-		assertThrows(
-			InvalidArgumentCheckedException.class,
+		assertDoesNotThrow(
 			() -> new Reservation(area, admin, start, end, comment)
 		);
 	}
@@ -160,7 +156,7 @@ class ReservationTest {
 		LocalDateTime newStart = start.plusHours(2);
 		LocalDateTime newEnd = end.plusHours(2);
 		assertThrows(
-			IllegalStateException.class,
+			ReservedException.class,
 			() -> new Reservation(
 				area,
 				nonAdmin,
@@ -177,7 +173,7 @@ class ReservationTest {
 		LocalDateTime end = LocalDateTime.now().minusDays(1).plusHours(3);
 		String comment = "Finding out what the fox says";
 		assertThrows(
-			IllegalStateException.class,
+			InvalidArgumentCheckedException.class,
 			() -> new Reservation(
 				area,
 				nonAdmin,
@@ -196,7 +192,7 @@ class ReservationTest {
 		LocalDateTime newStart = start.plusHours(2);
 		LocalDateTime newEnd = end.plusHours(2);
 		assertThrows(
-			IllegalStateException.class,
+			InvalidArgumentCheckedException.class,
 			() -> new Reservation(
 				area,
 				nonAdmin,
