@@ -1,15 +1,10 @@
 package no.ntnu.idata2900.group3.chairspace.entity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.util.HashSet;
-import java.util.Set;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,28 +18,15 @@ import org.junit.jupiter.api.Test;
  * @since 0.1
  */
 class AreaTypeTests {
+	private AreaType areaType;
+	private static String name = "Test Type";
+	private static String description = "Test Description";
 
-	private static AreaType areaType;
-	private static Area area;
-	private static Area area2;
-
-	@BeforeAll
-	static void setUpAreas() {
-		try {
-			AreaType testType = new AreaType("Test Type", "Test Descripton");
-			User user = new User.Builder("Argh", "REah").build();
-			area = new Area.Builder("Test Area", 123, testType).administrator(user).build();
-			area2 = new Area.Builder("Test Area 2", 23, testType).administrator(user).build();
-		} catch (Exception e) {
-			fail("Failed to set up areas" + e.getMessage(), e);
-			return;
-		}
-	}
 
 	@BeforeEach
 	void setUp() {
 		try {
-			areaType = new AreaType("Test Type", "Test Description");
+			areaType = new AreaType(name, description);
 		} catch (Exception e) {
 			fail("Failed to create AreaType" + e.getMessage(), e);
 			return;
@@ -56,14 +38,14 @@ class AreaTypeTests {
 	@DisplayName("Test that name is assigned")
 	@Test
 	void testName() {
-		assertEquals("Test Type", areaType.getName(), "Name is not assigned correctly");
+		assertEquals(name, areaType.getName(), "Name is not assigned correctly");
 	}
 
 	@DisplayName("Test that description is assigned")
 	@Test
 	void testDescription() {
 		assertEquals(
-			"Test Description",
+			description,
 			areaType.getDescription(),
 			"Description is not assigned correctly"
 		);
@@ -73,15 +55,18 @@ class AreaTypeTests {
 	@Test
 	void testNullName() {
 		assertThrows(
-			InvalidArgumentCheckedException.class, () -> new AreaType(null, "Test Description"),
+			IllegalArgumentException.class,
+			() -> new AreaType(null, "Test Description"),
 			"Does not throw exception when name is null"
 		);
 	}
 
+	@DisplayName("Test that constructor throws exception when name is blank")
 	@Test
 	void testBlankName() {
 		assertThrows(
-			InvalidArgumentCheckedException.class, () -> new AreaType("", "Test Description"),
+			InvalidArgumentCheckedException.class,
+			() -> new AreaType("", "Test Description"),
 			"Does not throw exception when name is blank"
 		);
 	}
@@ -91,65 +76,17 @@ class AreaTypeTests {
 	@DisplayName("Test that setDescription works")
 	@Test
 	void testSetDescription() {
-		try {
-			areaType.updateDescription("New Description");
-		} catch (Exception e) {
-			fail("Failed to set description" + e.getMessage(), e);
-			return;
-		}
-		assertEquals("New Description", areaType.getDescription());
+		String newDescription = "New Description";
+		areaType.setDescription(newDescription);
+		assertEquals(newDescription, areaType.getDescription());
 	}
 
 	@DisplayName("Test that setDescription throws exception when null")
 	@Test
 	void testSetNullDescription() {
 		assertThrows(
-			InvalidArgumentCheckedException.class, () -> areaType.updateDescription(null),
+			IllegalArgumentException.class, () -> areaType.setDescription(null),
 			"Does not throw exception when description is null"
 		);
-	}
-
-	@Test
-	void testAddArea() {
-		areaType.addArea(area);
-		areaType.addArea(area2);
-		assertTrue(areaType.getAreas().contains(area), "Area type does not contain area");
-		assertTrue(areaType.getAreas().contains(area2), "Area type does not contain area2");
-	}
-
-	@Test
-	void addAreas() {
-		Set<Area> areas = new HashSet<>();
-		areas.add(area);
-		areas.add(area2);
-		try {
-			areaType.addAreas(areas);
-		} catch (Exception e) {
-			fail("Failed to add multiple areas: " + e.getMessage(), e);
-			return;
-		}
-		assertTrue(areaType.getAreas().contains(area), "Area type does not contain area");
-		assertTrue(areaType.getAreas().contains(area2), "Area type does not contain area2");
-	}
-
-	@Test
-	void addNullAreas() {
-		assertThrows(
-			InvalidArgumentCheckedException.class,
-			() -> areaType.addAreas(null),
-			"AreaType does not throw when trying to add null areas"
-		);
-	}
-
-	@Test
-	void testRemoveArea() {
-		areaType.addArea(area);
-		areaType.addArea(area2);
-		assertTrue(areaType.getAreas().contains(area2));
-		assertTrue(areaType.getAreas().contains(area));
-		areaType.removeArea(area);
-		assertFalse(areaType.getAreas().contains(area));
-		areaType.removeArea(area2);
-		assertFalse(areaType.getAreas().contains(area2));
 	}
 }
