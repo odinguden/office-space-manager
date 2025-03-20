@@ -95,7 +95,7 @@ class AreaTests {
 	@Test
 	void testThatBuilderThrowsIfBlank() {
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> new Area.Builder("", 1232, areaType)
 		);
 	}
@@ -103,7 +103,7 @@ class AreaTests {
 	@Test
 	void testThatBuilderThrowsIfNoCapacity() {
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> new Area.Builder("Test", 0, areaType)
 		);
 	}
@@ -111,7 +111,7 @@ class AreaTests {
 	@Test
 	void testThatBuilderThrowsIfNegativeCapacity() {
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> new Area.Builder("Test", -1, areaType)
 		);
 	}
@@ -119,7 +119,7 @@ class AreaTests {
 	@Test
 	void testThatBuilderThrowsIfNoAreaType() {
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> new Area.Builder("Test", 1232, null)
 		);
 	}
@@ -176,7 +176,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> builder.administrator(null)
 		);
 	}
@@ -191,7 +191,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> builder.description("")
 		);
 	}
@@ -206,7 +206,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> builder.description(null)
 		);
 	}
@@ -221,7 +221,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> builder.feature(null)
 		);
 	}
@@ -236,7 +236,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> builder.calendarLink(null)
 		);
 	}
@@ -251,7 +251,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> builder.calendarLink("")
 		);
 	}
@@ -266,7 +266,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> builder.subArea(null)
 		);
 	}
@@ -281,7 +281,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> builder.superArea(null)
 		);
 	}
@@ -316,7 +316,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> builder.features(null),
 			"Does not throw when trying to set null features"
 		);
@@ -353,7 +353,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> builder.administrators(null),
 			"Added null administrators"
 		);
@@ -433,7 +433,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> builder.subArea(null),
 			"Area lets you add null area"
 		);
@@ -449,7 +449,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> builder.subAreas(null),
 			"Area lets you add null area"
 		);
@@ -534,7 +534,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> area.removeAdministrator(null),
 			"Area lets you remove null admin"
 		);
@@ -610,7 +610,7 @@ class AreaTests {
 		}
 
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> area.addSubArea(null, adminUser),
 			"Adding null sub area does not throw exception"
 		);
@@ -632,7 +632,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> area.addSubArea(sub, null),
 			"Adding sub area with no user not throw exception"
 		);
@@ -753,7 +753,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> area.updateDescription(null),
 			"Does not throw exception when null text is given"
 		);
@@ -772,7 +772,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> area.updateDescription(""),
 			"Does not throw exception when blank test is given"
 		);
@@ -809,7 +809,7 @@ class AreaTests {
 		}
 
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> area.addAreaFeature(null),
 			"Area did not throw when adding null feature"
 		);
@@ -869,7 +869,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> area.replaceSuperArea(null),
 			"Area did not throw when trying to set superArea to null"
 		);
@@ -1078,7 +1078,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> area.addReservation(null)
 		);
 	}
@@ -1147,7 +1147,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> area.addAdministrator(null)
 		);
 	}
@@ -1228,7 +1228,7 @@ class AreaTests {
 			return;
 		}
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> supArea.removeSubArea(null)
 		);
 	}
@@ -1251,7 +1251,7 @@ class AreaTests {
 			() -> new Reservation(area, adminUser, start, end, "More testing")
 		);
 		assertThrows(
-			IllegalArgumentException.class,
+			InvalidArgumentCheckedException.class,
 			() -> area.removeReservation(null)
 		);
 	}
