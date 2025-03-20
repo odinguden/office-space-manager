@@ -214,4 +214,53 @@ public class Reservation {
 	public String getComment() {
 		return comment;
 	}
+
+	/* ---- Methods ---- */
+
+	/**
+	 * Checks if a timespan collides with the reservation.
+	 * A timespan consists of a start time and a end time.
+	 * It collides with the reservation if the timespan starts or ends within the timespan or if it
+	 * encompasses it.
+	 *
+	 * @param start start of timespan
+	 * @param end end of timespan
+	 * @return True if reservations collides with the provided timespan.
+	 */
+	public boolean doesCollide(LocalDateTime start, LocalDateTime end) {
+		if (start == null) {
+			throw new IllegalArgumentException("start was null when value was expected");
+		}
+		if (end == null) {
+			throw new IllegalArgumentException("end was null when value was expected");
+		}
+		boolean doesCollide = false;
+		if (doesCollide(start) || doesCollide(end)) {
+			//Timespan ends or starts during reservation
+			doesCollide = true;
+		}
+		if (start.isAfter(startDateTime) && end.isBefore(endDateTime)) {
+			//Reservation is during timespan
+			doesCollide = true;
+		}
+		return doesCollide;
+	}
+
+	/**
+	 * Returns true if this time point collides with the reservation.
+	 * Collides means that it falls between the start and end time of the reservation.
+	 *
+	 * @param timePoint time to check
+	 * @return true if the timePoint falls between the start and end of the reservation.
+	 */
+	public boolean doesCollide(LocalDateTime timePoint) {
+		if (timePoint == null) {
+			throw new IllegalArgumentException("timePoint is null when a value was expected");
+		}
+		boolean doesCollide = false;
+		if (timePoint.isAfter(startDateTime) && timePoint.isBefore(endDateTime)) {
+			doesCollide = true;
+		}
+		return doesCollide;
+	}
 }

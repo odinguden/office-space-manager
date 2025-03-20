@@ -462,27 +462,9 @@ public class Area {
 	 */
 	public boolean isFreeBetween(LocalDateTime start, LocalDateTime end)
 		throws InvalidArgumentCheckedException {
-		if (start == null || end == null) {
-			throw new InvalidArgumentCheckedException("Null argument provided");
-		}
-		boolean isFree = true;
-		Iterator<Reservation> it = getReservations();
-		while (isFree && it.hasNext()) {
-			Reservation reservation = it.next();
-			if (end.isBefore(reservation.getEnd()) && end.isAfter(reservation.getStart())) {
-				//Timespan ends during reservation
-				isFree = false;
-			}
-			if (start.isAfter(reservation.getStart()) && start.isBefore(reservation.getEnd())) {
-				//Timespan starts during reservation
-				isFree = false;
-			}
-			if (reservation.getStart().isAfter(start) && reservation.getEnd().isBefore(end)) {
-				//Reservation is during timespan
-				isFree = false;
-			}
-		}
-		return isFree;
+		// Thanks Sigve
+		return reservations.stream()
+			.noneMatch(r -> r.doesCollide(start, end));
 	}
 
 	/**
@@ -497,15 +479,8 @@ public class Area {
 		if (time == null) {
 			throw new IllegalArgumentException("Null argument provided");
 		}
-		boolean isFree = true;
-		Iterator<Reservation> it = getReservations();
-		while (isFree && it.hasNext()) {
-			Reservation reservation = it.next();
-			if (time.isBefore(reservation.getEnd()) && time.isAfter(reservation.getStart())) {
-				isFree = false;
-			}
-		}
-		return isFree;
+		return reservations.stream()
+			.noneMatch(r -> r.doesCollide(time));
 	}
 
 	/**
