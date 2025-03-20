@@ -7,8 +7,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.UUID;
-import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
+import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 
 /**
  * Represents a reservation of an area.
@@ -70,14 +70,40 @@ public class Reservation {
 		String comment
 	) throws InvalidArgumentCheckedException, ReservedException {
 		setUser(user);
-		setStart(start);
-		setEnd(end);
+		setTimes(start, end);
 		setComment(comment);
 		// Area needs to be set last. This is to ensure that the reservation is added to the
 		// area's reservation list after all the fields are set.
 		setArea(area);
 	}
 
+	/**
+	 * Constructor for Reservation.
+	 * Initializes the area, user, start and end date and time and a comment for the reservation.
+	 *
+	 * <p>
+	 * Also adds the reservation to the area and user's reservations list.
+	 *
+	 * @param area Area to reserve
+	 * @param user that is reserving the area
+	 * @param start start date and time of reservation
+	 * @param end end date and time of reservation
+	 * @throws InvalidArgumentCheckedException if any of the parameters are null or blank
+	 * @throws ReservedException if the area is not free for the specified timespan
+	 * @throws IllegalStateException if the end time is before the start time
+	 * @throws IllegalStateException if the start time is before the current time
+	 */
+	public Reservation(
+		Area area,
+		User user,
+		LocalDateTime start,
+		LocalDateTime end
+	) throws InvalidArgumentCheckedException, ReservedException {
+		setUser(user);
+		setTimes(start, end);
+		setComment("");
+		setArea(area);
+	}
 
 
 
@@ -121,37 +147,25 @@ public class Reservation {
 	}
 
 	/**
-	 * Sets the start date and time of the reservation.
+	 * Sets start and end time for the reservation.
+	 * Start time must be before end time.
 	 *
-	 * @param start date and time of reservation start
-	 * @throws InvalidArgumentCheckedException if start is null
-	 * @throws IllegalStateException if start is before the current time
+	 * @param start start time of the reservation
+	 * @param end end time of the reservation
+	 * @throws InvalidArgumentCheckedException if the start time is after the end time
 	 */
-	private void setStart(LocalDateTime start)
-		throws InvalidArgumentCheckedException, IllegalStateException {
+	private void setTimes(LocalDateTime start, LocalDateTime end)
+		throws InvalidArgumentCheckedException {
 		if (start == null) {
-			throw new InvalidArgumentCheckedException("Start time cannot be null");
+			throw new IllegalArgumentException("start is null where value was expected");
 		}
-		if (start.isBefore(LocalDateTime.now())) {
-			throw new IllegalStateException("Cannot create a reservation in the past");
+		if (end == null) {
+			throw new IllegalArgumentException("End is null where value was expected");
+		}
+		if (end.isBefore(start)) {
+			throw new InvalidArgumentCheckedException("Start time is before end time");
 		}
 		this.startDateTime = start;
-	}
-
-	/**
-	 * Sets the end date and time of the reservation.
-	 *
-	 * @param end date and time of reservation
-	 * @throws InvalidArgumentCheckedException if end is null
-	 * @throws IllegalStateException if end is before the start time
-	 */
-	private void setEnd(LocalDateTime end) throws InvalidArgumentCheckedException, IllegalStateException {
-		if (end == null) {
-			throw new InvalidArgumentCheckedException("End time cannot be null");
-		}
-		if (end.isBefore(startDateTime)) {
-			throw new IllegalStateException("End time cannot be before start time");
-		}
 		this.endDateTime = end;
 	}
 
@@ -159,11 +173,10 @@ public class Reservation {
 	 * Sets the comment for the reservation.
 	 *
 	 * @param comment for the reservation
-	 * @throws InvalidArgumentCheckedException if comment is null or blank
 	 */
-	private void setComment(String comment) throws InvalidArgumentCheckedException {
-		if (comment == null || comment.isBlank()) {
-			throw new InvalidArgumentCheckedException("Comment cannot be blank or null");
+	private void setComment(String comment) {
+		if (comment == null) {
+			throw new IllegalArgumentException("Comment is null when a value was expected");
 		}
 		this.comment = comment;
 	}
