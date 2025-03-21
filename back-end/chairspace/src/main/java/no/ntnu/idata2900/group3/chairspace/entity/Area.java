@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.exceptions.AdminCountException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
+import no.ntnu.idata2900.group3.chairspace.exceptions.NotReservableException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -33,7 +34,6 @@ import org.apache.commons.lang3.NotImplementedException;
  * @version 0.2
  * @since 0.1
  */
-//TODO: make reservable boolean
 @Entity
 @Schema(description = "Represents a reservable area in the database")
 @Table(name = "areas")
@@ -76,6 +76,7 @@ public class Area {
 		}
 	)
 	private Set<AreaFeature> features;
+	private boolean reservable;
 
 	/**
 	 * No args constructor for JPA.
@@ -99,6 +100,7 @@ public class Area {
 		this.administrators = builder.administrators;
 		this.features = builder.features;
 		this.reservations = new HashSet<>();
+		this.reservable = builder.reservable;
 	}
 
 	/* ---- Getters ---- */
@@ -251,6 +253,15 @@ public class Area {
 		return superArea != null && (superArea == area || superArea.isSuperArea(area));
 	}
 
+	/**
+	 * Returns true if the area is reservable, false if not.
+	 *
+	 * @return reservable status
+	 */
+	public boolean isReservable() {
+		return reservable;
+	}
+
 
 	/* ---- Setters ---- */
 
@@ -260,14 +271,18 @@ public class Area {
 	 *
 	 * @param reservation the reservation to add
 	 * @throws ReservedException if area is not free for the reservations timespan
+	 * @throws NotReservableException if area is not reservable
 	 */
 	public void addReservation(Reservation reservation)
-		throws  ReservedException {
+		throws  ReservedException, NotReservableException {
 		if (reservation == null) {
 			throw new IllegalArgumentException("Reservation is null when value was expected ");
 		}
+		if (!reservable) {
+			throw NotReservableException.overlapException();
+		}
 		if (!isFreeBetween(reservation.getStart(), reservation.getEnd())) {
-			throw new ReservedException("Reservation clashes with existing reservation");
+			throw ReservedException.reservationOverlapException();
 		}
 		reservations.add(reservation);
 	}
@@ -392,6 +407,33 @@ public class Area {
 		capacity = newCapacity;
 	}
 
+	/**
+	 * Toggles the reservable state of the area.
+	 * State will not change from true to false if there are reservations in the future.
+	 *
+	 * @param reservable the new reservable state
+	 * @throws InvalidArgumentCheckedException if there are reservations in the future when trying
+	 *     to make area non reservable
+	 */
+	public void setReservable(boolean reservable) throws InvalidArgumentCheckedException {
+		if (!reservable) {
+			Iterator<Reservation> it = getReservations();
+			LocalDateTime now = LocalDateTime.now();
+			boolean reservationsInFuture = false;
+			while (it.hasNext() && !reservationsInFuture) {
+				Reservation reservation = it.next();
+
+				reservationsInFuture = reservation.getEnd().isAfter(now);
+			}
+			if (reservationsInFuture) {
+				throw new InvalidArgumentCheckedException(
+					"Cannot make area non reservable as there are reservation in the future"
+				);
+			}
+		}
+		this.reservable = reservable;
+	}
+
 	/* ---- Methods ---- */
 
 	private void isFreeIncludingSubAreas() {
@@ -473,6 +515,7 @@ public class Area {
 		private Area superArea;
 		private AreaType areaType;
 		private Set<AreaFeature> features;
+		private boolean reservable;
 		// Damn this is a lot of fields.
 		// Good im using the builder pattern then 😎
 
@@ -516,6 +559,7 @@ public class Area {
 				throw new InvalidArgumentCheckedException("Name Cannot be empty");
 			}
 			this.name = name;
+			reservable = true;
 			return this;
 		}
 
@@ -677,6 +721,18 @@ public class Area {
 				throw new AdminCountException("Cannot create area without administrator");
 			}
 			return new Area(this);
+		}
+
+		/**
+		 * Sets the reservable state of the area.
+		 * Will be true be default
+		 *
+		 * @param reservable the reservable state of the area.
+		 * @return builder object
+		 */
+		public Builder reservable(Boolean reservable) {
+			this.reservable = reservable;
+			return this;
 		}
 	}
 }
