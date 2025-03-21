@@ -71,9 +71,10 @@ public class Reservation {
 		setUser(user);
 		setTimes(start, end);
 		setComment(comment);
-		// Area needs to be set last. This is to ensure that the reservation is added to the
-		// area's reservation list after all the fields are set.
-		setArea(area);
+		setArea(area, start, end);
+		// If this method is ever changed, make sure to always have this at the bottom to not add a
+		//   incomplete object to the area
+		area.addReservation(this);
 	}
 
 	/**
@@ -100,7 +101,10 @@ public class Reservation {
 		setUser(user);
 		setTimes(start, end);
 		setComment("");
-		setArea(area);
+		setArea(area, start, end);
+		// If this method is ever changed, make sure to always have this at the bottom to not add a
+		//   incomplete object to the area
+		area.addReservation(this);
 	}
 
 
@@ -110,21 +114,52 @@ public class Reservation {
 	/**
 	 * Sets the area of the reservation.
 	 * Also checks if the area is free for the specified timespan.
-	 * Also adds the reservation to the area's reservation list.
 	 *
 	 * @param area to reserve
 	 * @throws ReservedException if area is not free for the specified timespan
 	 */
-	private void setArea(Area area) throws ReservedException {
+	private void setArea(Area area)
+		throws ReservedException {
 		if (area == null) {
 			throw new IllegalArgumentException("Area was null when value was expected");
+		}
+		if (startDateTime == null || endDateTime == null) {
+			throw new IllegalStateException(
+				"Cannot assign area as the reservation has no start or end time"
+			);
 		}
 		if (!area.isFreeBetween(startDateTime, endDateTime)) {
 			throw new ReservedException(
 				"Cannot create reservation, area is not free for the specified timespan"
 			);
 		}
-		area.addReservation(this);
+		this.area = area;
+	}
+
+	/**
+	 * Sets the area of the reservation.
+	 * Checks if the area is free for the timespan
+	 *
+	 * @param area the area to reserve
+	 * @param startTime start time of the reservation
+	 * @param endTime end time of the reservation
+	 * @throws ReservedException If timespan overlaps with existing reservation
+	 */
+	private void setArea(Area area, LocalDateTime startTime, LocalDateTime endTime)
+		throws ReservedException {
+		if (area == null) {
+			throw new IllegalArgumentException("Area was null when value was expected");
+		}
+		if (startTime == null || endTime == null) {
+			throw new IllegalStateException(
+				"Cannot assign area as the reservation has no start or end time"
+			);
+		}
+		if (!area.isFreeBetween(startDateTime, endDateTime)) {
+			throw new ReservedException(
+				"Cannot create reservation, reservation clashes with existing reservation"
+			);
+		}
 		this.area = area;
 	}
 
