@@ -8,6 +8,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
+import no.ntnu.idata2900.group3.chairspace.exceptions.NotReservableException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 
 /**
@@ -60,6 +61,7 @@ public class Reservation {
 	 * @throws ReservedException if the area is not free for the specified timespan
 	 * @throws InvalidArgumentCheckedException if the end time is before the start time
 	 * @throws InvalidArgumentCheckedException if the start time is before the current time
+	 * @throws NotReservableException if the area is not reservable
 	 */
 	public Reservation(
 		Area area,
@@ -67,7 +69,7 @@ public class Reservation {
 		LocalDateTime start,
 		LocalDateTime end,
 		String comment
-	) throws InvalidArgumentCheckedException, ReservedException {
+	) throws InvalidArgumentCheckedException, ReservedException, NotReservableException {
 		setUser(user);
 		setTimes(start, end);
 		setComment(comment);
@@ -91,13 +93,14 @@ public class Reservation {
 	 * @throws ReservedException if the area is not free for the specified timespan
 	 * @throws InvalidArgumentCheckedException if the end time is before the start time
 	 * @throws InvalidArgumentCheckedException if the start time is before the current time
+	 * @throws NotReservableException if tge area is not reservable
 	 */
 	public Reservation(
 		Area area,
 		User user,
 		LocalDateTime start,
 		LocalDateTime end
-	) throws InvalidArgumentCheckedException, ReservedException {
+	) throws InvalidArgumentCheckedException, ReservedException, NotReservableException {
 		setUser(user);
 		setTimes(start, end);
 		setComment("");
