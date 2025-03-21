@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.time.LocalDateTime;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
+import no.ntnu.idata2900.group3.chairspace.exceptions.NotReservableException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -246,7 +247,7 @@ class ReservationTest {
 				end,
 				comment
 			);
-		} catch (InvalidArgumentCheckedException | ReservedException e) {
+		} catch (InvalidArgumentCheckedException | ReservedException | NotReservableException e) {
 			fail("Failed to create reservation", e);
 			return;
 		}
@@ -278,7 +279,7 @@ class ReservationTest {
 		assertEquals(start2, end);
 		try {
 			reservation = new Reservation(area, admin, start, end);
-		} catch (InvalidArgumentCheckedException | ReservedException e) {
+		} catch (InvalidArgumentCheckedException | ReservedException | NotReservableException e) {
 			fail(e.getMessage(), e);
 			return;
 		}
