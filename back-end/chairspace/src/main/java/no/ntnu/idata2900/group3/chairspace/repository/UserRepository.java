@@ -9,4 +9,4 @@ import org.springframework.stereotype.Repository;
  * Repository for the Account entity.
  */
 @Repository
-public interface AccountRepository extends CrudRepository<User, UUID> {}
+public interface UserRepository extends CrudRepository<User, UUID> {}
