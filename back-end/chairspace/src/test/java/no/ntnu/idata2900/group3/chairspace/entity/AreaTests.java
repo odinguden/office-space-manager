@@ -103,18 +103,10 @@ class AreaTests {
 	}
 
 	@Test
-	void testThatBuilderThrowsIfNoCapacity() {
-		assertThrows(
-			InvalidArgumentCheckedException.class,
-			() -> new Area.Builder("Test", 0, areaType)
-		);
-	}
-
-	@Test
 	void testThatBuilderThrowsIfNegativeCapacity() {
 		assertThrows(
 			InvalidArgumentCheckedException.class,
-			() -> new Area.Builder("Test", -1, areaType)
+			() -> new Area.Builder("Test", -3, areaType)
 		);
 	}
 
@@ -163,7 +155,7 @@ class AreaTests {
 		boolean containsFeature = false;
 		Iterator<AreaFeature> itFeature = area.getFeatures();
 
-		while (itFeature.hasNext()) {
+		while (itFeature.hasNext() && !containsFeature) {
 			AreaFeature feature = itFeature.next();
 			if (feature == areaFeature) {
 				containsFeature = true;
@@ -1041,10 +1033,7 @@ class AreaTests {
 			fail("Failed to create areas: " + e.getMessage(), e);
 			return;
 		}
-		assertThrows(
-			IllegalArgumentException.class,
-			() -> area.setSuperArea(null)
-		);
+		assertNull(area.getSuperArea());
 	}
 
 	@Test

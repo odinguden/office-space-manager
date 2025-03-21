@@ -2,6 +2,7 @@ package no.ntnu.idata2900.group3.chairspace.entity;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -265,5 +266,22 @@ class ReservationTest {
 			() -> reservation.doesCollide(null),
 			"DoesCollide throws when timePoint is null"
 		);
+	}
+
+	@Test
+	void testDoesCollideDoesReturnsFalseIfSameEndAndStartIsSame() {
+		Reservation reservation;
+		LocalDateTime start = LocalDateTime.now().plusDays(27);
+		LocalDateTime end = start.plusHours(2);
+		LocalDateTime start2 = end;
+		LocalDateTime end2 = start2.plusHours(2);
+		assertEquals(start2, end);
+		try {
+			reservation = new Reservation(area, admin, start, end);
+		} catch (InvalidArgumentCheckedException | ReservedException e) {
+			fail(e.getMessage(), e);
+			return;
+		}
+		assertFalse(reservation.doesCollide(start2, end2));
 	}
 }
