@@ -20,6 +20,7 @@ import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.exceptions.AdminCountException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
+import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * Represents a reservable area in the database.
@@ -32,6 +33,7 @@ import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
  * @version 0.2
  * @since 0.1
  */
+//TODO: make reservable boolean
 @Entity
 @Schema(description = "Represents a reservable area in the database")
 @Table(name = "areas")
@@ -120,8 +122,7 @@ public class Area {
 	 * @return Administrators of area, including super area.
 	 */
 	public Set<User> getAdministrators() {
-		Set<User> allAdmins = new HashSet<>();
-		allAdmins.addAll(administrators);
+		Set<User> allAdmins = new HashSet<>(administrators);
 		if (getSuperArea() != null) {
 			allAdmins.addAll(superArea.getAdministrators());
 		}
@@ -243,15 +244,11 @@ public class Area {
 	* @return true if area exists as super of this area
 	 */
 	public boolean isSuperArea(Area area) {
-		boolean isSuper;
-		if (superArea != null && superArea == area) {
-			isSuper = true;
-		} else if (superArea != null) {
-			isSuper = superArea.isSuperArea(area);
-		} else {
-			isSuper = false;
-		}
-		return isSuper;
+		// If super area is null, return false as this is the top of the stack.
+		// If super area is also the area we're checking return true.
+		// if there is a super area but its not the area we're checking for check the super
+		//    for that area
+		return superArea != null && (superArea == area || superArea.isSuperArea(area));
 	}
 
 
@@ -270,7 +267,7 @@ public class Area {
 			throw new IllegalArgumentException("Reservation is null when value was expected ");
 		}
 		if (!isFreeBetween(reservation.getStart(), reservation.getEnd())) {
-			throw new ReservedException("Area is not free for the reservations timespan");
+			throw new ReservedException("Reservation clashes with existing reservation");
 		}
 		reservations.add(reservation);
 	}
@@ -340,21 +337,21 @@ public class Area {
 	 * @throws InvalidArgumentCheckedException if this area already has a super area
 	 * @throws InvalidArgumentCheckedException If you are trying to assign a area to become
 	 *     a super area of itself
+	 * @throws AdminCountException if you try to set the super area to null while this area has no
+	 *     administrators of itself
 
 	 */
 	public void setSuperArea(Area area)
-		throws InvalidArgumentCheckedException {
+		throws InvalidArgumentCheckedException, AdminCountException {
 		if (this.superArea != null) {
 			throw new IllegalStateException("This area already has a super area");
+		} else if (area == null) {
+			removeSuperArea();
+		} else if (area.isSuperArea(this) || area == this) {
+			throw new InvalidArgumentCheckedException("Cannot make a space it's own superspace");
+		} else {
+			this.superArea = area;
 		}
-		if (area == null) {
-			throw new IllegalArgumentException("Cannot set super area to null.");
-		}
-		if (area.isSuperArea(this) || area == this) {
-			throw new InvalidArgumentCheckedException("Cannot assign area to be a super of itself");
-		}
-
-		this.superArea = area;
 	}
 
 	/**
@@ -383,19 +380,25 @@ public class Area {
 
 	/**
 	 * Updates the capacity.
-	 * Throws an exception if the new capacity is less than 1.
+	 * Throws an exception if the new capacity is less than 0.
 	 *
 	 * @param newCapacity the updated capacity
-	 * @throws InvalidArgumentCheckedException if newCapacity is less than 1
+	 * @throws InvalidArgumentCheckedException if newCapacity is less than 0
 	 */
 	public void updateCapacity(int newCapacity) throws InvalidArgumentCheckedException {
-		if (newCapacity <= 0) {
+		if (newCapacity < 0) {
 			throw new InvalidArgumentCheckedException("Capacity cannot be less than 1");
 		}
 		capacity = newCapacity;
 	}
 
 	/* ---- Methods ---- */
+
+	private void isFreeIncludingSubAreas() {
+		//TODO: implement
+		// Should isFreeBetween check super area for conflicts
+		throw new NotImplementedException();
+	}
 
 	/**
 	 * Returns true if the area is free in this block of time. false if not.
@@ -517,14 +520,14 @@ public class Area {
 		}
 
 		/**
-		 * Sets the capacity of the area as an int. Throws exception if capacity is less than 1.
+		 * Sets the capacity of the area as an int. Throws exception if capacity is less than 0.
 		 *
 		 * @param capacity as int
 		 * @return Builder object
-		 * @throws InvalidArgumentCheckedException if capacity is less than 1
+		 * @throws InvalidArgumentCheckedException if capacity is less than 0
 		 */
 		private Builder capacity(int capacity) throws InvalidArgumentCheckedException {
-			if (capacity < 1) {
+			if (capacity < 0) {
 				throw new InvalidArgumentCheckedException("Capacity is less than 1");
 			}
 			this.capacity = capacity;
@@ -567,7 +570,7 @@ public class Area {
 		 * @throws InvalidArgumentCheckedException if calendar link is null
 		 */
 		public Builder calendarLink(String calendarLink) throws InvalidArgumentCheckedException {
-			if (calendarLink == null ) {
+			if (calendarLink == null) {
 				throw new IllegalArgumentException("Calendar link is null when value was expected");
 			}
 			if (calendarLink.isEmpty()) {
@@ -668,7 +671,9 @@ public class Area {
 		 * @see Area.Builder#administrator(User)
 		 */
 		public Area build() throws AdminCountException {
-			if (superArea == null && administrators.isEmpty()) {
+			//If area has no administrators of itself,
+			// and super area is either null or has no administrators
+			if (administrators.isEmpty() && (superArea == null || superArea.getAdminCount() <= 0)) {
 				throw new AdminCountException("Cannot create area without administrator");
 			}
 			return new Area(this);
