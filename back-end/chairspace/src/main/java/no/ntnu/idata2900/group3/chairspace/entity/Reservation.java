@@ -129,9 +129,7 @@ public class Reservation {
 			);
 		}
 		if (!area.isFreeBetween(startDateTime, endDateTime)) {
-			throw new ReservedException(
-				"Cannot create reservation, area is not free for the specified timespan"
-			);
+			throw ReservedException.reservationOverlapException();
 		}
 		this.area = area;
 	}
@@ -156,9 +154,7 @@ public class Reservation {
 			);
 		}
 		if (!area.isFreeBetween(startDateTime, endDateTime)) {
-			throw new ReservedException(
-				"Cannot create reservation, reservation clashes with existing reservation"
-			);
+			throw ReservedException.reservationOverlapException();
 		}
 		this.area = area;
 	}
