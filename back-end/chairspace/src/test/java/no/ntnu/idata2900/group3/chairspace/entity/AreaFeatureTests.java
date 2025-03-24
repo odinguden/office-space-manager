@@ -46,14 +46,14 @@ class AreaFeatureTests {
 			fail("Failed to create area feature", e);
 			return;
 		}
-		assertEquals(name, newAreaFeature.getName());
+		assertEquals(name, newAreaFeature.getId());
 		assertEquals("", newAreaFeature.getDescription());
 	}
 
 	@DisplayName("Test that name is assigned")
 	@Test
 	void testName() {
-		assertEquals(name, areaFeature.getName(), "Name is not assigned correctly");
+		assertEquals(name, areaFeature.getId(), "Name is not assigned correctly");
 	}
 
 	@DisplayName("Test that description is assigned")
