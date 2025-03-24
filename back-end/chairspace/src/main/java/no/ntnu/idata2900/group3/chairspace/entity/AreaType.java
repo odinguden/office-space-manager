@@ -13,7 +13,7 @@ import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedExce
  * @see Area
  */
 @Entity
-public class AreaType {
+public class AreaType implements EntityInterface<String> {
 	@Id
 	private String name;
 	private String description;
@@ -53,7 +53,7 @@ public class AreaType {
 	 *
 	 * @return the name of the area type as string
 	 */
-	public String getName() {
+	public String getId() {
 		return name;
 	}
 
