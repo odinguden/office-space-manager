@@ -2,11 +2,6 @@ package no.ntnu.idata2900.group3.chairspace.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.web.server.ResponseStatusException;
-
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 
 /**
@@ -19,6 +14,8 @@ public class PaginationDTO<EntityTypeT> {
 
 	/**
 	 * Constructs a pagination.
+	 * The pagination content will contain the items from the index itemsPerPage * current page
+	 * to the index ( itemsPerPage * current page ) + itemsPerPage.
 	 *
 	 * @param items Items to paginate
 	 * @param itemsPerPage the amount of items per page
@@ -46,7 +43,7 @@ public class PaginationDTO<EntityTypeT> {
 	}
 
 	/**
-	 * Returns the page content.
+	 * Returns the page content in a list.
 	 *
 	 * @return page content
 	 */
