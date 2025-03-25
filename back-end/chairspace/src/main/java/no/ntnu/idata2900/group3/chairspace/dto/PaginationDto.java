@@ -2,21 +2,23 @@ package no.ntnu.idata2900.group3.chairspace.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
- * TODO:
+ * This class works to paginate large amounts of data from the database.
+ * This is done to avoid unnecessarily large data transfers to the frontend.
  */
-public class PaginationDto<EntityTypeT> {
+public class PaginationDTO<EntityTypeT> {
 	private int numberOfPages;
 	private List<EntityTypeT> pageContent;
 
 	/**
-	 * TODO make constuctor comment.
+	 * Constructs a pagination.
 	 *
-	 * @param items
+	 * @param items Items to paginate
+	 * @param itemsPerPage the amount of items per page
+	 * @param currentPage the current page that is requested
 	 */
-	public PaginationDto(List<EntityTypeT> items, int itemsPerPage, int currentPage) {
+	public PaginationDTO(List<EntityTypeT> items, int itemsPerPage, int currentPage) {
 		setNumberOfPages(items.size());
 		setPageContent(items, currentPage, itemsPerPage);
 
@@ -35,8 +37,9 @@ public class PaginationDto<EntityTypeT> {
 	}
 
 	/**
-	 * TODO: Propper imlementation
-	 * @return
+	 * Returns the page content.
+	 *
+	 * @return page content
 	 */
 	public List<EntityTypeT> getPageContent() {
 		return pageContent;
@@ -45,16 +48,23 @@ public class PaginationDto<EntityTypeT> {
 	/* ---- Setters ---- */
 
 	/**
-	 * 
-	 * @param numberOfPages
+	 * Sets the total number of pages in the pagination.
+	 *
+	 * @param numberOfPages the total number of pages
 	 */
 	private void setNumberOfPages(int numberOfPages) {
 		this.numberOfPages = numberOfPages;
 	}
 
 	/**
-	 * 
-	 * @param pageContent
+	 * Sets the page content.
+	 * The items for the page will be the items starting on content list with
+	 * the index currentPage * itemsPerPage and stopping when the page content is filled or when
+	 * there are no more items left in the content list.
+	 *
+	 * @param content the content that needs o be paginated
+	 * @param itemsPerPage the number of items on a page
+	 * @param currentPage the current page
 	 */
 	private void setPageContent(List<EntityTypeT> content, int itemsPerPage, int currentPage) {
 		int currentIndex = itemsPerPage * currentPage;

@@ -7,9 +7,9 @@ import jakarta.validation.constraints.AssertTrue;
 /**
  * Tests for the pagination dto.
  *
- * @see PaginationDto
+ * @see PaginationDTO
  */
-public class PaginationDtoTests {
+public class PaginationDTOTests {
 
 	@Test
 	void assertTrueTest() {
