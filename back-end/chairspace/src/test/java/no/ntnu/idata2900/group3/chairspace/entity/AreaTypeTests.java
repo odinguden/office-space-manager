@@ -44,14 +44,14 @@ class AreaTypeTests {
 			fail("Failed to create area type", e);
 			return;
 		}
-		assertEquals(name, singleArgAreaType.getName());
+		assertEquals(name, singleArgAreaType.getId());
 		assertEquals("", singleArgAreaType.getDescription());
 	}
 
 	@DisplayName("Test that name is assigned")
 	@Test
 	void testName() {
-		assertEquals(name, areaType.getName(), "Name is not assigned correctly");
+		assertEquals(name, areaType.getId(), "Name is not assigned correctly");
 	}
 
 	@DisplayName("Test that description is assigned")

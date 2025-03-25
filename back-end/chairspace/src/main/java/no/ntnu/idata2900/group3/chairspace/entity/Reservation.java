@@ -29,7 +29,7 @@ import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
  * @see User
  */
 @Entity
-public class Reservation {
+public class Reservation implements EntityInterface<UUID> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID reservationUuid;
@@ -218,6 +218,15 @@ public class Reservation {
 	}
 
 	/* ---- Getters ---- */
+
+	/**
+	 * Gets the uuid of the reservation.
+	 *
+	 * @return the uuid of the reservation
+	 */
+	public UUID getId() {
+		return reservationUuid;
+	}
 
 	/**
 	 * Returns the area of the reservation.

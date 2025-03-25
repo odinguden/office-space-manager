@@ -37,7 +37,7 @@ import org.apache.commons.lang3.NotImplementedException;
 @Entity
 @Schema(description = "Represents a reservable area in the database")
 @Table(name = "areas")
-public class Area {
+public class Area implements EntityInterface<UUID> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	@Column(name = "area_id")
