@@ -3,6 +3,12 @@ package no.ntnu.idata2900.group3.chairspace.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.web.server.ResponseStatusException;
+
+import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
+
 /**
  * This class works to paginate large amounts of data from the database.
  * This is done to avoid unnecessarily large data transfers to the frontend.
@@ -17,12 +23,15 @@ public class PaginationDTO<EntityTypeT> {
 	 * @param items Items to paginate
 	 * @param itemsPerPage the amount of items per page
 	 * @param currentPage the current page that is requested
+	 * @throws InvalidArgumentCheckedException if the current page is negative
 	 */
-	public PaginationDTO(List<EntityTypeT> items, int itemsPerPage, int currentPage) {
-		setNumberOfPages(items.size());
-		setPageContent(items, currentPage, itemsPerPage);
-
-
+	public PaginationDTO(List<EntityTypeT> items, int itemsPerPage, int currentPage)
+		throws InvalidArgumentCheckedException {
+		if (items == null) {
+			throw new IllegalArgumentException("Items are null where value was expected");
+		}
+		setPageContent(items, itemsPerPage, currentPage);
+		setNumberOfPages(itemsPerPage, items.size());
 	}
 
 	/* ---- Getters ---- */
@@ -50,10 +59,23 @@ public class PaginationDTO<EntityTypeT> {
 	/**
 	 * Sets the total number of pages in the pagination.
 	 *
-	 * @param numberOfPages the total number of pages
+	 * @param itemsPerPage the number of items per page
+	 * @param numberOfItems the total number of items
 	 */
-	private void setNumberOfPages(int numberOfPages) {
-		this.numberOfPages = numberOfPages;
+	private void setNumberOfPages(int itemsPerPage, int numberOfItems) {
+		if (itemsPerPage <= 0) {
+			throw new IllegalArgumentException(
+				"Number of items on a page cannot be equal or less than zero"
+			);
+		}
+		if (numberOfItems < 0) {
+			// Something has gone horribly wrong if an array has less than zero entries.
+			// At least it wouldn't be something wrong with our code.
+			throw new IllegalArgumentException(
+				"The content on a page cannot be less than zero"
+				);
+		}
+		numberOfPages = (int) Math.ceil((double) numberOfItems / (double) itemsPerPage);
 	}
 
 	/**
@@ -65,12 +87,25 @@ public class PaginationDTO<EntityTypeT> {
 	 * @param content the content that needs o be paginated
 	 * @param itemsPerPage the number of items on a page
 	 * @param currentPage the current page
+	 * @throws InvalidArgumentCheckedException if the index of the requested page is less than zero
 	 */
-	private void setPageContent(List<EntityTypeT> content, int itemsPerPage, int currentPage) {
+	private void setPageContent(List<EntityTypeT> content, int itemsPerPage, int currentPage)
+		throws InvalidArgumentCheckedException {
+		if (itemsPerPage < 0) {
+			throw new IllegalArgumentException(
+				"The number of items per page cannot be less than zero"
+				);
+		}
+		if (currentPage < 0) {
+			throw new InvalidArgumentCheckedException(
+				"There is no page with the index: " + currentPage
+			);
+		}
+
+		pageContent = new ArrayList<>();
 		int currentIndex = itemsPerPage * currentPage;
 		int indexStop = currentIndex + itemsPerPage;
 
-		pageContent = new ArrayList<>();
 
 		while (currentIndex < content.size() && currentIndex < indexStop) {
 			pageContent.add(content.get(currentIndex));
