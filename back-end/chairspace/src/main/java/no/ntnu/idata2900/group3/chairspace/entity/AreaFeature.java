@@ -20,7 +20,7 @@ import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedExce
  */
 @Schema(description = "Represents an area feature in the database")
 @Entity
-public class AreaFeature {
+public class AreaFeature implements EntityInterface<String> {
 	@Id
 	private String name;
 	private String description;
@@ -70,7 +70,7 @@ public class AreaFeature {
 	 *
 	 * @return The name of the area feature
 	 */
-	public String getName() {
+	public String getId() {
 		return name;
 	}
 

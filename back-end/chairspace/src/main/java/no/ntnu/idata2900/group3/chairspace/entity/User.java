@@ -27,7 +27,7 @@ import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedExce
 @Entity
 @Schema(description = "Represents a user in the database")
 @Table(name = "accounts")
-public class User {
+public class User implements EntityInterface<UUID> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID userUuid;
