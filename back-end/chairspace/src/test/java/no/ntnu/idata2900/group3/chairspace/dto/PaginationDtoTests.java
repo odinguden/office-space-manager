@@ -2,6 +2,7 @@ package no.ntnu.idata2900.group3.chairspace.dto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
@@ -84,6 +85,18 @@ public class PaginationDtoTests {
 			return;
 		}
 		assertEquals(5, paginationDto.getNumberOfPages());
+	}
+
+	@Test
+	void testMaxPagePlusOneIsEmpty() {
+		PaginationDto<AreaFeature> paginationDto;
+		try {
+			paginationDto = new PaginationDto<>(content, 20, 6);
+		} catch (InvalidArgumentCheckedException e) {
+			fail("Failed to create pagination", e);
+			return;
+		}
+		assertTrue(paginationDto.getPageContent().isEmpty());
 	}
 
 	@Test
