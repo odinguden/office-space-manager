@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import org.junit.jupiter.api.BeforeAll;
@@ -62,7 +61,7 @@ public class PaginationDtoTests {
 	@Test
 	void testConstructorThrowsWhenNegativeCurrentPage() {
 		assertThrows(
-			InvalidArgumentCheckedException.class,
+			IllegalArgumentException.class,
 			() -> new PaginationDto<>(content, 10, -1)
 		);
 	}
@@ -88,15 +87,12 @@ public class PaginationDtoTests {
 	}
 
 	@Test
-	void testMaxPagePlusOneIsEmpty() {
-		PaginationDto<AreaFeature> paginationDto;
-		try {
-			paginationDto = new PaginationDto<>(content, 20, 6);
-		} catch (InvalidArgumentCheckedException e) {
-			fail("Failed to create pagination", e);
-			return;
-		}
-		assertTrue(paginationDto.getPageContent().isEmpty());
+	void testInvalidPageNumberThrows() {
+		assertThrows(
+			InvalidArgumentCheckedException.class,
+			() -> new PaginationDto<>(content, 20, 6),
+			"Pagination constructor does not throw when a non extant page is requested"
+		);
 	}
 
 	@Test

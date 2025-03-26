@@ -28,7 +28,6 @@ public class PaginationDto<EntityTypeT> {
 			throw new IllegalArgumentException("Items are null where value was expected");
 		}
 		setPageContent(items, itemsPerPage, currentPage);
-		setNumberOfPages(itemsPerPage, items.size());
 	}
 
 	/* ---- Getters ---- */
@@ -93,7 +92,13 @@ public class PaginationDto<EntityTypeT> {
 				"The number of items per page cannot be less than zero"
 			);
 		}
+		setNumberOfPages(itemsPerPage, content.size());
 		if (currentPage < 0) {
+			throw new IllegalArgumentException(
+				"Page index cannot be a negative number"
+			);
+		}
+		if (currentPage > numberOfPages) {
 			throw new InvalidArgumentCheckedException(
 				"There is no page with the index: " + currentPage
 			);
