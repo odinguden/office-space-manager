@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
+import java.util.List;
+
 import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import org.junit.jupiter.api.BeforeAll;
@@ -21,36 +23,39 @@ public class PaginationDtoTests {
 	private static String description = "Description: ";
 
 	@BeforeAll
-	static void initialize() {
+	static void initialize() throws InvalidArgumentCheckedException {
 		content = new ArrayList<>();
 
 		for (int i = 0; i < 100; i++) {
-			try {
-				content.add(
-					new AreaFeature(
-						name + i,
-						description + i
-						)
-				);
-			} catch (InvalidArgumentCheckedException e) {
-				fail("Failed to create Area feature with index" + i, e);
-			}
+			content.add(
+				new AreaFeature(
+					name + i,
+					description + i
+					)
+			);
 		}
 	}
 
 	@Test
 	void testConstructor() {
-		PaginationDto<AreaFeature> PaginationDto;
+		PaginationDto<AreaFeature> paginationDto;
 		try {
-			PaginationDto = new PaginationDto<>(content, 20, 0);
+			paginationDto = new PaginationDto<>(content, 20, 1);
 		} catch (InvalidArgumentCheckedException e) {
 			fail("Failed to create pagination", e);
 			return;
 		}
-		assertEquals(20, PaginationDto.getPageContent().size(),
-			"Page content has the wrong number of items"
-		);
-		assertEquals(5, PaginationDto.getNumberOfPages());
+		assertEquals(5, paginationDto.getNumberOfPages());
+		List<AreaFeature> pageContent = paginationDto.getPageContent();
+		for (int i = 20; i < 40; i++) {
+			assertEquals(
+				content.get(i),
+				pageContent.get(i % 20),
+				"Expected: " + content.get(i).getId()
+				+ " but was: " + pageContent.get(i % 20).getId()
+				+ " At index: " + i
+			);
+		}
 	}
 
 	@Test
@@ -70,15 +75,15 @@ public class PaginationDtoTests {
 	}
 
 	@Test
-	void testPageNumberRoundUp() {
-		PaginationDto<AreaFeature> PaginationDto;
+	void testPageNumber() {
+		PaginationDto<AreaFeature> paginationDto;
 		try {
-			PaginationDto = new PaginationDto<>(content, 24, 1);
+			paginationDto = new PaginationDto<>(content, 24, 1);
 		} catch (InvalidArgumentCheckedException e) {
 			fail("Failed to create pagination", e);
 			return;
 		}
-		assertEquals(5, PaginationDto.getNumberOfPages());
+		assertEquals(5, paginationDto.getNumberOfPages());
 	}
 
 	@Test
