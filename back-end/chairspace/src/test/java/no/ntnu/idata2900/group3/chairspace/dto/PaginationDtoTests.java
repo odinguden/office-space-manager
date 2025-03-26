@@ -13,9 +13,9 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for the pagination dto.
  *
- * @see PaginationDTO
+ * @see PaginationDto
  */
-public class PaginationDTOTests {
+public class PaginationDtoTests {
 	private static ArrayList<AreaFeature> content;
 	private static String name = "Feature: ";
 	private static String description = "Description: ";
@@ -40,24 +40,24 @@ public class PaginationDTOTests {
 
 	@Test
 	void testConstructor() {
-		PaginationDTO<AreaFeature> paginationDto;
+		PaginationDto<AreaFeature> PaginationDto;
 		try {
-			paginationDto = new PaginationDTO<>(content, 20, 0);
+			PaginationDto = new PaginationDto<>(content, 20, 0);
 		} catch (InvalidArgumentCheckedException e) {
 			fail("Failed to create pagination", e);
 			return;
 		}
-		assertEquals(20, paginationDto.getPageContent().size(),
+		assertEquals(20, PaginationDto.getPageContent().size(),
 			"Page content has the wrong number of items"
 		);
-		assertEquals(5, paginationDto.getNumberOfPages());
+		assertEquals(5, PaginationDto.getNumberOfPages());
 	}
 
 	@Test
 	void testConstructorThrowsWhenNegativeCurrentPage() {
 		assertThrows(
 			InvalidArgumentCheckedException.class,
-			() -> new PaginationDTO<>(content, 10, -1)
+			() -> new PaginationDto<>(content, 10, -1)
 		);
 	}
 
@@ -65,27 +65,27 @@ public class PaginationDTOTests {
 	void testConstructorThrowsWhenNegativeItemsPerPage() {
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> new PaginationDTO<>(content, -10, 1)
+			() -> new PaginationDto<>(content, -10, 1)
 		);
 	}
 
 	@Test
 	void testPageNumberRoundUp() {
-		PaginationDTO<AreaFeature> paginationDto;
+		PaginationDto<AreaFeature> PaginationDto;
 		try {
-			paginationDto = new PaginationDTO<>(content, 24, 1);
+			PaginationDto = new PaginationDto<>(content, 24, 1);
 		} catch (InvalidArgumentCheckedException e) {
 			fail("Failed to create pagination", e);
 			return;
 		}
-		assertEquals(5, paginationDto.getNumberOfPages());
+		assertEquals(5, PaginationDto.getNumberOfPages());
 	}
 
 	@Test
 	void testNullContent() {
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> new PaginationDTO<AreaFeature>(null, 12, 3)
+			() -> new PaginationDto<AreaFeature>(null, 12, 3)
 		);
 	}
 }
