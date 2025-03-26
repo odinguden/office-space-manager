@@ -8,7 +8,7 @@ import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedExce
  * This class works to paginate large amounts of data from the database.
  * This is done to avoid unnecessarily large data transfers to the frontend.
  */
-public class PaginationDTO<EntityTypeT> {
+public class PaginationDto<EntityTypeT> {
 	private int numberOfPages;
 	private List<EntityTypeT> pageContent;
 
@@ -22,7 +22,7 @@ public class PaginationDTO<EntityTypeT> {
 	 * @param currentPage the current page that is requested
 	 * @throws InvalidArgumentCheckedException if the current page is negative
 	 */
-	public PaginationDTO(List<EntityTypeT> items, int itemsPerPage, int currentPage)
+	public PaginationDto(List<EntityTypeT> items, int itemsPerPage, int currentPage)
 		throws InvalidArgumentCheckedException {
 		if (items == null) {
 			throw new IllegalArgumentException("Items are null where value was expected");
