@@ -70,7 +70,7 @@ public class PaginationDto<EntityTypeT> {
 			// At least it wouldn't be something wrong with our code.
 			throw new IllegalArgumentException(
 				"The content on a page cannot be less than zero"
-				);
+			);
 		}
 		numberOfPages = (int) Math.ceil((double) numberOfItems / (double) itemsPerPage);
 	}
@@ -91,7 +91,7 @@ public class PaginationDto<EntityTypeT> {
 		if (itemsPerPage < 0) {
 			throw new IllegalArgumentException(
 				"The number of items per page cannot be less than zero"
-				);
+			);
 		}
 		if (currentPage < 0) {
 			throw new InvalidArgumentCheckedException(
