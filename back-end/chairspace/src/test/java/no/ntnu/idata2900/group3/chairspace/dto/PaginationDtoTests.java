@@ -2,7 +2,6 @@ package no.ntnu.idata2900.group3.chairspace.dto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
@@ -31,7 +30,7 @@ public class PaginationDtoTests {
 				new AreaFeature(
 					name + i,
 					description + i
-					)
+				)
 			);
 		}
 	}
