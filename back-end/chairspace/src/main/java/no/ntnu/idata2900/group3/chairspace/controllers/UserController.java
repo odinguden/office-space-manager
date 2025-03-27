@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 
 
@@ -63,7 +64,7 @@ public class UserController extends AbstractController<User, UUID> {
 		Optional<User> optionalUser = userRepository.findById(id);
 
 		if (!optionalUser.isPresent()) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
 
 		List<Area> areas = userRepository.getUserAreas(id);
@@ -98,7 +99,7 @@ public class UserController extends AbstractController<User, UUID> {
 		Optional<User> optionalUser = userRepository.findById(id);
 
 		if (!optionalUser.isPresent()) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
 
 		List<Reservation> reservations = userRepository.getUserReservations(id);
