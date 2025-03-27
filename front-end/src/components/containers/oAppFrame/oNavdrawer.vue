@@ -34,13 +34,29 @@ const visibleState = computed({
 
 <template>
 	<v-navigation-drawer v-model="visibleState">
-		<v-window v-model="windowState">
-			<v-window-item>
+		<v-window v-model="windowState" class="drawer-container">
+			<v-window-item class="drawer-item">
 				<o-navigation-drawer />
 			</v-window-item>
-			<v-window-item>
+			<v-window-item class="drawer-item">
 				<o-search-drawer />
 			</v-window-item>
 		</v-window>
 	</v-navigation-drawer>
 </template>
+
+<style scoped lang="scss">
+.drawer-container {
+	// Negates a visual bug when swapping windows
+	height: 100%;
+
+	.drawer-item {
+		// Ensures drawer is scrollable
+		overflow-y: auto;
+
+		// Negates a visual bug causing the "search" button to jump
+		// upon changing windows
+		height: 100%;
+	}
+}
+</style>
