@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
+import no.ntnu.idata2900.group3.chairspace.exceptions.PageNotFoundException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -40,7 +41,7 @@ public class PaginationDtoTests {
 		PaginationDto<AreaFeature> paginationDto;
 		try {
 			paginationDto = new PaginationDto<>(content, 20, 1);
-		} catch (InvalidArgumentCheckedException e) {
+		} catch (PageNotFoundException e) {
 			fail("Failed to create pagination", e);
 			return;
 		}
@@ -60,7 +61,7 @@ public class PaginationDtoTests {
 	@Test
 	void testConstructorThrowsWhenNegativeCurrentPage() {
 		assertThrows(
-			IllegalArgumentException.class,
+			PageNotFoundException.class,
 			() -> new PaginationDto<>(content, 10, -1)
 		);
 	}
@@ -78,7 +79,7 @@ public class PaginationDtoTests {
 		PaginationDto<AreaFeature> paginationDto;
 		try {
 			paginationDto = new PaginationDto<>(content, 24, 1);
-		} catch (InvalidArgumentCheckedException e) {
+		} catch (PageNotFoundException e) {
 			fail("Failed to create pagination", e);
 			return;
 		}
@@ -88,7 +89,7 @@ public class PaginationDtoTests {
 	@Test
 	void testInvalidPageNumberThrows() {
 		assertThrows(
-			InvalidArgumentCheckedException.class,
+			PageNotFoundException.class,
 			() -> new PaginationDto<>(content, 20, 6),
 			"Pagination constructor does not throw when a non extant page is requested"
 		);

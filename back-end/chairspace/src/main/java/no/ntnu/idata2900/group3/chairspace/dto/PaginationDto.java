@@ -2,7 +2,7 @@ package no.ntnu.idata2900.group3.chairspace.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
+import no.ntnu.idata2900.group3.chairspace.exceptions.PageNotFoundException;
 
 /**
  * This class works to paginate large amounts of data from the database.
@@ -20,10 +20,10 @@ public class PaginationDto<EntityTypeT> {
 	 * @param items Items to paginate
 	 * @param itemsPerPage the amount of items per page
 	 * @param currentPage the current page that is requested
-	 * @throws InvalidArgumentCheckedException if the current page is negative
+	 * @throws PageNotFoundException if the current page is negative
 	 */
 	public PaginationDto(List<EntityTypeT> items, int itemsPerPage, int currentPage)
-		throws InvalidArgumentCheckedException {
+		throws PageNotFoundException {
 		if (items == null) {
 			throw new IllegalArgumentException("Items are null where value was expected");
 		}
@@ -83,10 +83,11 @@ public class PaginationDto<EntityTypeT> {
 	 * @param content the content that needs o be paginated
 	 * @param itemsPerPage the number of items on a page
 	 * @param currentPage the current page
-	 * @throws InvalidArgumentCheckedException if the index of the requested page is less than zero
+	 * @throws PageNotFoundException if the index of the requested page is less than zero
+	 * @throws PageNotFoundException if a non extant page is requested
 	 */
 	private void setPageContent(List<EntityTypeT> content, int itemsPerPage, int currentPage)
-		throws InvalidArgumentCheckedException {
+		throws PageNotFoundException {
 		if (itemsPerPage < 0) {
 			throw new IllegalArgumentException(
 				"The number of items per page cannot be less than zero"
@@ -94,14 +95,10 @@ public class PaginationDto<EntityTypeT> {
 		}
 		setNumberOfPages(itemsPerPage, content.size());
 		if (currentPage < 0) {
-			throw new IllegalArgumentException(
-				"Page index cannot be a negative number"
-			);
+			throw PageNotFoundException.negativePageException();
 		}
 		if (currentPage > numberOfPages) {
-			throw new InvalidArgumentCheckedException(
-				"There is no page with the index: " + currentPage
-			);
+			throw PageNotFoundException.nonExistentPageException(currentPage, numberOfPages);
 		}
 
 		pageContent = new ArrayList<>();
