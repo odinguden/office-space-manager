@@ -20,7 +20,10 @@ public class PaginationDto<EntityTypeT> {
 	 * @param items Items to paginate
 	 * @param itemsPerPage the amount of items per page
 	 * @param currentPage the current page that is requested
-	 * @throws PageNotFoundException if the current page is negative
+	 * @throws PageNotFoundException if the current page is bigger than total number of pages
+	 * @throws IllegalArgumentException if items per page is equal to or less than zero
+	 * @throws IllegalArgumentException if items are null
+	 * @throws IllegalArgumentException if current page is less than 0
 	 */
 	public PaginationDto(List<EntityTypeT> items, int itemsPerPage, int currentPage)
 		throws PageNotFoundException {
@@ -83,22 +86,22 @@ public class PaginationDto<EntityTypeT> {
 	 * @param content the content that needs o be paginated
 	 * @param itemsPerPage the number of items on a page
 	 * @param currentPage the current page
-	 * @throws IllegalArgumentException if the number of items per page is zero
+	 * @throws IllegalArgumentException if the number of items per page is less or equal to zero
 	 * @throws IllegalArgumentException if the index of the requested page is less than zero
 	 * @throws PageNotFoundException if a non extant page is requested
 	 */
 	private void setPageContent(List<EntityTypeT> content, int itemsPerPage, int currentPage)
 		throws PageNotFoundException {
-		if (itemsPerPage < 0) {
+		if (itemsPerPage <= 0) {
 			throw new IllegalArgumentException(
-				"The number of items per page cannot be less than zero"
+				"The number of items per page cannot be less or equal to zero"
 			);
 		}
 		setNumberOfPages(itemsPerPage, content.size());
 		if (currentPage < 0) {
 			throw new IllegalArgumentException("Page index cannot be a negative number");
 		}
-		if (currentPage > numberOfPages) {
+		if (currentPage >= numberOfPages) {
 			throw PageNotFoundException.nonExistentPageException(currentPage, numberOfPages);
 		}
 
