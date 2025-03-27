@@ -17,15 +17,6 @@ public final class PageNotFoundException extends Exception {
 	}
 
 	/**
-	 * Creates a PageNotFoundException indicating that a negative page index was requested.
-	 *
-	 * @return a PageNotFoundException with a message about the negative index
-	 */
-	public static PageNotFoundException negativePageException() {
-		return new PageNotFoundException("Page index cannot be a negative number");
-	}
-
-	/**
 	 * Creates a PageNotFoundException indicating that a page was
 	 * requested beyond the total number of pages.
 	 *
