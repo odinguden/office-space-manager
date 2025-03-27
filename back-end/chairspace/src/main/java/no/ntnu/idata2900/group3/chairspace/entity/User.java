@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 
 /**
@@ -30,7 +31,7 @@ import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedExce
 public class User implements EntityInterface<UUID> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
-	private UUID userUuid;
+	private UUID id;
 	@Column(name = "first_name", nullable = false)
 	private String firstName;
 	@Column(name = "last_name", nullable = false)
@@ -67,7 +68,7 @@ public class User implements EntityInterface<UUID> {
 	 * @return The id of the user
 	 */
 	public UUID getId() {
-		return this.userUuid;
+		return this.id;
 	}
 
 	/**

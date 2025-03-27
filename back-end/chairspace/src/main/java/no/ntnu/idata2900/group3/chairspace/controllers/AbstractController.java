@@ -257,7 +257,7 @@ public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT
 	public ResponseEntity<String> postEntity(@RequestBody EntityT object) {
 		this.hasPermissionToPost();
 
-		if (repository.findById(object.getId()).isPresent()) {
+		if (object.getId() != null && repository.findById(object.getId()).isPresent()) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT);
 		}
 
