@@ -2,12 +2,10 @@
 import { useDisplay } from 'vuetify';
 const { mobile, smAndDown } = useDisplay()
 
-const model = defineModel("modelValue", {
-	type: Number,
-	default: 0
-})
+// Which mode is currently selected
+const model = defineModel("modelValue", {type: Number})
 
-const drawerModes = [
+const DRAWER_MODES = [
 	{
 		name: "Navigation",
 		icon: "mdi-menu",
@@ -25,14 +23,14 @@ const drawerModes = [
 	<div class="drawer-mode-wrapper">
 		<v-btn-toggle
 			v-model="model"
-			class="drawer-mode-toggle"
-			:class="{'mobile': smAndDown}"
-			tile
 			:mandatory="!mobile"
+			:class="{'mobile': smAndDown}"
+			class="drawer-mode-toggle"
+			tile
 			color="primary"
 		>
 			<v-btn
-				v-for="mode in drawerModes"
+				v-for="mode in DRAWER_MODES"
 				:key="mode.name"
 				:aria-label="mode.name"
 			>
