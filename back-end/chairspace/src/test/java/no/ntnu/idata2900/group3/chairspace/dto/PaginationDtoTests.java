@@ -61,7 +61,7 @@ public class PaginationDtoTests {
 	@Test
 	void testConstructorThrowsWhenNegativeCurrentPage() {
 		assertThrows(
-			PageNotFoundException.class,
+			IllegalArgumentException.class,
 			() -> new PaginationDto<>(content, 10, -1)
 		);
 	}
