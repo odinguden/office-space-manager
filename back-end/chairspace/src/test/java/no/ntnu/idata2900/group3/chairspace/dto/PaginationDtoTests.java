@@ -96,6 +96,15 @@ public class PaginationDtoTests {
 	}
 
 	@Test
+	void testInvalidPageOffBy1Throws() {
+		assertThrows(
+			PageNotFoundException.class,
+			() -> new PaginationDto<>(content, 20, 5),
+			"Pagination constructor does not throw when a non extant page is requested"
+		);
+	}
+
+	@Test
 	void testNullContent() {
 		assertThrows(
 			IllegalArgumentException.class,
