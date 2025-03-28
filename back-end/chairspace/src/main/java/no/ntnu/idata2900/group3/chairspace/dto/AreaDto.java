@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.lang3.NotImplementedException;
+
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaType;
@@ -13,6 +15,7 @@ import no.ntnu.idata2900.group3.chairspace.entity.User;
 
 /**
  * A data transfer object used for creation and retrieval of area objects.
+ * TODO: Make method that builds area from this dto
  */
 public class AreaDto {
 	private UUID id;
@@ -124,5 +127,14 @@ public class AreaDto {
 
 	public boolean isReservable() {
 		return reservable;
+	}
+
+	/**
+	 * TODO:
+	 *
+	 * @return Area based on this object
+	 */
+	public Area buildArea() {
+		throw new NotImplementedException();
 	}
 }
