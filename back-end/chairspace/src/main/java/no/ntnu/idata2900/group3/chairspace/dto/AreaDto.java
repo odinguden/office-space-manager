@@ -87,6 +87,29 @@ public class AreaDto {
 		this.reservable = reservable;
 	}
 
+	public AreaDto(
+		List<UUID> administrators,
+		UUID superArea,
+		AreaType areaType,
+		List<AreaFeature> areaFeatures,
+		int capacity,
+		String calendarLink,
+		String name,
+		String description,
+		boolean reservable
+	) {
+		this.administrators = administrators;
+		this.superArea = superArea;
+		this.areaType = areaType;
+		this.areaFeatures = areaFeatures;
+		this.capacity = capacity;
+		this.calendarLink = calendarLink;
+		this.name = name;
+		this.description = description;
+		this.reservable = reservable;
+	}
+
+
 	/* ---- Getters ---- */
 
 	public UUID getId() {
