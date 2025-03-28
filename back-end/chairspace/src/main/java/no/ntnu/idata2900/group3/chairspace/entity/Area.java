@@ -611,18 +611,16 @@ public class Area implements EntityInterface<UUID> {
 		 *
 		 * @param calendarLink as String
 		 * @return Builder object
-		 * @throws InvalidArgumentCheckedException if calendar link is null
+		 * @throws InvalidArgumentCheckedException if calendar link has invalid format
 		 */
 		public Builder calendarLink(String calendarLink) throws InvalidArgumentCheckedException {
-			if (calendarLink == null) {
-				throw new IllegalArgumentException("Calendar link is null when value was expected");
+			if (calendarLink == null || calendarLink.isEmpty()) {
+				this.calendarLink = null;
+			} else {
+				//TODO When implementing proper calendar handling, include link format check here :)
+				this.calendarLink = calendarLink;
+				this.calendarControlled = true;
 			}
-			if (calendarLink.isEmpty()) {
-				throw new InvalidArgumentCheckedException("Calendar link cannot be blank");
-			}
-			//TODO When implementing proper calendar handling, include link format check here :)
-			this.calendarLink = calendarLink;
-			this.calendarControlled = true;
 			return this;
 		}
 
@@ -670,9 +668,6 @@ public class Area implements EntityInterface<UUID> {
 		 * @return Builder object
 		 */
 		public Builder superArea(Area superArea) {
-			if (superArea == null) {
-				throw new IllegalArgumentException("Super area is null when value was expected");
-			}
 			this.superArea = superArea;
 			return this;
 		}
