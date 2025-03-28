@@ -3,7 +3,7 @@ const isFavorite = ref(Math.random() > 0.7)
 </script>
 
 <template>
-	<v-card
+	<o-flat-card
 		class="space-card"
 		elevation="0"
 		tile
@@ -33,14 +33,11 @@ const isFavorite = ref(Math.random() > 0.7)
 		<div class="card-timeline">
 			<o-timeline/>
 		</div>
-	</v-card>
+	</o-flat-card>
 </template>
 
 <style scoped lang="scss">
 .space-card {
-	border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-	padding: 16px 24px;
-	border-radius: 4px;
 	display: grid;
 	grid-template-columns: auto 1fr;
 	gap: 16px;
