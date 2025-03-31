@@ -5,13 +5,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
-import org.apache.commons.lang3.NotImplementedException;
-
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaType;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
+import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * A data transfer object used for creation and retrieval of area objects.
@@ -29,12 +27,11 @@ public class AreaDto {
 	private String description;
 	private boolean reservable;
 
-	public AreaDto() {}
-
 	public AreaDto(Area area) {
 		if (area == null) {
-			//DO somthing
+			//TODO: DO somthing
 		}
+
 		this.id = area.getId();
 		this.capacity = area.getCapacity();
 		this.calendarLink = area.getCalendarLink();
@@ -47,7 +44,6 @@ public class AreaDto {
 			this.superArea = null;
 		}
 		this.areaType = area.getAreaType();
-
 		this.administrators = new ArrayList<>();
 
 		Set<User> admins = area.getAdministrators();
@@ -63,55 +59,13 @@ public class AreaDto {
 
 	}
 
-	public AreaDto(
-		UUID id,
-		List<UUID> administrators,
-		UUID superArea,
-		AreaType areaType,
-		List<AreaFeature> areaFeatures,
-		int capacity,
-		String calendarLink,
-		String name,
-		String description,
-		boolean reservable
-	) {
-		this.id = id;
-		this.administrators = administrators;
-		this.superArea = superArea;
-		this.areaType = areaType;
-		this.areaFeatures = areaFeatures;
-		this.capacity = capacity;
-		this.calendarLink = calendarLink;
-		this.name = name;
-		this.description = description;
-		this.reservable = reservable;
-	}
-
-	public AreaDto(
-		List<UUID> administrators,
-		UUID superArea,
-		AreaType areaType,
-		List<AreaFeature> areaFeatures,
-		int capacity,
-		String calendarLink,
-		String name,
-		String description,
-		boolean reservable
-	) {
-		this.administrators = administrators;
-		this.superArea = superArea;
-		this.areaType = areaType;
-		this.areaFeatures = areaFeatures;
-		this.capacity = capacity;
-		this.calendarLink = calendarLink;
-		this.name = name;
-		this.description = description;
-		this.reservable = reservable;
-	}
-
-
 	/* ---- Getters ---- */
 
+	/**
+	 * Returns the id of the area this DTO represents.
+	 *
+	 * @return 
+	 */
 	public UUID getId() {
 		return id;
 	}
