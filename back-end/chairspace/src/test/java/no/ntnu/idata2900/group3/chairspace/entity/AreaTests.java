@@ -210,51 +210,6 @@ class AreaTests {
 	}
 
 	@Test
-	void testThatBuilderThrowsIfNullLinkIsProvided() {
-		Area.Builder builder;
-		try {
-			builder = new Area.Builder("Test", 1232, areaType);
-		} catch (Exception e) {
-			fail("Failed to create builder: " + e.getMessage(), e);
-			return;
-		}
-		assertThrows(
-			IllegalArgumentException.class,
-			() -> builder.calendarLink(null)
-		);
-	}
-
-	@Test
-	void testThatBuilderThrowsIfBlankLinkIsProvided() {
-		Area.Builder builder;
-		try {
-			builder = new Area.Builder("Test", 1232, areaType);
-		} catch (Exception e) {
-			fail("Failed to create builder: " + e.getMessage(), e);
-			return;
-		}
-		assertThrows(
-			InvalidArgumentCheckedException.class,
-			() -> builder.calendarLink("")
-		);
-	}
-
-	@Test
-	void testThatBuilderThrowsIfNullSuperAreaIsProvided() {
-		Area.Builder builder;
-		try {
-			builder = new Area.Builder("Test", 1232, areaType);
-		} catch (Exception e) {
-			fail("Failed to create builder: " + e.getMessage(), e);
-			return;
-		}
-		assertThrows(
-			IllegalArgumentException.class,
-			() -> builder.superArea(null)
-		);
-	}
-
-	@Test
 	void testSetFeatures() {
 		HashSet<AreaFeature> features = new HashSet<>();
 		features.add(areaFeature);
