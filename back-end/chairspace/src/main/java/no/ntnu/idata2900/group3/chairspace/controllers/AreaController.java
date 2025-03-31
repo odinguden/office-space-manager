@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import no.ntnu.idata2900.group3.chairspace.dto.AreaCreationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.AreaDto;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
@@ -30,7 +31,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -58,53 +58,7 @@ public class AreaController extends AbstractAuthController {
 	private AreaFeatureRepository areaFeatureRepository;
 
 	/**
-	 * Checks if a area exists based on id.
-	 *
-	 * @param id id of area to check
-	 * @return true if it exist false if not
-	 */
-	private boolean existsArea(UUID id) {
-		Optional<Area> optionalArea = areaRepository.findById(id);
-		return optionalArea.isPresent();
-	}
-
-	/**
-	 * Returns an area feature based on id.
-	 *
-	 * @param id string id
-	 * @return Area feature from the database
-	 */
-	private AreaFeature getAreaFeature(String id) {
-		Optional<AreaFeature> optionalAreaFeature = areaFeatureRepository.findById(id);
-		if (!optionalAreaFeature.isPresent()) {
-			throw new ResponseStatusException(
-				HttpStatus.BAD_REQUEST,
-				"Cannot create area with feature: " + id + " as it does not exist in database"
-			);
-		}
-		return optionalAreaFeature.get();
-	}
-
-	/**
-	 * Returns AreaType based on id.
-	 *
-	 * @param id id of area type
-	 * @return AreaType from database
-	 * @throws ResponseStatusException 400 bad request if a area type cannot be found
-	 */
-	private AreaType getAreaType(String id) {
-		Optional<AreaType> optionalAreaType = areaTypeRepository.findById(id);
-		if (!optionalAreaType.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-			"Cannot create area with provided area type, as it does not exist in database"
-			);
-		}
-		return optionalAreaType.get();
-	}
-
-	/**
 	 * Posts a new area to the database based on the data from AreaDTO.
-	 * TODO: simplify
 	 *
 	 * @param areaDto DTO containing data relating to a area
 	 * @return a response entity with the status code 201 created
@@ -117,74 +71,9 @@ public class AreaController extends AbstractAuthController {
 
 	 */
 	@PostMapping()
-	public ResponseEntity<String> postEntity(@RequestBody AreaDto areaDto) {
+	public ResponseEntity<String> postEntity(@RequestBody AreaCreationDto areaDto) {
 		super.hasPermissionToPost();
-		if (areaDto.getId() != null && existsArea(areaDto.getId())) {
-			throw new ResponseStatusException(HttpStatus.CONFLICT);
-		}
-		// Find if areaType exists in database
-		AreaType areaType = getAreaType(areaDto.getAreaType().getId());
-
-		// Create builder with initial arguments
-		Area.Builder areaBuilder;
-		try {
-			areaBuilder = new Area.Builder(
-				areaDto.getName(),
-				areaDto.getCapacity(),
-				areaType
-			);
-		} catch (InvalidArgumentCheckedException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
-
-		// Adds administrators to area builder
-		for (UUID id : areaDto.getAdministrators()) {
-			Optional<User> optionalUser = userRepository.findById(id);
-			if (!optionalUser.isPresent()) {
-				throw new ResponseStatusException(
-					HttpStatus.BAD_REQUEST,
-					"Could not find user with id: " + id.toString()
-					+ ". Unable to create area with this user as administrator."
-				);
-			}
-			areaBuilder.administrator(optionalUser.get());
-		}
-
-		// Add calendar link if exists
-		try {
-			areaBuilder.calendarLink(areaDto.getCalendarLink());
-		} catch (InvalidArgumentCheckedException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
-
-		// These do not need any checks so they're just added
-		areaBuilder.description(areaDto.getDescription());
-		areaBuilder.reservable(areaDto.isReservable());
-
-		// Add super area if exists
-		if (areaDto.getSuperArea() != null && !existsArea(areaDto.getSuperArea())) {
-			throw new ResponseStatusException(
-				HttpStatus.BAD_REQUEST,
-				"Cannot create area. Could not find super area"
-			);
-		}
-
-		// Add area features
-		for (AreaFeature areaFeature : areaDto.getAreaFeatures()) {
-			//Check if feature exists in database before adding it to area object.
-			// If it does not exist throw exception
-			areaBuilder.feature(
-				getAreaFeature(areaFeature.getId())
-			);
-		}
-
-		// Finally build area
-		Area area;
-		try {
-			area = areaBuilder.build();
-		} catch (AdminCountException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
+		Area area = buildArea(areaDto);
 		areaRepository.save(area);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
@@ -318,6 +207,124 @@ public class AreaController extends AbstractAuthController {
 		areaRepository.delete(entity.get());
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
+	}
+
+	// ----- Methods for Area Creation -----
+
+	private Area buildArea(AreaCreationDto areaDto) {
+		AreaType areaType = getAreaType(areaDto.getAreaType());
+
+		// Create builder with initial arguments
+		Area.Builder areaBuilder;
+		try {
+			areaBuilder = new Area.Builder(
+				areaDto.getName(),
+				areaDto.getCapacity(),
+				areaType
+			);
+		} catch (InvalidArgumentCheckedException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+
+		// Adds administrators to area builder
+		for (UUID id : areaDto.getAdministrators()) {
+			areaBuilder.administrator(
+				getUser(id)
+			);
+		}
+
+		try {
+			areaBuilder.calendarLink(areaDto.getCalendarLink());
+		} catch (InvalidArgumentCheckedException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+		// These do not need any checks so they're just added
+		areaBuilder.description(areaDto.getDescription());
+		areaBuilder.reservable(areaDto.isReservable());
+
+		// Add super area if exists
+		if (areaDto.getSuperArea() != null) {
+			areaBuilder.superArea(
+				getAreaFromId(areaDto.getSuperArea())
+			);
+		}
+
+		// Add area features
+		for (String areaFeature : areaDto.getAreaFeatures()) {
+			areaBuilder.feature(
+				getAreaFeature(areaFeature)
+			);
+		}
+
+		// Finally build area
+		Area area;
+		try {
+			area = areaBuilder.build();
+		} catch (AdminCountException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+		return area;
+	}
+
+	/**
+	 * Gets an area from the database.
+	 *
+	 * @param id 
+	 * @return
+	 * @throws ResponseStatusException with 
+	 */
+	public Area getAreaFromId(UUID id) {
+		Optional<Area> optional = areaRepository.findById(id);
+		if (!optional.isPresent()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
+		return optional.get();
+	}
+
+	/**
+	 * Returns an area feature based on id.
+	 *
+	 * @param id string id
+	 * @return Area feature from the database
+	 */
+	private AreaFeature getAreaFeature(String id) {
+		Optional<AreaFeature> optionalAreaFeature = areaFeatureRepository.findById(id);
+		if (!optionalAreaFeature.isPresent()) {
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST,
+				"Cannot create area with feature: " + id + " as it does not exist in database"
+			);
+		}
+		return optionalAreaFeature.get();
+	}
+
+	private User getUser(UUID id) {
+		Optional<User> optionalUser = userRepository.findById(id);
+		if (!optionalUser.isPresent()) {
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST,
+				"Could not find user with id: " + id.toString()
+				+ ". Unable to create area with this user as administrator."
+			);
+		}
+		return optionalUser.get();
+	}
+
+	/**
+	 * Returns AreaType based on id.
+	 *
+	 * @param id id of area type
+	 * @return AreaType from database
+	 * @throws ResponseStatusException 400 bad request if a area type cannot be found
+	 */
+	private AreaType getAreaType(String id) {
+		Optional<AreaType> optionalAreaType = areaTypeRepository.findById(id);
+		if (!optionalAreaType.isPresent()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+			"Cannot create area with provided area type, as it does not exist in database"
+			);
+		}
+		return optionalAreaType.get();
 	}
 }
 
