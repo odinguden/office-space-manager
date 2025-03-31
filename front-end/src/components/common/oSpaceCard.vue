@@ -10,7 +10,7 @@ const isFavorite = ref(Math.random() > 0.7)
 	>
 		<v-icon>mdi-desk</v-icon>
 		<div class="card-header">
-			<h1>A123</h1>
+			<h1><router-link to="/room/0">A123</router-link></h1>
 			<v-btn
 				icon
 				flat
