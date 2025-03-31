@@ -47,7 +47,7 @@ import org.springframework.web.server.ResponseStatusException;
  * @see EntityInterface
  */
 public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT>, IdTypeT>
-	extends AbstractAuthController {
+	extends AbstractPermissionManager {
 	CrudRepository<EntityT, IdTypeT> repository;
 
 	/**

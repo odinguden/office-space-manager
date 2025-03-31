@@ -3,14 +3,17 @@ package no.ntnu.idata2900.group3.chairspace.controllers;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
+ * A base for controllers that need to implement permission control.
+ *
+ * <p>
+ * Includes overridable methods for common security cases.
+ * These methods will throw a ResponseStatusException.
+ * This exception is caught by spring and translated into a http response.
+ *
  * @author Sigve Bjørkedal
  * @author Odin Lyngsgård
  */
-public class AbstractAuthController {
-	
-	protected AbstractAuthController() {
-
-	}
+public abstract class AbstractPermissionManager {
 
 	/**
 	 * Checks if the current session user has permission to get a single entity.
