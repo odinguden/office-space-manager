@@ -1,5 +1,26 @@
+<script setup>
+const breadcrumbItems = [
+	{
+		text: "Town hall",
+		icon: "mdi-domain"
+	},
+	{
+		text: "Floor 1",
+		icon: "mdi-stairs"
+	},
+	{
+		text: "A123",
+		icon: "mdi-desk"
+	}
+]
+</script>
+
 <template>
 	<section class="room-page">
+		<o-breadcrumbs
+			:items="breadcrumbItems"
+			class="breadcrumbs"
+		/>
 		<header class="room-header">
 			<v-icon>mdi-desk</v-icon>
 			<h1>A123</h1>
@@ -39,5 +60,9 @@ header.room-header {
 	> :not(:first-child) {
 		grid-column: 2;
 	}
+}
+
+.breadcrumbs {
+	opacity: 0.8;
 }
 </style>
