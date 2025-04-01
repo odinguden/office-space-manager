@@ -10,12 +10,14 @@ const props = defineProps({
 	"day": Date
 })
 
+// Checks whether this day is the current day
 const isToday = computed(() => {
 	const now = new Date()
 
 	return props.day !== undefined && vDate.isSameDay(now, props.day)
 })
 
+// Creates an aria-compliant name for this day
 const dateName = computed(() => {
 	const day = vDate.getDate(props.day)
 	const month = oDate.getMonthName(props.day.getMonth())

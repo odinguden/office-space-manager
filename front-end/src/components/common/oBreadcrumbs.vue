@@ -22,12 +22,8 @@ const props = defineProps({
 </template>
 
 <style scoped lang="scss">
-.breadcrumbs {
-	> span:not(:last-child) {
-		&::after {
-			content: ' > ';
-			opacity: var(--v-medium-emphasis-opacity)
-		}
-	}
+.breadcrumbs > span:not(:last-child)::after {
+	content: ' > ';
+	opacity: var(--v-medium-emphasis-opacity);
 }
 </style>

@@ -10,10 +10,13 @@ const props = defineProps({
 	month: Number
 })
 
+// Gets all the weeks belonging to this month
 const weeks = computed(() => {
 	return oDate.getWeeksOfMonth(props.year, props.month)
 })
 
+// Checks whether the provided day is outside of the current month.
+// Used for styling.
 function isOutOfMonth(day) {
 	return day.getMonth() !== props.month
 }

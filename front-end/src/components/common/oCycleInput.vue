@@ -16,15 +16,22 @@ const model = defineModel({
 })
 
 const props = defineProps({
-	"max": Number,
-	"min": Number,
-	"cycle": Boolean,
-	"ariaName": String
+	"max": Number, // The maximum value of this input
+	"min": Number, // The minimum value of this input
+	"cycle": Boolean, // Whether or not the input should loop
+	"ariaName": { // An aria friendly name used to determine aria labels
+		type: String,
+		default: "value"
+	}
 })
 
 
+// Since model updates a tick late, we need to store
+// a local version in order to ensure proper handling
 const internalValue = ref(model.value)
 
+// This computed property ensures that both the internal
+// and model value are set correctly
 const computedValue = computed({
 	get() {
 		return internalValue.value
@@ -36,19 +43,26 @@ const computedValue = computed({
 	}
 })
 
+// Checks whether the current value exceeds any boundaries
 function checkBoundaries() {
+	// If it's a loopign component, we don't correct anything
 	if (!props.cycle) {
 		if (props.max !== undefined) {
+			// Clamp the value to the max value
 			computedValue.value = Math.min(computedValue.value, props.max)
 		}
 		if (props.min !== undefined) {
+			// Clamp the value to the min value
 			computedValue.value = Math.max(computedValue.value, props.min)
 		}
 	}
 }
 
+// Checks whether to loop the current value if this is a loopable
+// component.
 function checkCycle() {
 	if (props.cycle && props.max !== undefined && props.min !== undefined) {
+		// Emit events as necessary and loop values
 		if (computedValue.value > props.max) {
 			emit("on-cycle-increase")
 			computedValue.value = props.min
@@ -59,28 +73,33 @@ function checkCycle() {
 	}
 }
 
-function increase() {
-	emit("on-increase")
-	computedValue.value++;
+// Changes the value and emits relevant events
+function change(amount) {
+	if (amount > 0) {
+		emit("on-increase")
+	} else if (amount < 0) {
+		emit("on-decrease")
+	}
+
+	computedValue.value += amount
 
 	checkBoundaries()
 	checkCycle()
 }
 
-function decrease() {
-	emit("on-decrease")
-	computedValue.value--;
-
-	checkBoundaries()
-	checkCycle()
-}
-
-const maxDisabled = computed(() => {
-	return !props.cycle && props.max !== undefined && computedValue.value >= props.max
+// Checks whether the right arrow should be disabled
+const addDisabled = computed(() => {
+	return !props.cycle // Never disable when the component is cycleable
+		&& props.max !== undefined // Never disable if no max exists
+		&& computedValue.value >= props.max // Disable if the current value is at max
 })
 
-const minDisabled = computed(() => {
-	return !props.cycle && props.min !== undefined && computedValue.value <= props.min
+// Checks whether the left arrow should be disabled
+const subDisabled = computed(() => {
+	// Almost identical logic to above
+	return !props.cycle
+		&& props.min !== undefined
+		&& computedValue.value <= props.min
 })
 
 </script>
@@ -97,8 +116,8 @@ const minDisabled = computed(() => {
 			tile
 			flat
 			v-bind="$attrs"
-			:disabled="minDisabled"
-			@click="decrease"
+			:disabled="subDisabled"
+			@click="change(-1)"
 		/>
 		<v-divider vertical />
 		<v-spacer />
@@ -115,8 +134,8 @@ const minDisabled = computed(() => {
 			tile
 			flat
 			v-bind="$attrs"
-			:disabled="maxDisabled"
-			@click="increase"
+			:disabled="addDisabled"
+			@click="change(1)"
 		/>
 	</div>
 </template>
