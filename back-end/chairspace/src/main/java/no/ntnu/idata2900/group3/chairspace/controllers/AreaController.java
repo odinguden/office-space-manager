@@ -87,14 +87,14 @@ public class AreaController extends AbstractAuthController {
 	 * @return area
 	 */
 	@GetMapping("/{id}")
-	public ResponseEntity<Area> getArea(@PathVariable UUID id) {
+	public ResponseEntity<AreaDto> getArea(@PathVariable UUID id) {
 		hasPermissionToGet();
 		Optional<Area> optionalArea = areaRepository.findById(id);
 		if (!optionalArea.isPresent()) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
-
-		return new ResponseEntity<>(optionalArea.get(), HttpStatus.OK);
+		AreaDto areaDto = new AreaDto(optionalArea.get());
+		return new ResponseEntity<>(areaDto, HttpStatus.OK);
 	}
 
 	/**
@@ -105,13 +105,15 @@ public class AreaController extends AbstractAuthController {
 	 * @return all areas in the database in list
 	 */
 	@GetMapping("")
-	public ResponseEntity<List<Area>> getArea() {
+	public ResponseEntity<List<AreaDto>> getArea() {
 		hasPermissionToGetAll();
 		Iterator<Area> it = areaRepository.findAll().iterator();
-		List<Area> areas = new ArrayList<>();
+		List<AreaDto> areas = new ArrayList<>();
 
 		while (it.hasNext()) {
-			areas.add(it.next());
+			areas.add(
+				new AreaDto(it.next())
+			);
 		}
 		return new ResponseEntity<>(areas, HttpStatus.OK);
 	}
@@ -157,7 +159,6 @@ public class AreaController extends AbstractAuthController {
 		if (!optionalArea.isPresent()) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
-		areaRepository.save(areaDto.buildArea());
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
@@ -269,9 +270,9 @@ public class AreaController extends AbstractAuthController {
 	/**
 	 * Gets an area from the database.
 	 *
-	 * @param id 
-	 * @return
-	 * @throws ResponseStatusException with 
+	 * @param id the id of the area to get
+	 * @return an area from the database
+	 * @throws ResponseStatusException if the area does not exist
 	 */
 	public Area getAreaFromId(UUID id) {
 		Optional<Area> optional = areaRepository.findById(id);
