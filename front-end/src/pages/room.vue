@@ -1,4 +1,6 @@
 <script setup>
+import BookingModel from '@/components/forms/bookingModel';
+
 const breadcrumbItems = [
 	{
 		text: "Town hall",
@@ -13,6 +15,12 @@ const breadcrumbItems = [
 		icon: "mdi-desk"
 	}
 ]
+
+const showModal = ref(false)
+
+function getNewBookingModel() {
+	return new BookingModel("A123")
+}
 </script>
 
 <template>
@@ -32,7 +40,18 @@ const breadcrumbItems = [
 			text="Book this room"
 			tile
 			variant="outlined"
+			@click="showModal = true"
 		/>
+		<v-dialog max-width="512px" v-model="showModal">
+			<v-card>
+				<v-card-title>
+					Booking
+				</v-card-title>
+				<v-card-text>
+					<o-booking :booking-model="getNewBookingModel()" />
+				</v-card-text>
+			</v-card>
+		</v-dialog>
 		<o-calendar />
 	</section>
 </template>
