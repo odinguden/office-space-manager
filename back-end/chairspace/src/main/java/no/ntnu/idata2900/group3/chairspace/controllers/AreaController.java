@@ -46,7 +46,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @CrossOrigin(origins = "${frontend.url}")
 @RequestMapping("/area")
-public class AreaController extends AbstractAuthController {
+public class AreaController extends AbstractPermissionManager {
 
 	@Autowired
 	private AreaRepository areaRepository;

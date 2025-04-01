@@ -19,7 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class AreaDto {
 	private UUID id;
 	private List<UUID> administrators;
-	private List<SimpleSuperAreaDTO> superAreas;
+	private List<SimpleSuperAreaDto> superAreas;
 	private AreaType areaType;
 	private List<AreaFeature> areaFeatures;
 	private int capacity;
@@ -71,7 +71,7 @@ public class AreaDto {
 
 		while (nextSuper != null) {
 			superAreas.add(
-				new SimpleSuperAreaDTO(nextSuper)
+				new SimpleSuperAreaDto(nextSuper)
 			);
 			nextSuper = nextSuper.getSuperArea();
 		}
@@ -102,7 +102,7 @@ public class AreaDto {
 	 *
 	 * @return List containing SimpleSuperAreaDTO's
 	 */
-	public List<SimpleSuperAreaDTO> getSuperAreas() {
+	public List<SimpleSuperAreaDto> getSuperAreas() {
 		return superAreas;
 	}
 
