@@ -9,8 +9,10 @@
 		<v-btn
 			color="primary"
 			text="Book this room"
+			tile
+			variant="outlined"
 		/>
-
+		<o-calendar />
 	</section>
 </template>
 
