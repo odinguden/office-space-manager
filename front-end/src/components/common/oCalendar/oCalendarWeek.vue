@@ -7,10 +7,11 @@ const props = defineProps({
 
 <template>
 	<v-sheet class="week">
-		<div class="week-number">
-			{{ weekNumber }}
-		</div>
-		<v-divider vertical />
+		<slot name="week-number" :number="weekNumber">
+			<div class="week-number">
+				{{ weekNumber }}
+			</div>
+		</slot>
 		<div v-for="day in props.days">
 			<slot :day="day">
 				<o-calendar-day :day="day"/>
@@ -22,11 +23,13 @@ const props = defineProps({
 <style scoped lang="scss">
 .week {
 	display: grid;
-	grid-template-columns: 1fr auto repeat(7, 1fr);
-	gap: 8px;
+	grid-template-columns: repeat(8, 1fr);
 
 	.week-number {
-		color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity))
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity))
 	}
 }
 </style>

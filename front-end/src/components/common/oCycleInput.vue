@@ -18,7 +18,8 @@ const model = defineModel({
 const props = defineProps({
 	"max": Number,
 	"min": Number,
-	"cycle": Boolean
+	"cycle": Boolean,
+	"ariaName": String
 })
 
 
@@ -92,6 +93,7 @@ const minDisabled = computed(() => {
 			color="primary"
 			variant="text"
 			density="comfortable"
+			:aria-label="'Previous ' + props.ariaName"
 			tile
 			flat
 			v-bind="$attrs"
@@ -109,6 +111,7 @@ const minDisabled = computed(() => {
 			color="primary"
 			variant="text"
 			density="comfortable"
+			:aria-label="'Next ' + props.ariaName"
 			tile
 			flat
 			v-bind="$attrs"
@@ -123,8 +126,10 @@ const minDisabled = computed(() => {
 	display: flex;
 	align-items: center;
 
+	font-weight: 500;
+
 	.fixed-width-btn {
-		width: 36px;
+		width: 44px;
 	}
 }
 </style>

@@ -9,17 +9,18 @@ const selectedMonth = ref(now.getMonth())
 </script>
 
 <template>
-	<v-sheet>
+	<v-sheet class="calendar">
 		<header>
 			<o-cycle-input
 				v-model="selectedYear"
+				aria-name="year"
 			>
 				{{ selectedYear }}
 			</o-cycle-input>
-			<v-divider />
 			<o-cycle-input
-				density="compact"
 				v-model="selectedMonth"
+				aria-name="month"
+				density="compact"
 				:min="0"
 				:max="11"
 				cycle
@@ -30,6 +31,16 @@ const selectedMonth = ref(now.getMonth())
 			</o-cycle-input>
 		</header>
 		<v-divider />
-		<o-calendar-month :year="selectedYear" :month="selectedMonth"/>
+		<o-calendar-month
+			class="calendar-content"
+			:year="selectedYear"
+			:month="selectedMonth"
+		/>
 	</v-sheet>
 </template>
+
+<style scoped lang="scss">
+.calendar {
+	border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+</style>

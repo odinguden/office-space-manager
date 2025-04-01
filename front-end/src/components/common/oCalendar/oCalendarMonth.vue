@@ -1,7 +1,9 @@
 <script setup>
 import { useODate } from '@/plugins/oDate'
+import { useDate } from 'vuetify'
 
 const oDate = useODate()
+const vDate = useDate()
 
 const props = defineProps({
 	year: Number,
@@ -11,16 +13,19 @@ const props = defineProps({
 const weeks = computed(() => {
 	return oDate.getWeeksOfMonth(props.year, props.month)
 })
+
+function isOutOfMonth(day) {
+	return day.getMonth() !== props.month
+}
 </script>
 
 <template>
 	<v-sheet>
 		<v-sheet class="weekdays">
 			<div />
-			<v-divider vertical />
-			<v-sheet v-for="day in oDate.weekdays">
+			<div v-for="day in oDate.weekdays">
 				{{ day.substring(0,2) }}
-			</v-sheet>
+			</div>
 		</v-sheet>
 		<o-calendar-week
 			v-for="week in weeks"
@@ -30,7 +35,7 @@ const weeks = computed(() => {
 			<template v-slot="{ day }">
 				<o-calendar-day
 					:day="day"
-					:class="{ 'out-of-month': day.getMonth() !== props.month }"
+					:disabled="isOutOfMonth(day)"
 				/>
 			</template>
 		</o-calendar-week>
@@ -40,11 +45,27 @@ const weeks = computed(() => {
 <style scoped lang="scss">
 .weekdays {
 	display: grid;
-	grid-template-columns: 1fr auto repeat(7, 1fr);
-	gap: 8px;
+	grid-template-columns: repeat(8, 1fr);
+
+	align-items: center;
+	justify-items: center;
+
+	border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+
+	:first-child {
+		width: 100%;
+		height: 100%;
+		border-right: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+	}
+}
+
+.calendar-item {
+	--day-opacity: 1;
+	vertical-align: middle;
+	color: rgba(var(--v-theme-on-surface), var(--day-opacity));
 }
 
 .out-of-month {
-	color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity))
+	--day-opacity: 0.4;
 }
 </style>
