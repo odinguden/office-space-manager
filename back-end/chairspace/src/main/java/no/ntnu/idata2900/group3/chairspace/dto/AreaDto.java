@@ -1,5 +1,6 @@
 package no.ntnu.idata2900.group3.chairspace.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -9,11 +10,11 @@ import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaType;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
- * A data transfer object used for creation and retrieval of area objects.
- * TODO: Make method that builds area from this dto
+ * A data transfer object used for retrieval of area objects.
  */
 public class AreaDto {
 	private UUID id;
@@ -27,9 +28,16 @@ public class AreaDto {
 	private String description;
 	private boolean reservable;
 
+	/**
+	 * Creates a single instance of an areaDto based on an exiting areaDTO.
+	 *
+	 * @param area the area to use as base
+	 */
 	public AreaDto(Area area) {
 		if (area == null) {
-			//TODO: DO somthing
+			throw new ResponseStatusException(
+				HttpStatus.NOT_FOUND
+			);
 		}
 
 		this.id = area.getId();
@@ -164,7 +172,12 @@ public class AreaDto {
 		return reservable;
 	}
 
-	private class SimpleSuperAreaDTO {
+	/**
+	 * A simple DTO to be used for the super areas contained within this dto.
+	 * This is used to avoid including irrelevant data about
+	 * super areas when requesting a single area.
+	 */
+	private class SimpleSuperAreaDto {
 		@JsonProperty
 		private UUID id;
 		@JsonProperty
@@ -172,7 +185,7 @@ public class AreaDto {
 		@JsonProperty
 		private String areaType;
 
-		public SimpleSuperAreaDTO(Area superArea) {
+		public SimpleSuperAreaDto(Area superArea) {
 			this.id = superArea.getId();
 			this.name = superArea.getName();
 			this.areaType = superArea.getAreaType().getId();
