@@ -68,9 +68,30 @@ public class AreaController extends AbstractPermissionManager {
 	 * @throws ResponseStatusException 409 conflict if the ID already exists in the repository
 	 * @throws ResponseStatusException 400 bad request if data in the DTO is not valid for creation
 	 *     of an area.
-
 	 */
 	@PostMapping()
+	@Operation(
+		summary = "Creates a new area",
+		description = "Attempts to create a new entity using data from the AreaCreationDto"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "201",
+			description = "Successfully created a new area"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users are not permitted to create areas"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to create areas"
+			),
+		@ApiResponse(
+			responseCode = "400",
+			description = "Failed to create area with the information contained within the area DTO"
+			)
+	})
 	public ResponseEntity<String> postEntity(@RequestBody AreaCreationDto areaDto) {
 		super.hasPermissionToPost();
 		Area area = buildArea(areaDto);
@@ -80,13 +101,33 @@ public class AreaController extends AbstractPermissionManager {
 
 	/**
 	 * Returns area with the given id.
-	 * TODO: mabye create seperate dto for returning area to avoid returning admin uuid's
-	 * TODO: Swagger doc
 	 *
 	 * @param id uuid of area
 	 * @return area
 	 */
 	@GetMapping("/{id}")
+	@Operation(
+		summary = "Gets an area",
+		description = "Attempts to find an area with the given ID"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Found an area with the given name"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users do not have access to read these areas"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to read these areas"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "No area with the given ID was found"
+			)
+	})
 	public ResponseEntity<AreaDto> getArea(@PathVariable UUID id) {
 		hasPermissionToGet();
 		Optional<Area> optionalArea = areaRepository.findById(id);
@@ -105,6 +146,24 @@ public class AreaController extends AbstractPermissionManager {
 	 * @return all areas in the database in list
 	 */
 	@GetMapping("")
+	@Operation(
+		summary = "Gets all Areas",
+		description = "Gets all areas in the repository"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Found all areas"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users do not have access to read these areas"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to read these areas"
+			)
+	})
 	public ResponseEntity<List<AreaDto>> getArea() {
 		hasPermissionToGetAll();
 		Iterator<Area> it = areaRepository.findAll().iterator();
@@ -148,8 +207,8 @@ public class AreaController extends AbstractPermissionManager {
 			description = "User has insufficient permissions to update area"
 			),
 		@ApiResponse(
-			responseCode = "404",
-			description = "Failed to update the area as it doesn't exist"
+			responseCode = "400",
+			description = "Bad request if not able to update area with the information contained in the dto"
 			)
 	})
 	public ResponseEntity<String> putArea(@RequestBody AreaDto areaDto) {
@@ -175,7 +234,7 @@ public class AreaController extends AbstractPermissionManager {
 	 */
 	@DeleteMapping("/{id}")
 	@Operation(
-		summary = "Deletes aa area",
+		summary = "Deletes an area",
 		description = "Attempts to delete a area with the given ID"
 	)
 	@ApiResponses(value = {
@@ -193,7 +252,7 @@ public class AreaController extends AbstractPermissionManager {
 			),
 		@ApiResponse(
 			responseCode = "404",
-			description = "Failed to area the entity as it doesn't exist"
+			description = "Failed to delete the area as it doesn't exist"
 			)
 	})
 	public ResponseEntity<String> deleteArea(@PathVariable UUID id) {
