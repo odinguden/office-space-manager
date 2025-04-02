@@ -29,6 +29,11 @@ public class AreaDto {
 	private boolean reservable;
 
 	/**
+	 * No args constructor
+	 */
+	public AreaDto(){}
+
+	/**
 	 * Creates a single instance of an areaDto based on an exiting areaDTO.
 	 *
 	 * @param area the area to use as base
@@ -172,23 +177,42 @@ public class AreaDto {
 		return reservable;
 	}
 
+	public UUID getIdOfSuperArea() {
+		UUID id = null;
+		if (!superAreas.isEmpty()) {
+			id = superAreas.get(0).id;
+		}
+		return id;
+	}
+
 	/**
 	 * A simple DTO to be used for the super areas contained within this dto.
 	 * This is used to avoid including irrelevant data about
 	 * super areas when requesting a single area.
 	 */
-	private class SimpleSuperAreaDto {
-		@JsonProperty
+	static public class SimpleSuperAreaDto {
 		private UUID id;
-		@JsonProperty
 		private String name;
-		@JsonProperty
 		private String areaType;
 
 		public SimpleSuperAreaDto(Area superArea) {
 			this.id = superArea.getId();
 			this.name = superArea.getName();
 			this.areaType = superArea.getAreaType().getId();
+		}
+
+		public SimpleSuperAreaDto() {}
+
+		public UUID getId() {
+			return id;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public String getAreaType() {
+			return areaType;
 		}
 	}
 }

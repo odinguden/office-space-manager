@@ -101,6 +101,7 @@ public class Area implements EntityInterface<UUID> {
 		this.features = builder.features;
 		this.reservations = new HashSet<>();
 		this.reservable = builder.reservable;
+		this.id = builder.id;
 	}
 
 	/* ---- Getters ---- */
@@ -516,6 +517,7 @@ public class Area implements EntityInterface<UUID> {
 		private AreaType areaType;
 		private Set<AreaFeature> features;
 		private boolean reservable;
+		private UUID id;
 		// Damn this is a lot of fields.
 		// Good im using the builder pattern then 😎
 
@@ -716,6 +718,18 @@ public class Area implements EntityInterface<UUID> {
 				throw new AdminCountException("Cannot create area without administrator");
 			}
 			return new Area(this);
+		}
+
+		/**
+		 * Sets the id of the area that is to be built.
+		 * This parameter is nullable
+		 *
+		 * @param id id as UUID
+		 * @return builder object
+		 */
+		public Builder id(UUID id) {
+			this.id = id;
+			return this;
 		}
 
 		/**

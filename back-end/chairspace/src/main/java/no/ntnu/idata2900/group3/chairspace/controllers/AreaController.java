@@ -68,6 +68,9 @@ public class AreaController extends AbstractPermissionManager {
 	 * @throws ResponseStatusException 409 conflict if the ID already exists in the repository
 	 * @throws ResponseStatusException 400 bad request if data in the DTO is not valid for creation
 	 *     of an area.
+	 * @throws ResponseStatusException code 404 if the super area included in the dto does not exist
+	 * @throws ResponseStatusException code 404 if the area feature included in the dto does not exist
+	 * @throws ResponseStatusException code 404 if the area included in the dto type does not exist
 	 */
 	@PostMapping()
 	@Operation(
@@ -90,6 +93,18 @@ public class AreaController extends AbstractPermissionManager {
 		@ApiResponse(
 			responseCode = "400",
 			description = "Failed to create area with the information contained within the area DTO"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Could not find super area from Id in area creation dto"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Could not find areaType from Id in area creation dto"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Could not find areaFeature from Id in area creation dto"
 			)
 	})
 	public ResponseEntity<String> postEntity(@RequestBody AreaCreationDto areaDto) {
@@ -104,6 +119,9 @@ public class AreaController extends AbstractPermissionManager {
 	 *
 	 * @param id uuid of area
 	 * @return area
+	 * @throws ResponseStatus exception code 401 unauthorized if the request lacks authorization
+	 * @throws ResponseStatus exception code 403 forbidden if the authorization included is not sufficient to get area
+	 * @throws ResponseStatus exception code 404 if no area can be found with this id
 	 */
 	@GetMapping("/{id}")
 	@Operation(
@@ -139,11 +157,11 @@ public class AreaController extends AbstractPermissionManager {
 	}
 
 	/**
-	 * Gets all areas in database.
-	 * TODO: Make areaData to return areas without administrators
-	 * TODO: Swagger doc
+	 * Returns all areas from the database as area DTO's
 	 *
 	 * @return all areas in the database in list
+	 * @throws ResponseStatusException code 401 unauthorized if the request lacks authorization
+	 * @throws ResponseStatusException code 403 forbidden if the authorization included is not sufficient to get all areas
 	 */
 	@GetMapping("")
 	@Operation(
@@ -213,11 +231,9 @@ public class AreaController extends AbstractPermissionManager {
 	})
 	public ResponseEntity<String> putArea(@RequestBody AreaDto areaDto) {
 		super.hasPermissionToPut();
-		UUID id = areaDto.getId();
-		Optional<Area> optionalArea = areaRepository.findById(id);
-		if (!optionalArea.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-		}
+		getAreaFromId(areaDto.getId()); // Throws 404 if area cannot be found
+		Area newArea = buildArea(areaDto); // Builds area from regular dto
+		areaRepository.save(newArea); // Saves area :)
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
@@ -271,6 +287,82 @@ public class AreaController extends AbstractPermissionManager {
 
 	// ----- Methods for Area Creation -----
 
+	/**
+	 * Builds area from regular data DTO
+	 *
+	 * @param areaDto the Dto used to build the area
+	 * @throws ResponseStatusException code 404 if the area does not exist
+	 * @throws ResponseStatusException code 404 if the area feature does not exist
+	 * @throws ResponseStatusException code 404 if the area type does not exist
+	 * @return new Area Object
+	 */
+	private Area buildArea(AreaDto areaDto) {
+		AreaType areaType = getAreaType(areaDto.getAreaType().getId());
+
+		// Create builder with initial arguments
+		Area.Builder areaBuilder;
+		try {
+			areaBuilder = new Area.Builder(
+				areaDto.getName(),
+				areaDto.getCapacity(),
+				areaType
+			);
+		} catch (InvalidArgumentCheckedException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+
+		areaBuilder.id(areaDto.getId());
+
+		// Adds administrators to area builder
+		for (UUID id : areaDto.getAdministrators()) {
+			areaBuilder.administrator(
+				getUser(id)
+			);
+		}
+
+		try {
+			areaBuilder.calendarLink(areaDto.getCalendarLink());
+		} catch (InvalidArgumentCheckedException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+		// These do not need any checks so they're just added
+		areaBuilder.description(areaDto.getDescription());
+		areaBuilder.reservable(areaDto.isReservable());
+
+		// Add super area if exists
+		if (areaDto.getIdOfSuperArea() != null) {
+			areaBuilder.superArea(
+				getAreaFromId(areaDto.getIdOfSuperArea())
+			);
+		}
+
+		// Add area features
+		for (AreaFeature areaFeature : areaDto.getAreaFeatures()) {
+			String areaFeatureId = areaFeature.getId();
+			areaBuilder.feature(
+				getAreaFeature(areaFeatureId)
+			);
+		}
+
+		// Finally build area
+		Area area;
+		try {
+			area = areaBuilder.build();
+		} catch (AdminCountException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+		return area;
+	}
+
+	/**
+	 * Builds an area object from an area creation DTO
+	 *
+	 * @param areaDto The area DTO to be used as base to build area object
+	 * @return area built from dto
+	 * @throws ResponseStatusException code 404 if the area does not exist
+	 * @throws ResponseStatusException code 404 if the area feature does not exist
+	 * @throws ResponseStatusException code 404 if the area type does not exist
+	 */
 	private Area buildArea(AreaCreationDto areaDto) {
 		AreaType areaType = getAreaType(areaDto.getAreaType());
 
@@ -331,7 +423,7 @@ public class AreaController extends AbstractPermissionManager {
 	 *
 	 * @param id the id of the area to get
 	 * @return an area from the database
-	 * @throws ResponseStatusException if the area does not exist
+	 * @throws ResponseStatusException code 404 if the area does not exist
 	 */
 	public Area getAreaFromId(UUID id) {
 		Optional<Area> optional = areaRepository.findById(id);
@@ -346,12 +438,13 @@ public class AreaController extends AbstractPermissionManager {
 	 *
 	 * @param id string id
 	 * @return Area feature from the database
+	 * @throws ResponseStatusException code 404 if the area feature does not exist in the database
 	 */
 	private AreaFeature getAreaFeature(String id) {
 		Optional<AreaFeature> optionalAreaFeature = areaFeatureRepository.findById(id);
 		if (!optionalAreaFeature.isPresent()) {
 			throw new ResponseStatusException(
-				HttpStatus.BAD_REQUEST,
+				HttpStatus.NOT_FOUND,
 				"Cannot create area with feature: " + id + " as it does not exist in database"
 			);
 		}
@@ -375,12 +468,12 @@ public class AreaController extends AbstractPermissionManager {
 	 *
 	 * @param id id of area type
 	 * @return AreaType from database
-	 * @throws ResponseStatusException 400 bad request if a area type cannot be found
+	 * @throws ResponseStatusException code 404 if the area type does not exist in the database
 	 */
 	private AreaType getAreaType(String id) {
 		Optional<AreaType> optionalAreaType = areaTypeRepository.findById(id);
 		if (!optionalAreaType.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
 			"Cannot create area with provided area type, as it does not exist in database"
 			);
 		}
