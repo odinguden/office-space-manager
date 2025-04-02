@@ -1,4 +1,4 @@
-package no.ntnu.idata2900.group3.chairspace.dto;
+package no.ntnu.idata2900.group3.chairspace.dto.area;
 
 import java.util.List;
 import java.util.UUID;
