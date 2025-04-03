@@ -43,7 +43,7 @@ const isFavorite = ref(Math.random() > 0.7)
 .space-card {
 	display: grid;
 	grid-template-columns: auto 1fr;
-	gap: 0 8px;
+	gap: 8px 16px;
 	align-items: center;
 
 	.card-header {
