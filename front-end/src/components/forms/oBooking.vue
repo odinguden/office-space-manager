@@ -1,31 +1,6 @@
 <script setup>
 import { useDisplay } from 'vuetify';
-import BookingModel from './bookingModel';
-
 const { mobile } = useDisplay()
-
-const props = defineProps({
-	bookingModel: {
-		type: BookingModel,
-		default: new BookingModel()
-	}
-})
-
-function bookingModelComputed(property) {
-	return computed({
-		get() {
-			return props.bookingModel.values[property].value
-		},
-		set(value) {
-			props.bookingModel.values[property].value = value
-		}
-	})
-}
-
-const room = bookingModelComputed("room")
-const day = bookingModelComputed("day")
-const start = bookingModelComputed("start")
-const end = bookingModelComputed("end")
 </script>
 
 <template>
@@ -35,35 +10,25 @@ const end = bookingModelComputed("end")
 				global: {
 					variant: 'outlined',
 					hideDetails: 'auto'
-				},
-				VTextField: {
 				}
 			}"
 		>
 			<v-autocomplete
 				label="Room"
-				v-model="room"
-				:readonly="props.bookingModel.values.room.readonly"
 			/>
 			<v-divider class="my-3" />
 			<v-text-field
 				label="Day"
 				type="date"
-				v-model="day"
-				:readonly="props.bookingModel.values.day.readonly"
 			/>
 			<div class="h-input-group">
 				<v-text-field
 					label="From"
 					type="time"
-					v-model="start"
-					:readonly="props.bookingModel.values.start.readonly"
 				/>
 				<v-text-field
 					label="To"
 					type="time"
-					v-model="end"
-					:readonly="props.bookingModel.values.end.readonly"
 				/>
 			</div>
 			<o-timeline style="height: 32px" />
@@ -71,6 +36,7 @@ const end = bookingModelComputed("end")
 			<div class="h-input-group reverse-on-mobile">
 				<v-btn
 					text="cancel"
+					@click="$emit('cancel')"
 				/>
 				<v-btn
 					text="place booking"
