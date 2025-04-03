@@ -13,6 +13,8 @@ const breadcrumbItems = [
 		icon: "mdi-desk"
 	}
 ]
+
+const showModal = ref(false)
 </script>
 
 <template>
@@ -32,7 +34,21 @@ const breadcrumbItems = [
 			text="Book this room"
 			tile
 			variant="outlined"
+			@click="showModal = true"
 		/>
+		<v-dialog
+			v-model="showModal"
+			max-width="512px"
+		>
+			<v-card>
+				<v-card-title>
+					Booking
+				</v-card-title>
+				<v-card-text>
+					<o-booking @cancel="showModal = false"/>
+				</v-card-text>
+			</v-card>
+		</v-dialog>
 		<o-calendar />
 	</section>
 </template>
