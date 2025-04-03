@@ -10,6 +10,7 @@ import { setupLayouts } from 'virtual:generated-layouts'
 
 import Index from '@/pages/index.vue'
 import Room from '@/pages/room.vue'
+import Bookings from '@/pages/bookings.vue'
 
 const routes = [
 	{
@@ -21,6 +22,11 @@ const routes = [
 		path: "/room/:id",
 		name: "room",
 		component: Room
+	},
+	{
+		path: "/bookings",
+		name: "bookings",
+		component: Bookings
 	}
 ]
 

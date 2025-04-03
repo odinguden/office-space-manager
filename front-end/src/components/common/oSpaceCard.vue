@@ -33,6 +33,9 @@ const isFavorite = ref(Math.random() > 0.7)
 		<div class="card-timeline">
 			<o-timeline/>
 		</div>
+		<div class="actions-container">
+			<slot name="actions" />
+		</div>
 	</o-flat-card>
 </template>
 
@@ -40,7 +43,7 @@ const isFavorite = ref(Math.random() > 0.7)
 .space-card {
 	display: grid;
 	grid-template-columns: auto 1fr;
-	gap: 16px;
+	gap: 8px 16px;
 	align-items: center;
 
 	.card-header {
@@ -61,6 +64,10 @@ const isFavorite = ref(Math.random() > 0.7)
 	.card-timeline {
 		grid-column: 1 / span 2;
 		height: 24px;
+	}
+
+	.actions-container {
+		grid-column: 1 / span 2;
 	}
 }
 </style>

@@ -18,6 +18,7 @@ const props = defineProps({
 	--max-width: 328px;
 	display: grid;
 	gap: 16px 24px;
-	grid-template-columns: repeat(auto-fill, minmax(var(--max-width), 1fr))
+	grid-template-columns: repeat(auto-fill, minmax(var(--max-width), 1fr));
+	align-content: start;
 }
 </style>
