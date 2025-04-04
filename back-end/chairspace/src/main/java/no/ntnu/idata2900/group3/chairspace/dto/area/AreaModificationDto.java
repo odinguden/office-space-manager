@@ -1,9 +1,12 @@
 package no.ntnu.idata2900.group3.chairspace.dto.area;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
+/**
+ * A data transfer object used for modification of area objects.
+ * Contains all the fields that can be modified non-explicitly.
+ */
 public class AreaModificationDto {
 	@JsonProperty
 	private UUID id;
@@ -90,5 +93,4 @@ public class AreaModificationDto {
 	public String getAreaType() {
 		return areaType;
 	}
-	
 }
