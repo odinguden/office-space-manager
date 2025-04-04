@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.dto.area.AreaCreationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.area.AreaDto;
+import no.ntnu.idata2900.group3.chairspace.dto.area.AreaModificationDto;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaType;
@@ -157,11 +158,12 @@ public class AreaController extends AbstractPermissionManager {
 	}
 
 	/**
-	 * Returns all areas from the database as area DTO's
+	 * Returns all areas from the database as area DTO's.
 	 *
 	 * @return all areas in the database in list
 	 * @throws ResponseStatusException code 401 unauthorized if the request lacks authorization
-	 * @throws ResponseStatusException code 403 forbidden if the authorization included is not sufficient to get all areas
+	 * @throws ResponseStatusException code 403 forbidden if the authorization
+	 *     included is not sufficient to get all areas
 	 */
 	@GetMapping("")
 	@Operation(
@@ -206,7 +208,7 @@ public class AreaController extends AbstractPermissionManager {
 	 * @throws ResponseStatusException 404 not found upon attempting to update an area that does
 	 *      not exist
 	 */
-	@PutMapping("")
+	@PutMapping()
 	@Operation(
 		summary = "Updates an area",
 		description = "Attempts to update an area"
@@ -229,11 +231,31 @@ public class AreaController extends AbstractPermissionManager {
 			description = "Bad request if not able to update area with the information contained in the dto"
 			)
 	})
-	public ResponseEntity<String> putArea(@RequestBody AreaDto areaDto) {
+	public ResponseEntity<String> putArea(@RequestBody AreaModificationDto areaDto) {
 		super.hasPermissionToPut();
-		getAreaFromId(areaDto.getId()); // Throws 404 if area cannot be found
-		Area newArea = buildArea(areaDto); // Builds area from regular dto
-		areaRepository.save(newArea); // Saves area :)
+		// Throws 404 if area cannot be found
+		Area area = getAreaFromId(areaDto.getId());
+		try {
+			area.updateName(areaDto.getName());
+		} catch (InvalidArgumentCheckedException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+		area.updateDescription(areaDto.getDescription());
+		try {
+			area.setReservable(areaDto.isReservable());
+		} catch (InvalidArgumentCheckedException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+		try {
+			area.updateCapacity(areaDto.getCapacity());
+		} catch (InvalidArgumentCheckedException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+		// Throws 404 if area type cannot be found
+		AreaType areaType = getAreaType(areaDto.getAreaType());
+		area.updateAreaType(areaType);
+		area.updateCalendarLink(areaDto.getCalendarLink());
+		areaRepository.save(area);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
@@ -288,13 +310,13 @@ public class AreaController extends AbstractPermissionManager {
 	// ----- Methods for Area Creation -----
 
 	/**
-	 * Builds area from regular data DTO
+	 * Builds area from regular data DTO.
 	 *
 	 * @param areaDto the Dto used to build the area
+	 * @return new Area Object
 	 * @throws ResponseStatusException code 404 if the area does not exist
 	 * @throws ResponseStatusException code 404 if the area feature does not exist
 	 * @throws ResponseStatusException code 404 if the area type does not exist
-	 * @return new Area Object
 	 */
 	private Area buildArea(AreaDto areaDto) {
 		AreaType areaType = getAreaType(areaDto.getAreaType().getId());
@@ -355,7 +377,7 @@ public class AreaController extends AbstractPermissionManager {
 	}
 
 	/**
-	 * Builds an area object from an area creation DTO
+	 * Builds an area object from an area creation DTO.
 	 *
 	 * @param areaDto The area DTO to be used as base to build area object
 	 * @return area built from dto
@@ -455,7 +477,7 @@ public class AreaController extends AbstractPermissionManager {
 		Optional<User> optionalUser = userRepository.findById(id);
 		if (!optionalUser.isPresent()) {
 			throw new ResponseStatusException(
-				HttpStatus.BAD_REQUEST,
+				HttpStatus.NOT_FOUND,
 				"Could not find user with id: " + id.toString()
 				+ ". Unable to create area with this user as administrator."
 			);
@@ -478,6 +500,53 @@ public class AreaController extends AbstractPermissionManager {
 			);
 		}
 		return optionalAreaType.get();
+	}
+
+	/**
+	 * Adds an area feature to an area.
+	 *
+	 * @param areaId id of the area to add the feature to
+	 * @param areaFeatureId id of the area feature to add to the area
+	 * @return response entity with status 204 no content
+	 * @throws ResponseStatusException code 401 unauthorized if the request lacks authorization
+	 * @throws ResponseStatusException code 403 forbidden if the authorization included with the
+	 *      request has insufficient permissions to update entities.
+	 * @throws ResponseStatusException code 404 not found upon attempting to update an area that
+	 *      does not exist
+	 * @throws ResponseStatusException code 404 not found upon attempting to add an areaFeature that
+	 *      does not exist
+	 */
+	@PostMapping("/addAreaFeature/{areaId}/{areaFeatureId}")
+	@Operation(
+		summary = "Adds an area feature to an area",
+		description = "Attempts to add an area feature to an area"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "204",
+			description = "Successfully added area feature to area"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users are not permitted to add area features to areas"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to add area features to areas"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Failed to add area feature to area as it doesn't exist"
+			)
+	})
+	public ResponseEntity<String> addAreaFeatureToArea(@PathVariable UUID areaId,
+		@PathVariable String areaFeatureId) {
+		super.hasPermissionToPut();
+		Area area = getAreaFromId(areaId);
+		AreaFeature areaFeature = getAreaFeature(areaFeatureId);
+		area.addAreaFeature(areaFeature);
+		areaRepository.save(area);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 }
 
