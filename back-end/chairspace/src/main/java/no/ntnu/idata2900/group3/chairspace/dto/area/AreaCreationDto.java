@@ -19,6 +19,10 @@ public class AreaCreationDto {
 	private String description;
 	private boolean reservable;
 
+	public AreaCreationDto() {
+		// Empty constructor for serialization/deserialization
+	}
+
 	/**
 	 * Returns the uuid of administrator.
 	 *
