@@ -403,9 +403,54 @@ public class Area implements EntityInterface<UUID> {
 	 */
 	public void updateCapacity(int newCapacity) throws InvalidArgumentCheckedException {
 		if (newCapacity < 0) {
-			throw new InvalidArgumentCheckedException("Capacity cannot be less than 1");
+			throw new InvalidArgumentCheckedException("Capacity cannot be less than 0");
 		}
 		capacity = newCapacity;
+	}
+
+	/**
+	 * Updates the calendar link.
+	 * Will set the calendar controlled status to true if a link is provided.
+	 *
+	 * @param newCalendarLink the new calendar link
+	 */
+	public void updateCalendarLink(String newCalendarLink) {
+		if (newCalendarLink == null || newCalendarLink.isEmpty()) {
+			calendarControlled = false;
+			calendarLink = null;
+		} else {
+			calendarControlled = true;
+			calendarLink = newCalendarLink;
+		}
+	}
+
+	/**
+	 * Updates the name of the area.
+	 *
+	 * @param newName the new name of the area
+	 * @throws InvalidArgumentCheckedException if newName is null or empty
+	 */
+	public void updateName(String newName) throws InvalidArgumentCheckedException {
+		if (newName == null) {
+			throw new InvalidArgumentCheckedException("Name cannot be null");
+		}
+		if (newName.isBlank()) {
+			throw new InvalidArgumentCheckedException("Name cannot be empty");
+		}
+		name = newName;
+	}
+
+	/**
+	 * Updates the area type of the area.
+	 *
+	 * @param newAreaType the new area type
+	 * @throws IllegalArgumentException if newAreaType is null
+	 */
+	public void updateAreaType(AreaType newAreaType) {
+		if (newAreaType == null) {
+			throw new IllegalArgumentException("Area type is null when value was expected");
+		}
+		areaType = newAreaType;
 	}
 
 	/**
