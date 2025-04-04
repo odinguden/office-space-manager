@@ -11,6 +11,7 @@ import { setupLayouts } from 'virtual:generated-layouts'
 import Index from '@/pages/index.vue'
 import Room from '@/pages/room.vue'
 import Bookings from '@/pages/bookings.vue'
+import Plans from '@/pages/plans.vue'
 
 const routes = [
 	{
@@ -27,6 +28,11 @@ const routes = [
 		path: "/bookings",
 		name: "bookings",
 		component: Bookings
+	},
+	{
+		path: "/plans",
+		name: "plans",
+		component: Plans
 	}
 ]
 

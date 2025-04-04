@@ -30,47 +30,36 @@ function confirm() {
 </script>
 
 <template>
-	<v-dialog
+	<o-closeable-dialog
 		v-model="open"
 		max-width="356px"
 		persistent
 	>
-		<v-card>
-			<v-card-title class="card-title">
-				<slot name="title">
-					{{ title }}
-				</slot>
-				<v-spacer />
+		<template #title>
+			{{ title }}
+		</template>
+		<v-card-text>
+			<slot>
+				Are you certain you want to do this?
+			</slot>
+		</v-card-text>
+		<v-card-actions class="card-actions">
+			<slot name="cancel-button">
 				<v-btn
-					icon="mdi-close"
-					density="compact"
-					variant="plain"
+					color="error"
+					variant="outlined"
+					:text="cancelText"
 					@click="cancel"
 				/>
-			</v-card-title>
-			<v-card-text>
-				<slot>
-					Are you certain you want to do this?
-				</slot>
-			</v-card-text>
-			<v-card-actions class="card-actions">
-				<slot name="cancel-button">
-					<v-btn
-						color="error"
-						variant="outlined"
-						:text="cancelText"
-						@click="cancel"
-					/>
-					<v-btn
-						color="success"
-						variant="flat"
-						:text="confirmText"
-						@click="confirm"
-					/>
-				</slot>
-			</v-card-actions>
-		</v-card>
-	</v-dialog>
+				<v-btn
+					color="success"
+					variant="flat"
+					:text="confirmText"
+					@click="confirm"
+				/>
+			</slot>
+		</v-card-actions>
+	</o-closeable-dialog>
 </template>
 
 <style scoped lang="scss">
