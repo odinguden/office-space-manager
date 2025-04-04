@@ -29,7 +29,7 @@ public class AreaDto {
 	private boolean reservable;
 
 	/**
-	 * No args constructor
+	 * No args constructor.
 	 */
 	public AreaDto(){}
 
@@ -178,41 +178,10 @@ public class AreaDto {
 	}
 
 	public UUID getIdOfSuperArea() {
-		UUID id = null;
+		UUID superId = null;
 		if (!superAreas.isEmpty()) {
-			id = superAreas.get(0).id;
+			superId = superAreas.get(0).getId();
 		}
-		return id;
-	}
-
-	/**
-	 * A simple DTO to be used for the super areas contained within this dto.
-	 * This is used to avoid including irrelevant data about
-	 * super areas when requesting a single area.
-	 */
-	static public class SimpleSuperAreaDto {
-		private UUID id;
-		private String name;
-		private String areaType;
-
-		public SimpleSuperAreaDto(Area superArea) {
-			this.id = superArea.getId();
-			this.name = superArea.getName();
-			this.areaType = superArea.getAreaType().getId();
-		}
-
-		public SimpleSuperAreaDto() {}
-
-		public UUID getId() {
-			return id;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public String getAreaType() {
-			return areaType;
-		}
+		return superId;
 	}
 }
