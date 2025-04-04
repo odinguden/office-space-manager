@@ -604,5 +604,57 @@ public class AreaController extends AbstractPermissionManager {
 		areaRepository.save(area);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
+
+	/**
+	 * Removes the super area of an area.
+	 * This is a put mapping since it modifies the area object.
+	 *
+	 * @param areaId id of the area to remove the super area from
+	 * @return response entity with status 204 no content
+	 * @throws ResponseStatusException code 401 unauthorized if the request lacks authorization
+	 * @throws ResponseStatusException code 403 forbidden if the authorization included with the
+	 *      request has insufficient permissions to update entities.
+	 * @throws ResponseStatusException code 404 not found upon attempting to update an area that
+	 *      does not exist
+	 */
+	@PutMapping("removesuperarea/{areaId}")
+	@Operation(
+		summary = "Removes the super area of an area",
+		description = "Attempts to remove the super area of an area"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "204",
+			description = "Successfully removed the super area of the area"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users are not permitted to remove super areas of areas"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to remove super areas of areas"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Failed to remove super area of area as it doesn't exist"
+			),
+		@ApiResponse(
+			responseCode = "400",
+			description = "Failed to remove super area of area as"
+				+ " the area has no admins of it's own"
+			),
+	})
+	public ResponseEntity<String> removeSuperArea(@PathVariable UUID areaId) {
+		super.hasPermissionToPut();
+		Area area = getAreaFromId(areaId);
+		try {
+			area.removeSuperArea();
+		} catch (AdminCountException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+		areaRepository.save(area);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
 }
 
