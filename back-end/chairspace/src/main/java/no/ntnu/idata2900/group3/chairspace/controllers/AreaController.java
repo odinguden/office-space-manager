@@ -48,9 +48,6 @@ import org.springframework.web.server.ResponseStatusException;
 @CrossOrigin(origins = "${frontend.url}")
 @RequestMapping("/area")
 public class AreaController extends AbstractPermissionManager {
-
-    private final AreaFeatureController areaFeatureController;
-
 	@Autowired
 	private AreaRepository areaRepository;
 	@Autowired
@@ -59,10 +56,6 @@ public class AreaController extends AbstractPermissionManager {
 	private UserRepository userRepository;
 	@Autowired
 	private AreaFeatureRepository areaFeatureRepository;
-
-    AreaController(AreaFeatureController areaFeatureController) {
-        this.areaFeatureController = areaFeatureController;
-    }
 
 	/**
 	 * Posts a new area to the database based on the data from AreaDTO.
@@ -76,7 +69,8 @@ public class AreaController extends AbstractPermissionManager {
 	 * @throws ResponseStatusException 400 bad request if data in the DTO is not valid for creation
 	 *     of an area.
 	 * @throws ResponseStatusException code 404 if the super area included in the dto does not exist
-	 * @throws ResponseStatusException code 404 if the area feature included in the dto does not exist
+	 * @throws ResponseStatusException code 404 if the area feature included
+	 *     in the dto does not exist
 	 * @throws ResponseStatusException code 404 if the area included in the dto type does not exist
 	 */
 	@PostMapping()
@@ -127,7 +121,8 @@ public class AreaController extends AbstractPermissionManager {
 	 * @param id uuid of area
 	 * @return area
 	 * @throws ResponseStatus exception code 401 unauthorized if the request lacks authorization
-	 * @throws ResponseStatus exception code 403 forbidden if the authorization included is not sufficient to get area
+	 * @throws ResponseStatus exception code 403 forbidden if the authorization
+	 *     included is not sufficient to get area
 	 * @throws ResponseStatus exception code 404 if no area can be found with this id
 	 */
 	@GetMapping("/{id}")
@@ -234,7 +229,8 @@ public class AreaController extends AbstractPermissionManager {
 			),
 		@ApiResponse(
 			responseCode = "400",
-			description = "Bad request if not able to update area with the information contained in the dto"
+			description = "Bad request if not able to update"
+				+ " area with the information contained in the dto"
 			)
 	})
 	public ResponseEntity<String> putArea(@RequestBody AreaModificationDto areaDto) {
@@ -314,73 +310,6 @@ public class AreaController extends AbstractPermissionManager {
 	}
 
 	// ----- Methods for Area Creation -----
-
-	/**
-	 * Builds area from regular data DTO.
-	 *
-	 * @param areaDto the Dto used to build the area
-	 * @return new Area Object
-	 * @throws ResponseStatusException code 404 if the area does not exist
-	 * @throws ResponseStatusException code 404 if the area feature does not exist
-	 * @throws ResponseStatusException code 404 if the area type does not exist
-	 */
-	private Area buildArea(AreaDto areaDto) {
-		AreaType areaType = getAreaType(areaDto.getAreaType().getId());
-
-		// Create builder with initial arguments
-		Area.Builder areaBuilder;
-		try {
-			areaBuilder = new Area.Builder(
-				areaDto.getName(),
-				areaDto.getCapacity(),
-				areaType
-			);
-		} catch (InvalidArgumentCheckedException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
-
-		areaBuilder.id(areaDto.getId());
-
-		// Adds administrators to area builder
-		for (UUID id : areaDto.getAdministrators()) {
-			areaBuilder.administrator(
-				getUser(id)
-			);
-		}
-
-		try {
-			areaBuilder.calendarLink(areaDto.getCalendarLink());
-		} catch (InvalidArgumentCheckedException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
-		// These do not need any checks so they're just added
-		areaBuilder.description(areaDto.getDescription());
-		areaBuilder.reservable(areaDto.isReservable());
-
-		// Add super area if exists
-		if (areaDto.getIdOfSuperArea() != null) {
-			areaBuilder.superArea(
-				getAreaFromId(areaDto.getIdOfSuperArea())
-			);
-		}
-
-		// Add area features
-		for (AreaFeature areaFeature : areaDto.getAreaFeatures()) {
-			String areaFeatureId = areaFeature.getId();
-			areaBuilder.feature(
-				getAreaFeature(areaFeatureId)
-			);
-		}
-
-		// Finally build area
-		Area area;
-		try {
-			area = areaBuilder.build();
-		} catch (AdminCountException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
-		return area;
-	}
 
 	/**
 	 * Builds an area object from an area creation DTO.
