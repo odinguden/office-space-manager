@@ -1,7 +1,7 @@
 <template>
 	<section>
 		<h1>My Plans</h1>
-		<o-contained-grid>
+		<o-contained-grid min-width="400px">
 			<o-space-card v-for="_ in Array(4)">
 				<template #timeline>
 					<o-calendar />
