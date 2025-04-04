@@ -30,10 +30,14 @@ const isFavorite = ref(Math.random() > 0.7)
 		<div class="card-extras">
 			<o-space-extras />
 		</div>
-		<div class="card-timeline">
-			<o-timeline/>
+		<div class="one-span-two">
+			<slot name="timeline">
+				<div class="card-timeline">
+					<o-timeline/>
+				</div>
+			</slot>
 		</div>
-		<div class="actions-container">
+		<div class="one-span-two">
 			<slot name="actions" />
 		</div>
 	</o-flat-card>
@@ -62,11 +66,10 @@ const isFavorite = ref(Math.random() > 0.7)
 	}
 
 	.card-timeline {
-		grid-column: 1 / span 2;
 		height: 24px;
 	}
 
-	.actions-container {
+	.one-span-two {
 		grid-column: 1 / span 2;
 	}
 }

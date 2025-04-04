@@ -42,5 +42,6 @@ const selectedMonth = ref(now.getMonth())
 <style scoped lang="scss">
 .calendar {
 	border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+	min-width: 352px;
 }
 </style>
