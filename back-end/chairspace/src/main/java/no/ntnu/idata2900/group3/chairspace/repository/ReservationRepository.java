@@ -1,7 +1,7 @@
 package no.ntnu.idata2900.group3.chairspace.repository;
 
 import java.util.List;
-import java.util.UUID;	
+import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
 import org.hibernate.annotations.processing.SQL;
