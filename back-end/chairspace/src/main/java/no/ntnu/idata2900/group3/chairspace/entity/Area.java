@@ -383,6 +383,19 @@ public class Area implements EntityInterface<UUID> {
 	}
 
 	/**
+	 * Removes a area feature.
+	 *
+	 * @param areaFeature The feature to remove
+	 * @throws IllegalArgumentException if areaFeature is null
+	 */
+	public void removeAreaFeature(AreaFeature areaFeature) {
+		if (areaFeature == null) {
+			throw new IllegalArgumentException("Area feature is null when value is expected");
+		}
+		features.remove(areaFeature);
+	}
+
+	/**
 	 * Updates the description.
 	 *
 	 * @param newDescription new description as string.

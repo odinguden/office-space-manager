@@ -49,6 +49,8 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/area")
 public class AreaController extends AbstractPermissionManager {
 
+    private final AreaFeatureController areaFeatureController;
+
 	@Autowired
 	private AreaRepository areaRepository;
 	@Autowired
@@ -57,6 +59,10 @@ public class AreaController extends AbstractPermissionManager {
 	private UserRepository userRepository;
 	@Autowired
 	private AreaFeatureRepository areaFeatureRepository;
+
+    AreaController(AreaFeatureController areaFeatureController) {
+        this.areaFeatureController = areaFeatureController;
+    }
 
 	/**
 	 * Posts a new area to the database based on the data from AreaDTO.
@@ -545,6 +551,127 @@ public class AreaController extends AbstractPermissionManager {
 		Area area = getAreaFromId(areaId);
 		AreaFeature areaFeature = getAreaFeature(areaFeatureId);
 		area.addAreaFeature(areaFeature);
+		areaRepository.save(area);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	/**
+	 * Removes an area feature from an area.
+	 *
+	 * @param areaId id of the area to remove the feature from
+	 * @param areaFeatureId id of the area feature to remove from the area
+	 * @return response entity with status 204 no content
+	 * @throws ResponseStatusException code 401 unauthorized if the request lacks authorization
+	 * @throws ResponseStatusException code 403 forbidden if the authorization included with the
+	 *      request has insufficient permissions to update entities.
+	 * @throws ResponseStatusException code 404 not found upon attempting to update an area that
+	 *      does not exist
+	 * @throws ResponseStatusException code 404 not found upon attempting to remove an
+	 *     areaFeature that does not exist
+	 */
+	//Made this a put mapping since it modifies the area object
+	// and is not a delete operation. It is not a delete operation since the area feature
+	@PutMapping("/removeAreaFeature/{areaId}/{areaFeatureId}")
+	@Operation(
+		summary = "Removes an area feature from an area",
+		description = "Attempts to remove an area feature from an area"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "204",
+			description = "Successfully removed area feature from area"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users are not permitted to remove area features from areas"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to remove area features from areas"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Failed to remove area feature from area as it doesn't exist"
+			)
+	})
+	public ResponseEntity<String> removeAreaFeatureFromArea(@PathVariable UUID areaId,
+		@PathVariable String areaFeatureId) {
+		super.hasPermissionToPut();
+		Area area = getAreaFromId(areaId);
+		AreaFeature areaFeature = getAreaFeature(areaFeatureId);
+		area.removeAreaFeature(areaFeature);
+		areaRepository.save(area);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	/**
+	 * Replaces the super area of an area.
+	 * This is a put mapping since it modifies the area object.
+	 *
+	 * @param areaId id of the area to replace the super area of
+	 * @param superAreaId id of the new super area to set
+	 * @return response entity with status 204 no content
+	 * @throws ResponseStatusException code 401 unauthorized if the request lacks authorization
+	 * @throws ResponseStatusException code 403 forbidden if the authorization included with the
+	 * 	   request has insufficient permissions to update entities.
+	 * @throws ResponseStatusException code 404 not found upon attempting to update an area that
+	 * 	   does not exist
+	 * @throws ResponseStatusException code 404 not found upon attempting to set a super area that
+	 * 	   does not exist
+	 * @throws ResponseStatusException code 400 bad request if the super area is not valid
+	 * @throws ResponseStatusException code 400 bad request if the super area has no administrators
+	 */
+	@PutMapping("/replaceSuperArea/{areaId}/{superAreaId}")
+	@Operation(
+		summary = "Replaces the super area of an area",
+		description = "Attempts to replace the super area of an area"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "204",
+			description = "Successfully replaced the super area of the area"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users are not permitted to replace super areas of areas"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to replace super areas of areas"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Failed to replace super area of area as it doesn't exist"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Failed to replace super area of area as the super area doesn't exist"
+			),
+		@ApiResponse(
+			responseCode = "400",
+			description = "Failed to replace super area of area as the super area is not valid"
+			),
+		@ApiResponse(
+			responseCode = "400",
+			description = "Failed to replace super area of area as the super area has no "
+				+ "administrators"
+			)
+	})
+	public ResponseEntity<String> replaceSuperArea(@PathVariable UUID areaId,
+		@PathVariable UUID superAreaId) {
+		super.hasPermissionToPut();
+		Area area = getAreaFromId(areaId);
+		Area superArea = getAreaFromId(superAreaId);
+		try {
+			area.setSuperArea(superArea);
+			// Ideally we should catch and handle the exceptions separately.areaFeatureController
+			// But since we're just returning the error message to the client.
+			// We handle them both the same way.
+			// And also a super area should never have no administrators.
+			// So AdminCountException should never be thrown.
+		} catch (InvalidArgumentCheckedException | AdminCountException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
 		areaRepository.save(area);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
