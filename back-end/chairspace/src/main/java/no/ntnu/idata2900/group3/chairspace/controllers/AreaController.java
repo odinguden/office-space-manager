@@ -243,11 +243,7 @@ public class AreaController extends AbstractPermissionManager {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 		area.updateDescription(areaDto.getDescription());
-		try {
-			area.setReservable(areaDto.isReservable());
-		} catch (InvalidArgumentCheckedException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
+		area.setReservable(areaDto.isReservable());
 		try {
 			area.updateCapacity(areaDto.getCapacity());
 		} catch (InvalidArgumentCheckedException e) {
