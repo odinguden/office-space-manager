@@ -20,9 +20,7 @@ import no.ntnu.idata2900.group3.chairspace.repository.AreaRepository;
 import no.ntnu.idata2900.group3.chairspace.repository.AreaTypeRepository;
 import no.ntnu.idata2900.group3.chairspace.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Service class for managing and interacting with areas.
@@ -70,15 +68,24 @@ public class AreaService {
 
 	/* ---- DTO methods  ---- */
 
+
 	/**
-	 * Creates an area from the given AreaCreationDto.
+	 * Creates an area based on the data contained within a area dto.
 	 *
-	 * @param areaDto The AreaCreationDto object containing the data to create the area.
-	 * @return The created Area object.
+	 * @param areaDto dto to create area from
+	 * @return Created area object
+	 * @throws AdminCountException no administrators are provided
+	 * @throws InvalidArgumentCheckedException If any of the arguments provided in the
+	 *     Dto are invalid for the creation of the area
+	 * @throws ElementNotFoundException if areaType, areaFeature or superArea is not found
+	 *     in the database
 	 */
 	public Area createAreaFromDto(AreaCreationDto areaDto)
-		throws AdminCountException, InvalidArgumentCheckedException {
+		throws AdminCountException, InvalidArgumentCheckedException, ElementNotFoundException {
 		AreaType areaType = getAreaType(areaDto.getAreaType());
+		if (areaType == null) {
+			throw ElementNotFoundException.areaTypeNotFoundException(areaDto.getAreaType());
+		}
 		Area.Builder areaBuilder = new Area.Builder(
 			areaDto.getName(),
 			areaDto.getCapacity(),
@@ -86,13 +93,23 @@ public class AreaService {
 		);
 
 		for (UUID id : areaDto.getAdministrators()) {
+			User user = getUser(id);
+			if (user == null) {
+				throw ElementNotFoundException.userNotFoundException(id);
+			}
 			areaBuilder.administrator(
-				getUser(id)
+				user
 			);
 		}
 
 		areaBuilder.calendarLink(areaDto.getCalendarLink());
-		areaBuilder.superArea(getArea(areaDto.getSuperArea()));
+		if (areaDto.getSuperArea() != null) {
+			Area area = getArea(areaDto.getSuperArea());
+			if (area == null) {
+				throw ElementNotFoundException.areaNotFoundException(areaDto.getSuperArea());
+			}
+			areaBuilder.superArea(area);
+		}
 		areaBuilder.description(areaDto.getDescription());
 		for (String areaFeature : areaDto.getAreaFeatures()) {
 			areaBuilder.feature(
@@ -229,9 +246,11 @@ public class AreaService {
 	 * @param areaDto The AreaCreationDto object containing the data to create the area.
 	 * @throws InvalidArgumentCheckedException if the areaCreationDto contains invalid arguments
 	 * @throws AdminCountException if an area is created without an admin
+	 * @throws ElementNotFoundException if superArea, AreaType or AreaFeature
+	 *     can not be found in the database
 	 */
 	public void saveAreaFromCreationDto(AreaCreationDto areaDto)
-		throws AdminCountException, InvalidArgumentCheckedException {
+		throws AdminCountException, InvalidArgumentCheckedException, ElementNotFoundException {
 		Area area = createAreaFromDto(areaDto);
 		areaRepository.save(area);
 	}
