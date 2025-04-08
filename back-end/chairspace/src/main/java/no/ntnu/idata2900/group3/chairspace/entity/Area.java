@@ -495,12 +495,6 @@ public class Area implements EntityInterface<UUID> {
 
 	/* ---- Methods ---- */
 
-	private void isFreeIncludingSubAreas() {
-		//TODO: implement
-		// Should isFreeBetween check super area for conflicts
-		throw new NotImplementedException();
-	}
-
 	/**
 	 * Returns true if the area is free in this block of time. false if not.
 	 *
