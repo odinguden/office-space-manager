@@ -82,9 +82,9 @@ public class AreaService {
 	 */
 	public Area createAreaFromDto(AreaCreationDto areaDto)
 		throws AdminCountException, InvalidArgumentCheckedException, ElementNotFoundException {
-		AreaType areaType = getAreaType(areaDto.getAreaType());
+		AreaType areaType = getAreaType(areaDto.getAreaTypeIds());
 		if (areaType == null) {
-			throw ElementNotFoundException.areaTypeNotFoundException(areaDto.getAreaType());
+			throw ElementNotFoundException.areaTypeNotFoundException(areaDto.getAreaTypeIds());
 		}
 		Area.Builder areaBuilder = new Area.Builder(
 			areaDto.getName(),
@@ -92,7 +92,7 @@ public class AreaService {
 			areaType
 		);
 
-		for (UUID id : areaDto.getAdministrators()) {
+		for (UUID id : areaDto.getAdministratorIds()) {
 			User user = getUser(id);
 			if (user == null) {
 				throw ElementNotFoundException.userNotFoundException(id);
@@ -111,7 +111,7 @@ public class AreaService {
 			areaBuilder.superArea(area);
 		}
 		areaBuilder.description(areaDto.getDescription());
-		for (String areaFeature : areaDto.getAreaFeatures()) {
+		for (String areaFeature : areaDto.getAreaFeatureIds()) {
 			areaBuilder.feature(
 				getAreaFeature(areaFeature)
 			);

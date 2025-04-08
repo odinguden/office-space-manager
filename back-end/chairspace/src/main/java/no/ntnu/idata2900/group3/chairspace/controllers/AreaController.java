@@ -98,16 +98,20 @@ public class AreaController extends AbstractPermissionManager {
 	})
 	public ResponseEntity<String> postEntity(@RequestBody AreaCreationDto areaDto) {
 		super.hasPermissionToPost();
-		// TODO: Should make a checked exception for if a param is not found in the database.
 		try {
 			areaService.saveAreaFromCreationDto(areaDto);
-		} catch (AdminCountException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidArgumentCheckedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (AdminCountException | InvalidArgumentCheckedException e) {
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST,
+				e.getMessage()
+			);
+		} catch (ElementNotFoundException e) {
+			throw new ResponseStatusException(
+				HttpStatus.NOT_FOUND,
+				e.getMessage()
+			);
 		}
+
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
@@ -148,7 +152,10 @@ public class AreaController extends AbstractPermissionManager {
 		hasPermissionToGet();
 		Area area = areaService.getArea(id);
 		if (area == null) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+			throw new ResponseStatusException(
+				HttpStatus.NOT_FOUND,
+				"Could not find area with id: " + id
+			);
 		}
 		AreaDto areaDto = new AreaDto(area);
 		return new ResponseEntity<>(areaDto, HttpStatus.OK);
@@ -197,7 +204,7 @@ public class AreaController extends AbstractPermissionManager {
 	 *     included is not sufficient to get all areas
 	 * @throws ResponseStatusException code 400 if the requested page does not exist
 	 */
-	@GetMapping("/{page}")
+	@GetMapping("/page/{page}")
 	@Operation(
 		summary = "Gets all areas in a pagination",
 		description = "Gets all areas in the repository in a pagination containing 12 elements"

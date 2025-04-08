@@ -5,58 +5,62 @@ import java.util.UUID;
 
 /**
  * DTO to be used when creating Areas.
- * Contains felids for relevant data needed for the construction of a new Area.
+ * Contains fields for relevant data needed for the construction of a new Area.
  * This dto will only utilize the ID's for relevant entity.
  */
 public class AreaCreationDto {
-	private List<UUID> administrators;
+	private List<UUID> administratorIds;
 	private UUID superArea;
-	private String areaType;
-	private List<String> areaFeatures;
+	private String areaTypeIds;
+	private List<String> areaFeatureIds;
 	private int capacity;
 	private String calendarLink;
 	private String name;
 	private String description;
 	private boolean reservable;
 
+	/**
+	 * Empty constructor for serialization.
+	 */
 	public AreaCreationDto() {
 		// Empty constructor for serialization/deserialization
 	}
 
 	/**
-	 * Returns the uuid of administrator.
+	 * Returns list containing id of administrators.
 	 *
-	 * @return uuid of admin.
+	 * @return id's of administrators.
 	 */
-	public List<UUID> getAdministrators() {
-		return administrators;
+	public List<UUID> getAdministratorIds() {
+		return administratorIds;
 	}
 
 	/**
-	 * Returns the ID of the super area.
+	 * Returns the ID of the area that is to be set to the
+	 * created areas super area.
 	 *
-	 * @return UUID
+	 * @return the id of the super area
 	 */
 	public UUID getSuperArea() {
 		return superArea;
 	}
 
 	/**
-	 * Returns the name of the area type.
+	 * Returns the name / id of the area type.
 	 *
-	 * @return name as string
+	 * @return id of the area type
 	 */
-	public String getAreaType() {
-		return areaType;
+	public String getAreaTypeIds() {
+		return areaTypeIds;
 	}
 
 	/**
-	 * Returns the name of the area features in a list of strings.
+	 * Returns the name/id of the area features in a list of strings.
 	 *
-	 * @return names of area features
+	 * @return id of area features
 	 */
-	public List<String> getAreaFeatures() {
-		return areaFeatures;
+	public List<String> getAreaFeatureIds() {
+		return areaFeatureIds;
 	}
 
 	/**
@@ -99,7 +103,7 @@ public class AreaCreationDto {
 	/**
 	 * Returns reservable status of area.
 	 *
-	 * @return reservable status of area
+	 * @return true if the area can be reserved
 	 */
 	public boolean isReservable() {
 		return reservable;

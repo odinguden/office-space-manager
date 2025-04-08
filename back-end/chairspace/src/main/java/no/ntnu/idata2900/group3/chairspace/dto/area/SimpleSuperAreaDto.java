@@ -5,9 +5,8 @@ import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 
 /**
- * A simple DTO to be used for the super areas contained within this dto.
- * This is used to avoid including irrelevant data about
- * super areas when requesting a single area.
+ * A DTO containing barebones information about an area,
+ * intended to be used as a minimal representation of a superarea.
  */
 public class SimpleSuperAreaDto {
 	@JsonProperty

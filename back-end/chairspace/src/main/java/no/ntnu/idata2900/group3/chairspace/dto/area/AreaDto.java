@@ -9,15 +9,13 @@ import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaType;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * A data transfer object used for retrieval of area objects.
  */
 public class AreaDto {
 	private UUID id;
-	private List<UUID> administrators;
+	private List<UUID> administratorIds;
 	private List<SimpleSuperAreaDto> superAreas;
 	private AreaType areaType;
 	private List<AreaFeature> areaFeatures;
@@ -35,14 +33,14 @@ public class AreaDto {
 	}
 
 	/**
-	 * Creates a single instance of an areaDto based on an exiting areaDTO.
+	 * Creates a single instance of an areaDto based on an exiting area.
 	 *
 	 * @param area the area to use as base
 	 */
 	public AreaDto(Area area) {
 		if (area == null) {
-			throw new ResponseStatusException(
-				HttpStatus.NOT_FOUND
+			throw new IllegalArgumentException(
+				"Area was null when value was expected"
 			);
 		}
 
@@ -53,13 +51,13 @@ public class AreaDto {
 		this.description = area.getDescription();
 		this.reservable = area.isReservable();
 		this.areaType = area.getAreaType();
-		this.administrators = new ArrayList<>();
+		this.administratorIds = new ArrayList<>();
 
 		setSuperAreas(area);
 
 		Set<User> admins = area.getAdministrators();
 		for (User user : admins) {
-			this.administrators.add(user.getId());
+			this.administratorIds.add(user.getId());
 		}
 		Iterator<AreaFeature> it = area.getFeatures();
 		this.areaFeatures = new ArrayList<>();
@@ -88,7 +86,7 @@ public class AreaDto {
 	/**
 	 * Returns the id of the area this DTO represents.
 	 *
-	 * @return uuid
+	 * @return the id of the area
 	 */
 	public UUID getId() {
 		return id;
@@ -99,14 +97,14 @@ public class AreaDto {
 	 *
 	 * @return list of UUID's
 	 */
-	public List<UUID> getAdministrators() {
-		return administrators;
+	public List<UUID> getAdministratorIds() {
+		return administratorIds;
 	}
 
 	/**
 	 * Returns a list containing simpleSuperAreaDto's for all the super areas of this areaDTO.
 	 *
-	 * @return List containing SimpleSuperAreaDTO's
+	 * @return List containing SimpleSuperAreaDto's
 	 */
 	public List<SimpleSuperAreaDto> getSuperAreas() {
 		return superAreas;
@@ -116,7 +114,7 @@ public class AreaDto {
 	 * Returns area type of area.
 	 * Will return full area type object containing name and description.
 	 *
-	 * @return area type
+	 * @return the area type
 	 */
 	public AreaType getAreaType() {
 		return areaType;
@@ -135,7 +133,7 @@ public class AreaDto {
 	/**
 	 * Returns the capacity of the area this DTO represents.
 	 *
-	 * @return capacity
+	 * @return the the capacity of the area
 	 */
 	public int getCapacity() {
 		return capacity;
