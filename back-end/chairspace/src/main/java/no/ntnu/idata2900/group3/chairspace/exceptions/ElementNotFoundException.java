@@ -43,4 +43,30 @@ public class ElementNotFoundException extends Exception {
 			"Could not find area feature with name: " + featureId
 		);
 	}
+
+	/**
+	 * Creates new instance of ElementNotFoundException with predefined text
+	 * for if a area type is not found in the database.
+	 *
+	 * @param typeId id of the area type that could not be found
+	 * @return new ElementNotFoundException with matching error message
+	 */
+	public static ElementNotFoundException areaTypeNotFoundException(String typeId) {
+		return new ElementNotFoundException(
+			"Could not find area type with name: " + typeId
+		);
+	}
+
+	/**
+	 * Creates new instance of ElementNotFoundException with predefined text
+	 * for if a user is not found in the database.
+	 *
+	 * @param id id of the user that could not be found
+	 * @return new ElementNotFoundException with matching error message
+	 */
+	public static ElementNotFoundException userNotFoundException(UUID id) {
+		return new ElementNotFoundException(
+			"Could not find user with Id: " + id
+		);
+	}
 }
