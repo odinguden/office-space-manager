@@ -17,9 +17,9 @@ public class AreaModificationDto {
 	@JsonProperty
 	private String calendarLink;
 	@JsonProperty
-	private int capacity;
+	private Integer capacity;
 	@JsonProperty
-	private boolean reservable;
+	private Boolean reservable;
 	@JsonProperty
 	private String areaType;
 
@@ -72,7 +72,7 @@ public class AreaModificationDto {
 	 *
 	 * @return returns the capacity of the area
 	 */
-	public int getCapacity() {
+	public Integer getCapacity() {
 		return capacity;
 	}
 
@@ -81,7 +81,7 @@ public class AreaModificationDto {
 	 *
 	 * @return returns true if the area is reservable, false otherwise
 	 */
-	public boolean isReservable() {
+	public Boolean isReservable() {
 		return reservable;
 	}
 
