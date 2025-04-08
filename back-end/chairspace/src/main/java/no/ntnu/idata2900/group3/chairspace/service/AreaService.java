@@ -3,20 +3,26 @@ package no.ntnu.idata2900.group3.chairspace.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import no.ntnu.idata2900.group3.chairspace.dto.PaginationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.area.AreaCreationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.area.AreaDto;
+import no.ntnu.idata2900.group3.chairspace.dto.area.AreaModificationDto;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaType;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
 import no.ntnu.idata2900.group3.chairspace.exceptions.AdminCountException;
+import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
+import no.ntnu.idata2900.group3.chairspace.exceptions.PageNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.repository.AreaFeatureRepository;
 import no.ntnu.idata2900.group3.chairspace.repository.AreaRepository;
 import no.ntnu.idata2900.group3.chairspace.repository.AreaTypeRepository;
 import no.ntnu.idata2900.group3.chairspace.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Service class for managing and interacting with areas.
@@ -111,8 +117,111 @@ public class AreaService {
 		return areaDtos;
 	}
 
+	/**
+	 * Returns areas in a pagination dto.
+	 *
+	 * @param page the page the user is requesting
+	 * @param itemsPerPage the number of items contained by each page of the pagination
+	 * @return PaginationDto containing 12 areaDto's
+	 * @throws PageNotFoundException if a invalid page is requested
+	 */
+	public PaginationDto<AreaDto> getAreaPagination(int page, int itemsPerPage)
+			throws PageNotFoundException {
+		return new PaginationDto<AreaDto>(getAreasAsDto(), itemsPerPage, page);
+	}
+
 
 	/* ---- Database Methods ---- */
+
+	/**
+	 * Adds a single area feature to an area.
+	 *
+	 * @param areaId id of the area
+	 * @param featureId id of the feature
+	 * @throws ElementNotFoundException if either the feature or the area can not be
+	 *     found by id in the database
+	 */
+	public void addFeatureToArea(UUID areaId, String featureId) throws ElementNotFoundException {
+		Area area = getArea(areaId);
+		if (area == null) {
+			throw ElementNotFoundException.areaNotFoundException(areaId);
+		}
+		AreaFeature areaFeature = getAreaFeature(featureId);
+		if (areaFeature == null) {
+			throw new ElementNotFoundException(
+				"Could not find areaFeature with name: " + featureId
+			);
+		}
+		area.addAreaFeature(areaFeature);
+		areaRepository.save(area);
+	}
+
+	/**
+	 * Removes an areaFeature from an area.
+	 *
+	 * @param areaId id of the area
+	 * @param featureId id of the feature
+	 * @throws ElementNotFoundException if either the feature or the area can not be
+	 *     found by id in the database
+	 */
+	public void removeFeatureFromArea(UUID areaId, String featureId)
+		throws ElementNotFoundException {
+		Area area = getArea(areaId);
+		if (area == null) {
+			throw ElementNotFoundException.areaNotFoundException(areaId);
+		}
+		AreaFeature areaFeature = getAreaFeature(featureId);
+		if (areaFeature == null) {
+			throw new ElementNotFoundException(
+				"Could not find areaFeature with name: " + featureId
+			);
+		}
+		area.removeAreaFeature(areaFeature);
+		areaRepository.save(area);
+	}
+
+	/**
+	 * Replaces super area of a given area.
+	 * Is also used to add a super area if the area's super area is null
+	 *
+	 * @param areaId id of area that is going to get is's super area replaced
+	 * @param superAreaId id of new super area
+	 * @throws ElementNotFoundException if either area or new super area can not
+	 *     be found in the database
+	 * @throws InvalidArgumentCheckedException if new super area is not a valid super area
+	 * @throws AdminCountException the action will leave area without any administrators of it's own
+	 */
+	public void replaceSuperArea(UUID areaId, UUID superAreaId)
+		throws ElementNotFoundException, InvalidArgumentCheckedException, AdminCountException {
+		Area area = getArea(areaId);
+		if (area == null) {
+			throw ElementNotFoundException.areaNotFoundException(areaId);
+		}
+		Area superArea = getArea(superAreaId);
+		if (superArea == null) {
+			throw new ElementNotFoundException(
+				"Could not find super area with id: " + superAreaId
+			);
+		}
+		area.setSuperArea(superArea);
+		areaRepository.save(area);
+	}
+
+	/**
+	 * Removes a super area from an area.
+	 *
+	 * @param areaId id of the area to remove super area from
+	 * @throws ElementNotFoundException if area can not be found in the database
+	 * @throws AdminCountException if area has no admins of it's own
+	 */
+	public void removeSuperArea(UUID areaId) throws ElementNotFoundException, AdminCountException {
+		Area area = getArea(areaId);
+		if (area == null) {
+			throw ElementNotFoundException.areaNotFoundException(areaId);
+		}
+		area.removeSuperArea();
+		areaRepository.save(area);
+	}
 
 	/**
 	 * Builds an area from the given AreaCreationDto and saves it to the database.
@@ -124,6 +233,47 @@ public class AreaService {
 	public void saveAreaFromCreationDto(AreaCreationDto areaDto)
 		throws AdminCountException, InvalidArgumentCheckedException {
 		Area area = createAreaFromDto(areaDto);
+		areaRepository.save(area);
+	}
+
+	/**
+	 * Updates an area to fit the new data in the areaModificationDto.
+	 *
+	 * @param areaDto Dto that includes the data that needs updated in an area
+	 * @throws InvalidArgumentCheckedException If any of the arguments in the dto are illegal
+	 * @throws ElementNotFoundException If area with matching id to areaModificationDto
+	 *     cannot be found
+	 */
+	public void putArea(AreaModificationDto areaDto)
+		throws InvalidArgumentCheckedException, ElementNotFoundException {
+		Area area = getArea(areaDto.getId());
+		if (area == null) {
+			throw new ElementNotFoundException("Could not find Area with ID: " + areaDto.getId());
+		}
+		if (areaDto.getName() != null) {
+			area.updateName(areaDto.getName());
+		}
+		// no check as this can be set to null
+		area.updateDescription(areaDto.getDescription());
+		if (areaDto.isReservable() != null) {
+			area.setReservable(areaDto.isReservable());
+		}
+		if (areaDto.getCapacity() != null) {
+			area.updateCapacity(areaDto.getCapacity());
+		}
+		if (areaDto.getAreaType() != null) {
+			AreaType areaType = getAreaType(areaDto.getAreaType());
+			if (areaType == null) {
+				// A lot of indentation but seems like a waste to put all this in it's own method
+				throw new ElementNotFoundException(
+					"Could not find area type named: " + areaDto.getAreaType()
+				);
+			}
+			area.updateAreaType(areaType);
+		}
+		if (areaDto.getCalendarLink() != null) {
+			area.updateCalendarLink(areaDto.getCalendarLink());
+		}
 		areaRepository.save(area);
 	}
 
