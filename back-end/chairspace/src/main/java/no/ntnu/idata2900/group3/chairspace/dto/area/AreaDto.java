@@ -1,6 +1,5 @@
-package no.ntnu.idata2900.group3.chairspace.dto;
+package no.ntnu.idata2900.group3.chairspace.dto.area;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +26,13 @@ public class AreaDto {
 	private String name;
 	private String description;
 	private boolean reservable;
+
+	/**
+	 * No args constructor.
+	 */
+	public AreaDto() {
+		// Empty constructor for serialization/deserialization
+	}
 
 	/**
 	 * Creates a single instance of an areaDto based on an exiting areaDTO.
@@ -173,22 +179,16 @@ public class AreaDto {
 	}
 
 	/**
-	 * A simple DTO to be used for the super areas contained within this dto.
-	 * This is used to avoid including irrelevant data about
-	 * super areas when requesting a single area.
+	 * Returns the id of the super area of this area.
+	 * Will return null if no super area exists.
+	 *
+	 * @return super area id
 	 */
-	private class SimpleSuperAreaDto {
-		@JsonProperty
-		private UUID id;
-		@JsonProperty
-		private String name;
-		@JsonProperty
-		private String areaType;
-
-		public SimpleSuperAreaDto(Area superArea) {
-			this.id = superArea.getId();
-			this.name = superArea.getName();
-			this.areaType = superArea.getAreaType().getId();
+	public UUID getIdOfSuperArea() {
+		UUID superId = null;
+		if (!superAreas.isEmpty()) {
+			superId = superAreas.get(0).getId();
 		}
+		return superId;
 	}
 }

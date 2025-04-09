@@ -73,10 +73,7 @@ public class Reservation implements EntityInterface<UUID> {
 		setUser(user);
 		setTimes(start, end);
 		setComment(comment);
-		setArea(area, start, end);
-		// If this method is ever changed, make sure to always have this at the bottom to not add a
-		//   incomplete object to the area
-		area.addReservation(this);
+		setArea(area);
 	}
 
 	/**
@@ -104,10 +101,7 @@ public class Reservation implements EntityInterface<UUID> {
 		setUser(user);
 		setTimes(start, end);
 		setComment("");
-		setArea(area, start, end);
-		// If this method is ever changed, make sure to always have this at the bottom to not add a
-		//   incomplete object to the area
-		area.addReservation(this);
+		setArea(area);
 	}
 
 
@@ -120,44 +114,16 @@ public class Reservation implements EntityInterface<UUID> {
 	 *
 	 * @param area to reserve
 	 * @throws ReservedException if area is not free for the specified timespan
+	 * @throws NotReservableException if the area is not reservable
+	 * @throws IllegalArgumentException if the area is null
 	 */
 	private void setArea(Area area)
-		throws ReservedException {
+		throws NotReservableException {
 		if (area == null) {
 			throw new IllegalArgumentException("Area was null when value was expected");
 		}
-		if (startDateTime == null || endDateTime == null) {
-			throw new IllegalStateException(
-				"Cannot assign area as the reservation has no start or end time"
-			);
-		}
-		if (!area.isFreeBetween(startDateTime, endDateTime)) {
-			throw ReservedException.reservationOverlapException();
-		}
-		this.area = area;
-	}
-
-	/**
-	 * Sets the area of the reservation.
-	 * Checks if the area is free for the timespan
-	 *
-	 * @param area the area to reserve
-	 * @param startTime start time of the reservation
-	 * @param endTime end time of the reservation
-	 * @throws ReservedException If timespan overlaps with existing reservation
-	 */
-	private void setArea(Area area, LocalDateTime startTime, LocalDateTime endTime)
-		throws ReservedException {
-		if (area == null) {
-			throw new IllegalArgumentException("Area was null when value was expected");
-		}
-		if (startTime == null || endTime == null) {
-			throw new IllegalStateException(
-				"Cannot assign area as the reservation has no start or end time"
-			);
-		}
-		if (!area.isFreeBetween(startDateTime, endDateTime)) {
-			throw ReservedException.reservationOverlapException();
+		if (!area.isReservable()) {
+			throw NotReservableException.areaNotReservableException();
 		}
 		this.area = area;
 	}

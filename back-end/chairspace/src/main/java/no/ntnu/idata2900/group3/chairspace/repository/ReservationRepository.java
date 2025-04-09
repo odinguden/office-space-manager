@@ -3,6 +3,7 @@ package no.ntnu.idata2900.group3.chairspace.repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

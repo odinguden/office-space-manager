@@ -1,4 +1,4 @@
-package no.ntnu.idata2900.group3.chairspace.dto;
+package no.ntnu.idata2900.group3.chairspace.dto.area;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,6 +18,10 @@ public class AreaCreationDto {
 	private String name;
 	private String description;
 	private boolean reservable;
+
+	public AreaCreationDto() {
+		// Empty constructor for serialization/deserialization
+	}
 
 	/**
 	 * Returns the uuid of administrator.

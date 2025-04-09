@@ -8,8 +8,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import no.ntnu.idata2900.group3.chairspace.dto.AreaCreationDto;
-import no.ntnu.idata2900.group3.chairspace.dto.AreaDto;
+import no.ntnu.idata2900.group3.chairspace.dto.area.AreaCreationDto;
+import no.ntnu.idata2900.group3.chairspace.dto.area.AreaDto;
+import no.ntnu.idata2900.group3.chairspace.dto.area.AreaModificationDto;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaType;
@@ -47,7 +48,6 @@ import org.springframework.web.server.ResponseStatusException;
 @CrossOrigin(origins = "${frontend.url}")
 @RequestMapping("/area")
 public class AreaController extends AbstractPermissionManager {
-
 	@Autowired
 	private AreaRepository areaRepository;
 	@Autowired
@@ -68,9 +68,46 @@ public class AreaController extends AbstractPermissionManager {
 	 * @throws ResponseStatusException 409 conflict if the ID already exists in the repository
 	 * @throws ResponseStatusException 400 bad request if data in the DTO is not valid for creation
 	 *     of an area.
-
+	 * @throws ResponseStatusException code 404 if the super area included in the dto does not exist
+	 * @throws ResponseStatusException code 404 if the area feature included
+	 *     in the dto does not exist
+	 * @throws ResponseStatusException code 404 if the area included in the dto type does not exist
 	 */
 	@PostMapping()
+	@Operation(
+		summary = "Creates a new area",
+		description = "Attempts to create a new entity using data from the AreaCreationDto"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "201",
+			description = "Successfully created a new area"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users are not permitted to create areas"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to create areas"
+			),
+		@ApiResponse(
+			responseCode = "400",
+			description = "Failed to create area with the information contained within the area DTO"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Could not find super area from Id in area creation dto"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Could not find areaType from Id in area creation dto"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Could not find areaFeature from Id in area creation dto"
+			)
+	})
 	public ResponseEntity<String> postEntity(@RequestBody AreaCreationDto areaDto) {
 		super.hasPermissionToPost();
 		Area area = buildArea(areaDto);
@@ -80,13 +117,37 @@ public class AreaController extends AbstractPermissionManager {
 
 	/**
 	 * Returns area with the given id.
-	 * TODO: mabye create seperate dto for returning area to avoid returning admin uuid's
-	 * TODO: Swagger doc
 	 *
 	 * @param id uuid of area
 	 * @return area
+	 * @throws ResponseStatus exception code 401 unauthorized if the request lacks authorization
+	 * @throws ResponseStatus exception code 403 forbidden if the authorization
+	 *     included is not sufficient to get area
+	 * @throws ResponseStatus exception code 404 if no area can be found with this id
 	 */
 	@GetMapping("/{id}")
+	@Operation(
+		summary = "Gets an area",
+		description = "Attempts to find an area with the given ID"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Found an area with the given name"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users do not have access to read these areas"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to read these areas"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "No area with the given ID was found"
+			)
+	})
 	public ResponseEntity<AreaDto> getArea(@PathVariable UUID id) {
 		hasPermissionToGet();
 		Optional<Area> optionalArea = areaRepository.findById(id);
@@ -98,13 +159,32 @@ public class AreaController extends AbstractPermissionManager {
 	}
 
 	/**
-	 * Gets all areas in database.
-	 * TODO: Make areaData to return areas without administrators
-	 * TODO: Swagger doc
+	 * Returns all areas from the database as area DTO's.
 	 *
 	 * @return all areas in the database in list
+	 * @throws ResponseStatusException code 401 unauthorized if the request lacks authorization
+	 * @throws ResponseStatusException code 403 forbidden if the authorization
+	 *     included is not sufficient to get all areas
 	 */
 	@GetMapping("")
+	@Operation(
+		summary = "Gets all Areas",
+		description = "Gets all areas in the repository"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Found all areas"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users do not have access to read these areas"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to read these areas"
+			)
+	})
 	public ResponseEntity<List<AreaDto>> getArea() {
 		hasPermissionToGetAll();
 		Iterator<Area> it = areaRepository.findAll().iterator();
@@ -129,7 +209,7 @@ public class AreaController extends AbstractPermissionManager {
 	 * @throws ResponseStatusException 404 not found upon attempting to update an area that does
 	 *      not exist
 	 */
-	@PutMapping("")
+	@PutMapping()
 	@Operation(
 		summary = "Updates an area",
 		description = "Attempts to update an area"
@@ -148,17 +228,32 @@ public class AreaController extends AbstractPermissionManager {
 			description = "User has insufficient permissions to update area"
 			),
 		@ApiResponse(
-			responseCode = "404",
-			description = "Failed to update the area as it doesn't exist"
+			responseCode = "400",
+			description = "Bad request if not able to update"
+				+ " area with the information contained in the dto"
 			)
 	})
-	public ResponseEntity<String> putArea(@RequestBody AreaDto areaDto) {
+	public ResponseEntity<String> putArea(@RequestBody AreaModificationDto areaDto) {
 		super.hasPermissionToPut();
-		UUID id = areaDto.getId();
-		Optional<Area> optionalArea = areaRepository.findById(id);
-		if (!optionalArea.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		// Throws 404 if area cannot be found
+		Area area = getAreaFromId(areaDto.getId());
+		try {
+			area.updateName(areaDto.getName());
+		} catch (InvalidArgumentCheckedException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
+		area.updateDescription(areaDto.getDescription());
+		area.setReservable(areaDto.isReservable());
+		try {
+			area.updateCapacity(areaDto.getCapacity());
+		} catch (InvalidArgumentCheckedException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+		// Throws 404 if area type cannot be found
+		AreaType areaType = getAreaType(areaDto.getAreaType());
+		area.updateAreaType(areaType);
+		area.updateCalendarLink(areaDto.getCalendarLink());
+		areaRepository.save(area);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
@@ -175,7 +270,7 @@ public class AreaController extends AbstractPermissionManager {
 	 */
 	@DeleteMapping("/{id}")
 	@Operation(
-		summary = "Deletes aa area",
+		summary = "Deletes an area",
 		description = "Attempts to delete a area with the given ID"
 	)
 	@ApiResponses(value = {
@@ -193,7 +288,7 @@ public class AreaController extends AbstractPermissionManager {
 			),
 		@ApiResponse(
 			responseCode = "404",
-			description = "Failed to area the entity as it doesn't exist"
+			description = "Failed to delete the area as it doesn't exist"
 			)
 	})
 	public ResponseEntity<String> deleteArea(@PathVariable UUID id) {
@@ -212,6 +307,15 @@ public class AreaController extends AbstractPermissionManager {
 
 	// ----- Methods for Area Creation -----
 
+	/**
+	 * Builds an area object from an area creation DTO.
+	 *
+	 * @param areaDto The area DTO to be used as base to build area object
+	 * @return area built from dto
+	 * @throws ResponseStatusException code 404 if the area does not exist
+	 * @throws ResponseStatusException code 404 if the area feature does not exist
+	 * @throws ResponseStatusException code 404 if the area type does not exist
+	 */
 	private Area buildArea(AreaCreationDto areaDto) {
 		AreaType areaType = getAreaType(areaDto.getAreaType());
 
@@ -272,7 +376,7 @@ public class AreaController extends AbstractPermissionManager {
 	 *
 	 * @param id the id of the area to get
 	 * @return an area from the database
-	 * @throws ResponseStatusException if the area does not exist
+	 * @throws ResponseStatusException code 404 if the area does not exist
 	 */
 	public Area getAreaFromId(UUID id) {
 		Optional<Area> optional = areaRepository.findById(id);
@@ -287,12 +391,13 @@ public class AreaController extends AbstractPermissionManager {
 	 *
 	 * @param id string id
 	 * @return Area feature from the database
+	 * @throws ResponseStatusException code 404 if the area feature does not exist in the database
 	 */
 	private AreaFeature getAreaFeature(String id) {
 		Optional<AreaFeature> optionalAreaFeature = areaFeatureRepository.findById(id);
 		if (!optionalAreaFeature.isPresent()) {
 			throw new ResponseStatusException(
-				HttpStatus.BAD_REQUEST,
+				HttpStatus.NOT_FOUND,
 				"Cannot create area with feature: " + id + " as it does not exist in database"
 			);
 		}
@@ -303,7 +408,7 @@ public class AreaController extends AbstractPermissionManager {
 		Optional<User> optionalUser = userRepository.findById(id);
 		if (!optionalUser.isPresent()) {
 			throw new ResponseStatusException(
-				HttpStatus.BAD_REQUEST,
+				HttpStatus.NOT_FOUND,
 				"Could not find user with id: " + id.toString()
 				+ ". Unable to create area with this user as administrator."
 			);
@@ -316,16 +421,236 @@ public class AreaController extends AbstractPermissionManager {
 	 *
 	 * @param id id of area type
 	 * @return AreaType from database
-	 * @throws ResponseStatusException 400 bad request if a area type cannot be found
+	 * @throws ResponseStatusException code 404 if the area type does not exist in the database
 	 */
 	private AreaType getAreaType(String id) {
 		Optional<AreaType> optionalAreaType = areaTypeRepository.findById(id);
 		if (!optionalAreaType.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
 			"Cannot create area with provided area type, as it does not exist in database"
 			);
 		}
 		return optionalAreaType.get();
+	}
+
+	/**
+	 * Adds an area feature to an area.
+	 *
+	 * @param areaId id of the area to add the feature to
+	 * @param areaFeatureId id of the area feature to add to the area
+	 * @return response entity with status 204 no content
+	 * @throws ResponseStatusException code 401 unauthorized if the request lacks authorization
+	 * @throws ResponseStatusException code 403 forbidden if the authorization included with the
+	 *      request has insufficient permissions to update entities.
+	 * @throws ResponseStatusException code 404 not found upon attempting to update an area that
+	 *      does not exist
+	 * @throws ResponseStatusException code 404 not found upon attempting to add an areaFeature that
+	 *      does not exist
+	 */
+	@PostMapping("/addAreaFeature/{areaId}/{areaFeatureId}")
+	@Operation(
+		summary = "Adds an area feature to an area",
+		description = "Attempts to add an area feature to an area"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "204",
+			description = "Successfully added area feature to area"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users are not permitted to add area features to areas"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to add area features to areas"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Failed to add area feature to area as it doesn't exist"
+			)
+	})
+	public ResponseEntity<String> addAreaFeatureToArea(@PathVariable UUID areaId,
+		@PathVariable String areaFeatureId) {
+		super.hasPermissionToPut();
+		Area area = getAreaFromId(areaId);
+		AreaFeature areaFeature = getAreaFeature(areaFeatureId);
+		area.addAreaFeature(areaFeature);
+		areaRepository.save(area);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	/**
+	 * Removes an area feature from an area.
+	 *
+	 * @param areaId id of the area to remove the feature from
+	 * @param areaFeatureId id of the area feature to remove from the area
+	 * @return response entity with status 204 no content
+	 * @throws ResponseStatusException code 401 unauthorized if the request lacks authorization
+	 * @throws ResponseStatusException code 403 forbidden if the authorization included with the
+	 *      request has insufficient permissions to update entities.
+	 * @throws ResponseStatusException code 404 not found upon attempting to update an area that
+	 *      does not exist
+	 * @throws ResponseStatusException code 404 not found upon attempting to remove an
+	 *     areaFeature that does not exist
+	 */
+	//Made this a put mapping since it modifies the area object
+	// and is not a delete operation. It is not a delete operation since the area feature
+	@PutMapping("/removeAreaFeature/{areaId}/{areaFeatureId}")
+	@Operation(
+		summary = "Removes an area feature from an area",
+		description = "Attempts to remove an area feature from an area"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "204",
+			description = "Successfully removed area feature from area"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users are not permitted to remove area features from areas"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to remove area features from areas"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Failed to remove area feature from area as it doesn't exist"
+			)
+	})
+	public ResponseEntity<String> removeAreaFeatureFromArea(@PathVariable UUID areaId,
+		@PathVariable String areaFeatureId) {
+		super.hasPermissionToPut();
+		Area area = getAreaFromId(areaId);
+		AreaFeature areaFeature = getAreaFeature(areaFeatureId);
+		area.removeAreaFeature(areaFeature);
+		areaRepository.save(area);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	/**
+	 * Replaces the super area of an area.
+	 * This is a put mapping since it modifies the area object.
+	 *
+	 * @param areaId id of the area to replace the super area of
+	 * @param superAreaId id of the new super area to set
+	 * @return response entity with status 204 no content
+	 * @throws ResponseStatusException code 401 unauthorized if the request lacks authorization
+	 * @throws ResponseStatusException code 403 forbidden if the authorization included with the
+	 * 	   request has insufficient permissions to update entities.
+	 * @throws ResponseStatusException code 404 not found upon attempting to update an area that
+	 * 	   does not exist
+	 * @throws ResponseStatusException code 404 not found upon attempting to set a super area that
+	 * 	   does not exist
+	 * @throws ResponseStatusException code 400 bad request if the super area is not valid
+	 * @throws ResponseStatusException code 400 bad request if the super area has no administrators
+	 */
+	@PutMapping("/replaceSuperArea/{areaId}/{superAreaId}")
+	@Operation(
+		summary = "Replaces the super area of an area",
+		description = "Attempts to replace the super area of an area"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "204",
+			description = "Successfully replaced the super area of the area"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users are not permitted to replace super areas of areas"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to replace super areas of areas"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Failed to replace super area of area as it doesn't exist"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Failed to replace super area of area as the super area doesn't exist"
+			),
+		@ApiResponse(
+			responseCode = "400",
+			description = "Failed to replace super area of area as the super area is not valid"
+			),
+		@ApiResponse(
+			responseCode = "400",
+			description = "Failed to replace super area of area as the super area has no "
+				+ "administrators"
+			)
+	})
+	public ResponseEntity<String> replaceSuperArea(@PathVariable UUID areaId,
+		@PathVariable UUID superAreaId) {
+		super.hasPermissionToPut();
+		Area area = getAreaFromId(areaId);
+		Area superArea = getAreaFromId(superAreaId);
+		try {
+			area.setSuperArea(superArea);
+			// Ideally we should catch and handle the exceptions separately.areaFeatureController
+			// But since we're just returning the error message to the client.
+			// We handle them both the same way.
+			// And also a super area should never have no administrators.
+			// So AdminCountException should never be thrown.
+		} catch (InvalidArgumentCheckedException | AdminCountException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+		areaRepository.save(area);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	/**
+	 * Removes the super area of an area.
+	 * This is a put mapping since it modifies the area object.
+	 *
+	 * @param areaId id of the area to remove the super area from
+	 * @return response entity with status 204 no content
+	 * @throws ResponseStatusException code 401 unauthorized if the request lacks authorization
+	 * @throws ResponseStatusException code 403 forbidden if the authorization included with the
+	 *      request has insufficient permissions to update entities.
+	 * @throws ResponseStatusException code 404 not found upon attempting to update an area that
+	 *      does not exist
+	 */
+	@PutMapping("removesuperarea/{areaId}")
+	@Operation(
+		summary = "Removes the super area of an area",
+		description = "Attempts to remove the super area of an area"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "204",
+			description = "Successfully removed the super area of the area"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users are not permitted to remove super areas of areas"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to remove super areas of areas"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Failed to remove super area of area as it doesn't exist"
+			),
+		@ApiResponse(
+			responseCode = "400",
+			description = "Failed to remove super area of area as"
+				+ " the area has no admins of it's own"
+			),
+	})
+	public ResponseEntity<String> removeSuperArea(@PathVariable UUID areaId) {
+		super.hasPermissionToPut();
+		Area area = getAreaFromId(areaId);
+		try {
+			area.removeSuperArea();
+		} catch (AdminCountException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+		areaRepository.save(area);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 }
 

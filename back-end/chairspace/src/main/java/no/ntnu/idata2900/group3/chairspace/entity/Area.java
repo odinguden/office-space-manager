@@ -12,16 +12,12 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.exceptions.AdminCountException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
-import no.ntnu.idata2900.group3.chairspace.exceptions.NotReservableException;
-import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
-import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * Represents a reservable area in the database.
@@ -59,7 +55,6 @@ public class Area implements EntityInterface<UUID> {
 	@ManyToOne
 	private AreaType areaType;
 	@OneToMany(mappedBy = "area")
-	private Set<Reservation> reservations;
 	private int capacity;
 	private boolean calendarControlled;
 	private String calendarLink;
@@ -99,8 +94,8 @@ public class Area implements EntityInterface<UUID> {
 		this.calendarLink = builder.calendarLink;
 		this.administrators = builder.administrators;
 		this.features = builder.features;
-		this.reservations = new HashSet<>();
 		this.reservable = builder.reservable;
+		this.id = builder.id;
 	}
 
 	/* ---- Getters ---- */
@@ -211,16 +206,6 @@ public class Area implements EntityInterface<UUID> {
 	}
 
 	/**
-	 * Returns the reservations of this area in a set.
-	 *
-	 * @return the reservations of this area.
-	 * @see Reservation
-	 */
-	public Iterator<Reservation> getReservations() {
-		return reservations.iterator();
-	}
-
-	/**
 	 * Returns the number of admin users for this area + super areas.
 	 * This method is used to ensure that a area always has a admin user.
 	 *
@@ -264,28 +249,6 @@ public class Area implements EntityInterface<UUID> {
 
 
 	/* ---- Setters ---- */
-
-
-	/**
-	 * Adds a reservation if the area is free for the matching time span.
-	 *
-	 * @param reservation the reservation to add
-	 * @throws ReservedException if area is not free for the reservations timespan
-	 * @throws NotReservableException if area is not reservable
-	 */
-	public void addReservation(Reservation reservation)
-		throws  ReservedException, NotReservableException {
-		if (reservation == null) {
-			throw new IllegalArgumentException("Reservation is null when value was expected ");
-		}
-		if (!reservable) {
-			throw NotReservableException.overlapException();
-		}
-		if (!isFreeBetween(reservation.getStart(), reservation.getEnd())) {
-			throw ReservedException.reservationOverlapException();
-		}
-		reservations.add(reservation);
-	}
 
 	/**
 	 * Adds a user to the assigned administrators of this area.
@@ -332,20 +295,6 @@ public class Area implements EntityInterface<UUID> {
 	}
 
 	/**
-	 * Removes reservation from the area.
-	 *
-	 * @param reservation the reservation to remove.
-	 * @throws IllegalArgumentException if reservation is null
-	 */
-	public void removeReservation(Reservation reservation)
-		throws IllegalArgumentException {
-		if (reservation == null) {
-			throw new IllegalArgumentException("Reservation is null");
-		}
-		reservations.remove(reservation);
-	}
-
-	/**
 	 * Sets the super area of the area.
 	 *
 	 * @param area Super area
@@ -382,6 +331,19 @@ public class Area implements EntityInterface<UUID> {
 	}
 
 	/**
+	 * Removes a area feature.
+	 *
+	 * @param areaFeature The feature to remove
+	 * @throws IllegalArgumentException if areaFeature is null
+	 */
+	public void removeAreaFeature(AreaFeature areaFeature) {
+		if (areaFeature == null) {
+			throw new IllegalArgumentException("Area feature is null when value is expected");
+		}
+		features.remove(areaFeature);
+	}
+
+	/**
 	 * Updates the description.
 	 *
 	 * @param newDescription new description as string.
@@ -402,81 +364,68 @@ public class Area implements EntityInterface<UUID> {
 	 */
 	public void updateCapacity(int newCapacity) throws InvalidArgumentCheckedException {
 		if (newCapacity < 0) {
-			throw new InvalidArgumentCheckedException("Capacity cannot be less than 1");
+			throw new InvalidArgumentCheckedException("Capacity cannot be less than 0");
 		}
 		capacity = newCapacity;
 	}
 
 	/**
+	 * Updates the calendar link.
+	 * Will set the calendar controlled status to true if a link is provided.
+	 *
+	 * @param newCalendarLink the new calendar link
+	 */
+	public void updateCalendarLink(String newCalendarLink) {
+		if (newCalendarLink == null || newCalendarLink.isEmpty()) {
+			calendarControlled = false;
+			calendarLink = null;
+		} else {
+			calendarControlled = true;
+			calendarLink = newCalendarLink;
+		}
+	}
+
+	/**
+	 * Updates the name of the area.
+	 *
+	 * @param newName the new name of the area
+	 * @throws InvalidArgumentCheckedException if newName is null or empty
+	 */
+	public void updateName(String newName) throws InvalidArgumentCheckedException {
+		if (newName == null) {
+			throw new InvalidArgumentCheckedException("Name cannot be null");
+		}
+		if (newName.isBlank()) {
+			throw new InvalidArgumentCheckedException("Name cannot be empty");
+		}
+		name = newName;
+	}
+
+	/**
+	 * Updates the area type of the area.
+	 *
+	 * @param newAreaType the new area type
+	 * @throws IllegalArgumentException if newAreaType is null
+	 */
+	public void updateAreaType(AreaType newAreaType) {
+		if (newAreaType == null) {
+			throw new IllegalArgumentException("Area type is null when value was expected");
+		}
+		areaType = newAreaType;
+	}
+
+	/**
 	 * Toggles the reservable state of the area.
-	 * State will not change from true to false if there are reservations in the future.
+	 * Will not delete existing reservations.
+	 * But will make it impossible to make new reservations.
 	 *
 	 * @param reservable the new reservable state
-	 * @throws InvalidArgumentCheckedException if there are reservations in the future when trying
-	 *     to make area non reservable
 	 */
-	public void setReservable(boolean reservable) throws InvalidArgumentCheckedException {
-		if (!reservable) {
-			Iterator<Reservation> it = getReservations();
-			LocalDateTime now = LocalDateTime.now();
-			boolean reservationsInFuture = false;
-			while (it.hasNext() && !reservationsInFuture) {
-				Reservation reservation = it.next();
-
-				reservationsInFuture = reservation.getEnd().isAfter(now);
-			}
-			if (reservationsInFuture) {
-				throw new InvalidArgumentCheckedException(
-					"Cannot make area non reservable as there are reservation in the future"
-				);
-			}
-		}
+	public void setReservable(boolean reservable) {
 		this.reservable = reservable;
 	}
 
 	/* ---- Methods ---- */
-
-	private void isFreeIncludingSubAreas() {
-		//TODO: implement
-		// Should isFreeBetween check super area for conflicts
-		throw new NotImplementedException();
-	}
-
-	/**
-	 * Returns true if the area is free in this block of time. false if not.
-	 *
-	 * @param start start of time block
-	 * @param end end of time block
-	 * @return true or false depending on if reservations exists in this block of time
-	 */
-	public boolean isFreeBetween(LocalDateTime start, LocalDateTime end)
-		throws IllegalArgumentException {
-		if (start == null) {
-			throw new IllegalArgumentException("Start is null when value was expected");
-		}
-		if (end == null) {
-			throw new IllegalArgumentException("End is null when value was expected");
-		}
-		// Thanks Sigve
-		return reservations.stream()
-			.noneMatch(r -> r.doesCollide(start, end));
-	}
-
-	/**
-	 * Returns true if the area is free at this time. false if not.
-	 *
-	 * @param time The time to check
-	 * @return True or false depending on if the point of time is free
-	 * @throws IllegalArgumentException if time is null
-	 */
-	public boolean isFree(LocalDateTime time)
-		throws IllegalArgumentException {
-		if (time == null) {
-			throw new IllegalArgumentException("Time is null when value was expected");
-		}
-		return reservations.stream()
-			.noneMatch(r -> r.doesCollide(time));
-	}
 
 	/**
 	 * Returns true if user is administrator of this area or this areas super area.
@@ -516,6 +465,7 @@ public class Area implements EntityInterface<UUID> {
 		private AreaType areaType;
 		private Set<AreaFeature> features;
 		private boolean reservable;
+		private UUID id;
 		// Damn this is a lot of fields.
 		// Good im using the builder pattern then 😎
 
@@ -716,6 +666,18 @@ public class Area implements EntityInterface<UUID> {
 				throw new AdminCountException("Cannot create area without administrator");
 			}
 			return new Area(this);
+		}
+
+		/**
+		 * Sets the id of the area that is to be built.
+		 * This parameter is nullable
+		 *
+		 * @param id id as UUID
+		 * @return builder object
+		 */
+		public Builder id(UUID id) {
+			this.id = id;
+			return this;
 		}
 
 		/**
