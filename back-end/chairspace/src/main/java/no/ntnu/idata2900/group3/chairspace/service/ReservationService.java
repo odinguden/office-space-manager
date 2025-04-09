@@ -13,6 +13,9 @@ import no.ntnu.idata2900.group3.chairspace.repository.ReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service class for managing and interacting with reservations.
+ */
 @Service
 public class ReservationService {
 	public static final int MS_IN_DAY = 24 * 60 * 60 * 1000;
