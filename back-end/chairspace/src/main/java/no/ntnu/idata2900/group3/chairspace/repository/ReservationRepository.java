@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
-
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -43,4 +42,28 @@ public interface ReservationRepository extends CrudRepository<Reservation, UUID>
 		LocalDateTime startTime,
 		LocalDateTime endTime
 	);
+
+	/**
+	 * Checks if the time slot is occupied by an existing reservation.
+	 *
+	 * @param areaId the area to check for
+	 * @param startTime the start time of the time slot
+	 * @param endTime the end time of the time slot
+	 * @return true if the time slot is free
+	 */
+	@Query("""
+		SELECT COUNT(res) = 0
+		FROM Reservation res
+		WHERE res.area.id = ?1
+		AND (
+			res.startDateTime BETWEEN ?2 AND ?3
+			OR
+			res.endDateTime BETWEEN ?2 and ?3
+			OR
+			(
+				res.startDateTime < ?2 AND res.endDateTime > ?3
+			)
+		)
+		""")
+	public boolean isTimeSlotFree(UUID areaId, LocalDateTime startTime, LocalDateTime endTime);
 }
