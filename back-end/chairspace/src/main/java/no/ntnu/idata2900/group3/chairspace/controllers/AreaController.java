@@ -3,7 +3,6 @@ package no.ntnu.idata2900.group3.chairspace.controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.dto.PaginationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.area.AreaCreationDto;
@@ -26,6 +25,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -171,7 +171,7 @@ public class AreaController extends AbstractPermissionManager {
 	 *     included is not sufficient to get all areas
 	 * @throws ResponseStatusException code 400 if the requested page does not exist
 	 */
-	@GetMapping("/page/{page}")
+	@GetMapping("")
 	@Operation(
 		summary = "Gets all areas in a pagination",
 		description = "Gets all areas in the repository in a pagination containing 12 elements"
@@ -194,7 +194,7 @@ public class AreaController extends AbstractPermissionManager {
 			description = "The requested page does not exist"
 			)
 	})
-	public ResponseEntity<PaginationDto<AreaDto>> getAreasInPagination(@PathVariable int page) {
+	public ResponseEntity<PaginationDto<AreaDto>> getAreasInPagination(@RequestParam int page) {
 		hasPermissionToGetAll();
 		PaginationDto<AreaDto> areaPagination;
 		try {
@@ -219,7 +219,7 @@ public class AreaController extends AbstractPermissionManager {
 	 * @throws ResponseStatusException 404 not found upon attempting to update an area that does
 	 *      not exist
 	 * @throws ResponseStatusException 404 not found if new area type cannot be found
-	 * @throws ResponseStatusException 400 bad request if the user tries to change a value to 
+	 * @throws ResponseStatusException 400 bad request if the user tries to change a value to
 	 *     a invalid value
 	 */
 	@PutMapping()
