@@ -8,11 +8,13 @@ import no.ntnu.idata2900.group3.chairspace.entity.User;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Service for user entity.
  * Connects application logic to database
  */
+@Service	
 public class UserService extends AbstractEntityService<User, UUID> {
 	@Autowired
 	UserRepository userRepository;
