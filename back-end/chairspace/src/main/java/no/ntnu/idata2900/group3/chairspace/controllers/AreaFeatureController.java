@@ -1,7 +1,7 @@
 package no.ntnu.idata2900.group3.chairspace.controllers;
 
 import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
-import no.ntnu.idata2900.group3.chairspace.repository.AreaFeatureRepository;
+import no.ntnu.idata2900.group3.chairspace.service.AreaFeatureService;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/areafeature")
 public class AreaFeatureController extends AbstractController<AreaFeature, String> {
 
-	protected AreaFeatureController(AreaFeatureRepository repository) {
-		super(repository);
+	protected AreaFeatureController(AreaFeatureService service) {
+		super(service);
 	}
 }

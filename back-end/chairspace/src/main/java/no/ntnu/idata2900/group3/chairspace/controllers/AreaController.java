@@ -164,39 +164,6 @@ public class AreaController extends AbstractPermissionManager {
 	/**
 	 * Returns all areas from the database as area DTO's.
 	 *
-	 * @return all areas in the database in list
-	 * @throws ResponseStatusException code 401 unauthorized if the request lacks authorization
-	 * @throws ResponseStatusException code 403 forbidden if the authorization
-	 *     included is not sufficient to get all areas
-	 */
-	@GetMapping("/all")
-	@Operation(
-		summary = "Gets all Areas",
-		description = "Gets all areas in the repository"
-	)
-	@ApiResponses(value = {
-		@ApiResponse(
-			responseCode = "200",
-			description = "Found all areas"
-			),
-		@ApiResponse(
-			responseCode = "401",
-			description = "Unauthorized users do not have access to read these areas"
-			),
-		@ApiResponse(
-			responseCode = "403",
-			description = "User has insufficient permissions to read these areas"
-			)
-	})
-	public ResponseEntity<List<AreaDto>> getAreas() {
-		hasPermissionToGetAll();
-		List<AreaDto> areas = areaService.getAreasAsDto();
-		return new ResponseEntity<>(areas, HttpStatus.OK);
-	}
-
-	/**
-	 * Returns all areas from the database as area DTO's.
-	 *
 	 * @param page the requested page
 	 * @return all areas in the database in a pagination
 	 * @throws ResponseStatusException code 401 unauthorized if the request lacks authorization
