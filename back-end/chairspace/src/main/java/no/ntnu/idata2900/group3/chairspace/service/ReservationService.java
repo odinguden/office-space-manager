@@ -1,8 +1,13 @@
 package no.ntnu.idata2900.group3.chairspace.service;
 
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.UUID;
+import no.ntnu.idata2900.group3.chairspace.dto.reservation.ReservationDto;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
@@ -12,16 +17,6 @@ import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 import no.ntnu.idata2900.group3.chairspace.repository.AreaRepository;
 import no.ntnu.idata2900.group3.chairspace.repository.ReservationRepository;
 import no.ntnu.idata2900.group3.chairspace.repository.UserRepository;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Month;
-import java.time.YearMonth;
-import java.util.List;
-import java.util.UUID;
-import no.ntnu.idata2900.group3.chairspace.dto.reservation.ReservationDto;
-import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
-import no.ntnu.idata2900.group3.chairspace.repository.ReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +29,7 @@ public class ReservationService {
 
 	@Autowired
 	ReservationRepository reservationRepository;
-  @Autowired
+	@Autowired
 	private AreaRepository areaRepository;
 	@Autowired
 	private UserRepository userRepository;
@@ -49,8 +44,8 @@ public class ReservationService {
 	/**
 	 * Creates a reservation for the given area and user.
 	 *
-	 * @param area the area to reserve
-	 * @param user the user reserving the area
+	 * @param areaId the id of the area to reserve
+	 * @param userId the id of the user reserving the area
 	 * @param start the start date and time of the reservation
 	 * @param end the end date and time of the reservation
 	 * @param comment a comment for the reservation
@@ -61,37 +56,23 @@ public class ReservationService {
 	 * @throws NotReservableException if the area is not reservable
 	 */
 	public Reservation createReservation(
-		Area area,
-		User user,
+		UUID areaId,
+		UUID userId,
 		LocalDateTime start,
 		LocalDateTime end,
 		String comment
 	) throws InvalidArgumentCheckedException, ReservedException, NotReservableException {
-		area = getArea(area.getId());
-		user = getUser(user.getId());
-
-		if (checkAreaForConflict(area, start, end)) {
+		if (!reservationRepository.isTimeSlotFree(areaId, start, end)) {
 			throw ReservedException.reservationOverlapException();
 		}
+
+		Area area = getArea(areaId);
+		User user = getUser(userId);
 
 		return new Reservation(area, user, start, end, comment);
 	}
 
-	/**
-	 * Creates a reservation for the given area and user.
-	 *
-	 * @param area the area to reserve
-	 * @param start the start date and time of the reservation
-	 * @param end the end date and time of the reservation
-	 * @return true if there are conflicts, false otherwise
-	 */
-	private boolean checkAreaForConflict(Area area, LocalDateTime start, LocalDateTime end) {
-		List<Reservation> reservations = reservationRepository.findByArea(area);
-
-		return reservations.stream()
-		.noneMatch(r -> r.doesCollide(start, end));
-	}
-
+	// TODO: Remove these when area and user have their own services
 	private Area getArea(UUID id) throws InvalidArgumentCheckedException {
 		Area area = areaRepository.findById(id).orElse(null);
 		if (area == null) {
@@ -106,6 +87,7 @@ public class ReservationService {
 			throw new InvalidArgumentCheckedException("User not found");
 		}
 		return user;
+	}
 
 	/**
 	 * Gets all the reservations that exist for an area within the specified time period.
