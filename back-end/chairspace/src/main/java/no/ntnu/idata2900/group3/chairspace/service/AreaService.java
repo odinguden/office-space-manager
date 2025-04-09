@@ -199,7 +199,7 @@ public class AreaService {
 	 * @throws InvalidArgumentCheckedException if new super area is not a valid super area
 	 * @throws AdminCountException the action will leave area without any administrators of it's own
 	 */
-	public void replaceSuperArea(UUID areaId, UUID superAreaId)
+	public void setSuperArea(UUID areaId, UUID superAreaId)
 		throws ElementNotFoundException, InvalidArgumentCheckedException, AdminCountException {
 		Area area = getArea(areaId);
 		if (area == null) {
@@ -291,12 +291,10 @@ public class AreaService {
 	 * @return boolean indicating success of removal
 	 */
 	public boolean removeArea(UUID id) {
-		// Check if the area exists in the repository
-		if (areaRepository.existsById(id)) {
-			// Remove the area from the repository
+		boolean exist = areaRepository.existsById(id);
+		if (exist) {
 			areaRepository.deleteById(id);
-			return true;
 		}
-		return false;
+		return exist;
 	}
 }
