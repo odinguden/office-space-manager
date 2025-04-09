@@ -15,10 +15,7 @@ import no.ntnu.idata2900.group3.chairspace.exceptions.AdminCountException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.PageNotFoundException;
-import no.ntnu.idata2900.group3.chairspace.repository.AreaFeatureRepository;
 import no.ntnu.idata2900.group3.chairspace.repository.AreaRepository;
-import no.ntnu.idata2900.group3.chairspace.repository.AreaTypeRepository;
-import no.ntnu.idata2900.group3.chairspace.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,11 +27,11 @@ public class AreaService {
 	@Autowired
 	AreaRepository areaRepository;
 	@Autowired
-	UserRepository userRepository;
+	UserService userService;
 	@Autowired
-	AreaTypeRepository areaTypeRepository;
+	AreaTypeService areaTypeService;
 	@Autowired
-	AreaFeatureRepository areaFeatureRepository;
+	AreaFeatureService areaFeatureService;
 
 	/**
 	 * No-args constructor for AreaService.
@@ -82,7 +79,7 @@ public class AreaService {
 	 */
 	public Area createAreaFromDto(AreaCreationDto areaDto)
 		throws AdminCountException, InvalidArgumentCheckedException, ElementNotFoundException {
-		AreaType areaType = getAreaType(areaDto.getAreaTypeIds());
+		AreaType areaType = areaTypeService.getEntity(areaDto.getAreaTypeIds());
 		if (areaType == null) {
 			throw ElementNotFoundException.areaTypeNotFoundException(areaDto.getAreaTypeIds());
 		}
@@ -93,7 +90,7 @@ public class AreaService {
 		);
 
 		for (UUID id : areaDto.getAdministratorIds()) {
-			User user = getUser(id);
+			User user = userService.getEntity(id);
 			if (user == null) {
 				throw ElementNotFoundException.userNotFoundException(id);
 			}
@@ -111,7 +108,7 @@ public class AreaService {
 		areaBuilder.description(areaDto.getDescription());
 		for (String areaFeature : areaDto.getAreaFeatureIds()) {
 			areaBuilder.feature(
-				getAreaFeature(areaFeature)
+				areaFeatureService.getEntity(areaFeature)
 			);
 		}
 		return areaBuilder.build();
@@ -161,7 +158,7 @@ public class AreaService {
 		if (area == null) {
 			throw ElementNotFoundException.areaNotFoundException(areaId);
 		}
-		AreaFeature areaFeature = getAreaFeature(featureId);
+		AreaFeature areaFeature = areaFeatureService.getEntity(featureId);
 		if (areaFeature == null) {
 			throw ElementNotFoundException.areaNotFoundException(areaId);
 		}
@@ -183,7 +180,7 @@ public class AreaService {
 		if (area == null) {
 			throw ElementNotFoundException.areaNotFoundException(areaId);
 		}
-		AreaFeature areaFeature = getAreaFeature(featureId);
+		AreaFeature areaFeature = areaFeatureService.getEntity(featureId);
 		if (areaFeature == null) {
 			throw ElementNotFoundException.areaFeatureNotFoundException(featureId);
 		}
@@ -273,7 +270,7 @@ public class AreaService {
 			area.updateCapacity(areaDto.getCapacity());
 		}
 		if (areaDto.getAreaType() != null) {
-			AreaType areaType = getAreaType(areaDto.getAreaType());
+			AreaType areaType = areaTypeService.getEntity(areaDto.getAreaType());
 			if (areaType == null) {
 				// A lot of indentation but seems like a waste to put all this in it's own method
 				throw ElementNotFoundException.areaTypeNotFoundException(areaDto.getAreaType());
@@ -301,40 +298,5 @@ public class AreaService {
 			return true;
 		}
 		return false;
-	}
-
-	/* ---- Non Area Database methods ---- */
-	// Only for use with AreaService, not for use with other services
-
-	/**
-	 * Returns an area feature based on id.
-	 *
-	 * @param id string id
-	 * @return Area feature from the database
-	 */
-	private AreaFeature getAreaFeature(String id) {
-		return areaFeatureRepository.findById(id).orElse(null);
-	}
-
-	/**
-	 * Returns a user based on id.
-	 * Returns null if the user does not exist in the database.
-	 *
-	 * @param id UUID of the user
-	 * @return User from the database
-	 */
-	private User getUser(UUID id) {
-		return userRepository.findById(id).orElse(null);
-	}
-
-	/**
-	 * Returns an area type based on id.
-	 * Returns null if the area type does not exist in the database.
-	 *
-	 * @param id string id
-	 * @return Area type from the database
-	 */
-	private AreaType getAreaType(String id) {
-		return areaTypeRepository.findById(id).orElse(null);
 	}
 }

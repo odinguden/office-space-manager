@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
  * Service for user entity.
  * Connects application logic to database
  */
-@Service	
+@Service
 public class UserService extends AbstractEntityService<User, UUID> {
 	@Autowired
 	UserRepository userRepository;
