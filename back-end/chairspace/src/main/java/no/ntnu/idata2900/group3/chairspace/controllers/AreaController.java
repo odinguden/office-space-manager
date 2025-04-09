@@ -179,7 +179,7 @@ public class AreaController extends AbstractPermissionManager {
 	@GetMapping("")
 	@Operation(
 		summary = "Gets all areas in a pagination",
-		description = "Gets all areas in the repository in a pagination containing 12 elements"
+		description = "Gets all areas in the repository in a pagination"
 	)
 	@ApiResponses(value = {
 		@ApiResponse(
