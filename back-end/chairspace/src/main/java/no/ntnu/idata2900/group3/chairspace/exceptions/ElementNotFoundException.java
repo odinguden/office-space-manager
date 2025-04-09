@@ -14,8 +14,20 @@ public class ElementNotFoundException extends Exception {
 	 *
 	 * @param message reason for throwing
 	 */
-	public ElementNotFoundException(String message) {
+	private ElementNotFoundException(String message) {
 		super(message);
+	}
+
+	/**
+	 * Creates new instance of ElementNotFoundException with predefined text for if a
+	 * generic entity could not be found.
+	 *
+	 * @return new ElementCouldNotBeFound instance with matching message
+	 */
+	public static ElementNotFoundException entityNotFoundException() {
+		return new ElementNotFoundException(
+			"Could not find item"
+		);
 	}
 
 	/**
