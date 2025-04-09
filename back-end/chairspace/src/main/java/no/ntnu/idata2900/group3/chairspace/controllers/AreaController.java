@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -162,14 +163,18 @@ public class AreaController extends AbstractPermissionManager {
 	}
 
 	/**
-	 * Returns all areas from the database as area DTO's.
+	 * Returns areas from the database in a pagination.
+	 * The maximum number of items that can be requested on a single page is 50.
 	 *
 	 * @param page the requested page
+	 * @param itemsPerPage the numbers of items included on a page
 	 * @return all areas in the database in a pagination
 	 * @throws ResponseStatusException code 401 unauthorized if the request lacks authorization
 	 * @throws ResponseStatusException code 403 forbidden if the authorization
 	 *     included is not sufficient to get all areas
 	 * @throws ResponseStatusException code 400 if the requested page does not exist
+	 * @throws ResponseStatusException code 400 if the number of items requested in a page is
+	 *     more than 50
 	 */
 	@GetMapping("")
 	@Operation(
@@ -192,13 +197,28 @@ public class AreaController extends AbstractPermissionManager {
 		@ApiResponse(
 			responseCode = "400",
 			description = "The requested page does not exist"
+			),
+		@ApiResponse(
+			responseCode = "400",
+			description = "Requested more page items that is legal"
 			)
 	})
-	public ResponseEntity<PaginationDto<AreaDto>> getAreasInPagination(@RequestParam int page) {
+	public ResponseEntity<PaginationDto<AreaDto>> getAreasInPagination(
+		@RequestParam int page, @RequestParam Integer itemsPerPage
+	) {
+		if (itemsPerPage == null) {
+			itemsPerPage = 12;
+		}
+		if (itemsPerPage > 60) {
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST,
+				"The maximum amount of items per page is 50"
+			);
+		}
 		hasPermissionToGetAll();
 		PaginationDto<AreaDto> areaPagination;
 		try {
-			areaPagination = areaService.getAreaPagination(page, 12);
+			areaPagination = areaService.getAreaPagination(page, itemsPerPage);
 		} catch (PageNotFoundException e) {
 			throw new ResponseStatusException(
 				HttpStatus.BAD_REQUEST,
@@ -441,7 +461,7 @@ public class AreaController extends AbstractPermissionManager {
 	 * @throws ResponseStatusException code 400 bad request if the super area is not valid
 	 * @throws ResponseStatusException code 400 bad request if the super area has no administrators
 	 */
-	@PutMapping("/replaceSuperArea/{areaId}/{superAreaId}")
+	@PutMapping("/setSuperArea/{areaId}/{superAreaId}")
 	@Operation(
 		summary = "Replaces the super area of an area",
 		description = "Attempts to replace the super area of an area"
@@ -477,11 +497,11 @@ public class AreaController extends AbstractPermissionManager {
 				+ "administrators"
 			)
 	})
-	public ResponseEntity<String> replaceSuperArea(@PathVariable UUID areaId,
+	public ResponseEntity<String> setSuperArea(@PathVariable UUID areaId,
 		@PathVariable UUID superAreaId) {
 		super.hasPermissionToPut();
 		try {
-			areaService.replaceSuperArea(areaId, superAreaId);
+			areaService.setSuperArea(areaId, superAreaId);
 		} catch (ElementNotFoundException e) {
 			throw new ResponseStatusException(
 				HttpStatus.NOT_FOUND,
