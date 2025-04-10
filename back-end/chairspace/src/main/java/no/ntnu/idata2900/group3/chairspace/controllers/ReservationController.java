@@ -75,4 +75,16 @@ public class ReservationController extends AbstractPermissionManager {
 
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<String> deleteReservation(@PathVariable UUID id) {
+		// FIXME: Ensure that reservations can only be deleted by owning or administrating users
+		super.hasPermissionToDelete();
+
+		if (!reservationService.deleteReservation(id)) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
+
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
 }

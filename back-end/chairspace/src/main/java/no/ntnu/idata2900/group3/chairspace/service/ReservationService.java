@@ -112,6 +112,18 @@ public class ReservationService {
 		);
 	}
 
+	/**
+	 * Attempts to delete a reservation by its id.
+	 *
+	 * @param id the id of the reservation
+	 * @return true if the reservation was deleted
+	 */
+	public boolean deleteReservation(UUID id) {
+		boolean isDeletable = reservationRepository.existsById(id);
+		reservationRepository.deleteById(id);
+		return isDeletable;
+	}
+
 	// TODO: Remove these when area and user have their own services
 	private Area getArea(UUID id) throws InvalidArgumentCheckedException {
 		Area area = areaRepository.findById(id).orElse(null);
