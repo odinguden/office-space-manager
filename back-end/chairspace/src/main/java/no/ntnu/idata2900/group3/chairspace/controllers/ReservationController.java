@@ -1,5 +1,6 @@
 package no.ntnu.idata2900.group3.chairspace.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.time.LocalDate;
@@ -43,6 +44,10 @@ public class ReservationController extends AbstractPermissionManager {
 	 * @return 200 OK with the found reservation
 	 */
 	@GetMapping("/{id}")
+	@Operation(
+		summary = "Gets a reservation from its id.",
+		description = "Gets a reservation from the provided reservation id."
+	)
 	@ApiResponses(value = {
 		@ApiResponse(
 			responseCode = "200",
@@ -62,6 +67,10 @@ public class ReservationController extends AbstractPermissionManager {
 	 * @return a list of reservation DTOs belonging to the user
 	 */
 	@GetMapping("/user/{userId}")
+	@Operation(
+		summary = "Gets all reservations belonging to a user.",
+		description = "Gets all the reservations that belong to the specified user."
+	)
 	@ApiResponses(value = {
 		@ApiResponse(
 			responseCode = "200",
@@ -85,6 +94,12 @@ public class ReservationController extends AbstractPermissionManager {
 	 * @return 200 OK with a list of reservations for the given time period
 	 */
 	@GetMapping("/area/{areaId}")
+	@Operation(
+		summary = "Gets all the reservations that belong to an area.",
+		description = "Gets all the reservations that belong to a provided area for a given"
+			+ " timeframe. If start is omitted, uses the current time. If end is omitted, uses"
+			+ " the next 12 hours."
+	)
 	@ApiResponses(value = {
 		@ApiResponse(
 			responseCode = "200",
@@ -121,6 +136,12 @@ public class ReservationController extends AbstractPermissionManager {
 	 *     no reservations and 1 is a fully reserved time period.
 	 * @throws ResponseStatusException 400 if the month is not in range 1 to 12 inclusive
 	 */
+	@Operation(
+		summary = "Gets the reservation frequency for the given time.",
+		description = "Get the reservation frequency of the given day if specified, or the given"
+			+ " month if the day is unspecified. If month or year is omitted, uses the current"
+			+ " year/month."
+	)
 	@ApiResponses(value = {
 		@ApiResponse(
 			responseCode = "200",
@@ -174,6 +195,10 @@ public class ReservationController extends AbstractPermissionManager {
 	 *     with an existing reservation
 	 */
 	@PostMapping("")
+	@Operation(
+		summary = "Creates a new reservation.",
+		description = "Creates a new reservation based on the provided parameters."
+	)
 	@ApiResponses(value = {
 		@ApiResponse(
 			responseCode = "201",
@@ -213,6 +238,10 @@ public class ReservationController extends AbstractPermissionManager {
 	 * @return 204 NO CONTENT if the reservation was deleted
 	 * @throws ResponseStatusException 404 NOT FOUND if the id does not exist in the database
 	 */
+	@Operation(
+		summary = "Deletes a reservation.",
+		description = "Deletes the reservation with the provided reservation ID."
+	)
 	@ApiResponses(value = {
 		@ApiResponse(
 			responseCode = "204",
