@@ -9,16 +9,19 @@ import java.util.UUID;
  * This dto will only utilize the ID's for relevant entity.
  */
 public class AreaCreationDto {
-	private List<UUID> administrators;
-	private UUID superArea;
-	private String areaType;
-	private List<String> areaFeatures;
+	private List<UUID> administratorIds;
+	private UUID superAreaId;
+	private String areaTypeId;
+	private List<String> areaFeatureIds;
 	private int capacity;
 	private String calendarLink;
 	private String name;
 	private String description;
 	private boolean reservable;
 
+	/**
+	 * No-args constructor.
+	 */
 	public AreaCreationDto() {
 		// Empty constructor for serialization/deserialization
 	}
@@ -28,8 +31,8 @@ public class AreaCreationDto {
 	 *
 	 * @return uuid of admin.
 	 */
-	public List<UUID> getAdministrators() {
-		return administrators;
+	public List<UUID> getAdministratorIds() {
+		return administratorIds;
 	}
 
 	/**
@@ -37,8 +40,8 @@ public class AreaCreationDto {
 	 *
 	 * @return UUID
 	 */
-	public UUID getSuperArea() {
-		return superArea;
+	public UUID getSuperAreaId() {
+		return superAreaId;
 	}
 
 	/**
@@ -46,8 +49,8 @@ public class AreaCreationDto {
 	 *
 	 * @return name as string
 	 */
-	public String getAreaType() {
-		return areaType;
+	public String getAreaTypeId() {
+		return areaTypeId;
 	}
 
 	/**
@@ -55,8 +58,8 @@ public class AreaCreationDto {
 	 *
 	 * @return names of area features
 	 */
-	public List<String> getAreaFeatures() {
-		return areaFeatures;
+	public List<String> getAreaFeatureIds() {
+		return areaFeatureIds;
 	}
 
 	/**

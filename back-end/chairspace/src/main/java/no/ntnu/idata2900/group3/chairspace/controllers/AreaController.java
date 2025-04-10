@@ -317,7 +317,7 @@ public class AreaController extends AbstractPermissionManager {
 	 * @throws ResponseStatusException code 404 if the area type does not exist
 	 */
 	private Area buildArea(AreaCreationDto areaDto) {
-		AreaType areaType = getAreaType(areaDto.getAreaType());
+		AreaType areaType = getAreaType(areaDto.getAreaTypeId());
 
 		// Create builder with initial arguments
 		Area.Builder areaBuilder;
@@ -332,7 +332,7 @@ public class AreaController extends AbstractPermissionManager {
 		}
 
 		// Adds administrators to area builder
-		for (UUID id : areaDto.getAdministrators()) {
+		for (UUID id : areaDto.getAdministratorIds()) {
 			areaBuilder.administrator(
 				getUser(id)
 			);
@@ -348,14 +348,14 @@ public class AreaController extends AbstractPermissionManager {
 		areaBuilder.reservable(areaDto.isReservable());
 
 		// Add super area if exists
-		if (areaDto.getSuperArea() != null) {
+		if (areaDto.getSuperAreaId() != null) {
 			areaBuilder.superArea(
-				getAreaFromId(areaDto.getSuperArea())
+				getAreaFromId(areaDto.getSuperAreaId())
 			);
 		}
 
 		// Add area features
-		for (String areaFeature : areaDto.getAreaFeatures()) {
+		for (String areaFeature : areaDto.getAreaFeatureIds()) {
 			areaBuilder.feature(
 				getAreaFeature(areaFeature)
 			);
