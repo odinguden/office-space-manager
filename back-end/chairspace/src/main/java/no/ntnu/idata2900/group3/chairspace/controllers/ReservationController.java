@@ -17,6 +17,8 @@ import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 import no.ntnu.idata2900.group3.chairspace.repository.AreaRepository;
 import no.ntnu.idata2900.group3.chairspace.repository.ReservationRepository;
 import no.ntnu.idata2900.group3.chairspace.repository.UserRepository;
+import no.ntnu.idata2900.group3.chairspace.service.ReservationService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +32,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 
@@ -42,93 +46,33 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/reservation")
 public class ReservationController extends AbstractPermissionManager {
 	@Autowired
-	private ReservationRepository reservationRepository;
-	@Autowired
-	private UserRepository userRepository;
-	@Autowired
-	private AreaRepository areaRepository;
+	private ReservationService reservationService;
 
+	/**
+	 * Gets the reservation with the corresponding ID.
+	 *
+	 * @param id the id of the reservation to fetch
+	 * @return 200 OK with the found reservation
+	 */
+	@GetMapping("/{id}")
+	public ResponseEntity<ReservationDto> getReservation(@PathVariable UUID id) {
+		super.hasPermissionToGet();
+		ReservationDto reservationDto = reservationService.getReservationById(id);
+		return new ResponseEntity<>(reservationDto, HttpStatus.OK);
+	}
 
-	@GetMapping("")
-	public ResponseEntity<List<ReservationDto>> getAllReservation() {
-		Iterator<Reservation> it = reservationRepository.findAll().iterator();
-		List<ReservationDto> reservations = new ArrayList<>();
-		while (it.hasNext()) {
-			reservations.add(
-				new ReservationDto(
-					it.next()
-				)
-			);
-		}
-		return new ResponseEntity<>(reservations, HttpStatus.OK);
-	}
-	
-	@GetMapping("{id}")
-	public String getMethodName(@PathVariable UUID id) {
-		return new String();
-	}
-	
 	@PostMapping("")
-	public ResponseEntity<String> createNewReservation(@RequestBody ReservationCreationDto reservationCreationDto) {
-		Reservation reservation = createReservationFromDto(reservationCreationDto);
-		reservationRepository.save(reservation);
-		return new ResponseEntity<>(HttpStatus.CREATED);
-	}
+	public ResponseEntity<String> postMethodName(@RequestBody ReservationCreationDto creationDto) {
+		super.hasPermissionToPost();
 
-	@PutMapping("path/{id}")
-	public String putMethodName(@PathVariable String id, @RequestBody String entity) {
-		//TODO: process PUT request
-
-		return entity;
-	}
-
-	@DeleteMapping
-	public ResponseEntity<String> deleteReservation() {
-		return new ResponseEntity<>(HttpStatus.I_AM_A_TEAPOT);
-	}
-
-	// ---- Create Reservation ----
-
-	private Reservation createReservationFromDto(ReservationCreationDto reservationCreationDto) {
-		String comment = reservationCreationDto.getComment();
-		LocalDateTime startTime = reservationCreationDto.getStartTime();
-		LocalDateTime endTime = reservationCreationDto.getEndTime();
-		Area area = getArea(reservationCreationDto.getArea());
-		User user = getUser(reservationCreationDto.getUser());
-		Reservation reservation;
 		try {
-			reservation = new Reservation(area, user, startTime, endTime, comment);
-		} catch (InvalidArgumentCheckedException e) {
-			throw new ResponseStatusException(HttpStatus.I_AM_A_TEAPOT);
+			reservationService.createReservationByCreationDto(creationDto);
+		} catch (InvalidArgumentCheckedException | NotReservableException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		} catch (ReservedException e) {
-			throw new ResponseStatusException(HttpStatus.I_AM_A_TEAPOT);
-		} catch (NotReservableException e) {
-			throw new ResponseStatusException(HttpStatus.I_AM_A_TEAPOT);
+			throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
 		}
-		return reservation;
-	}
 
-	private User getUser(UUID id) {
-		Optional<User> optionalUser = userRepository.findById(id);
-		if (!optionalUser.isPresent()) {
-			throw new ResponseStatusException(
-				HttpStatus.BAD_REQUEST,
-				"Could not find user with id: " + id.toString()
-				+ ". Unable to create reservation with this user."
-			);
-		}
-		return optionalUser.get();
-	}
-
-	private Area getArea(UUID id) {
-		Optional<Area> optionalArea = areaRepository.findById(id);
-		if (!optionalArea.isPresent()) {
-			throw new ResponseStatusException(
-				HttpStatus.BAD_REQUEST,
-				"Could not find area with id: " + id.toString()
-				+ ". Unable to create reservation with this area."
-			);
-		}
-		return optionalArea.get();
+		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 }
