@@ -61,6 +61,33 @@ public class ReservationController extends AbstractPermissionManager {
 		return new ResponseEntity<>(reservationDto, HttpStatus.OK);
 	}
 
+	/**
+	 * Gets a list of all reservations for an area within the given timeframe.
+	 *
+	 * @param areaId the id of the area for which to get reservations
+	 * @param start the start of the time slot to check, defaults to the current time
+	 * @param end the end of the time slot to check, defaults to 12 hours from start
+	 * @return 200 OK with a list of reservations for the given time period
+	 */
+	@GetMapping("/area/{areaId}")
+	public ResponseEntity<List<ReservationDto>> getReservationsInTimeFrame(
+		@PathVariable UUID areaId,
+		@RequestParam LocalDateTime start,
+		@RequestParam LocalDateTime end) {
+		if (start == null) {
+			start = LocalDateTime.now();
+		}
+		if (end == null) {
+			end = start.plusHours(12);
+		}
+
+		return new ResponseEntity<>(
+			reservationService.getReservationsForAreaInTimePeriod(areaId, start, end),
+			HttpStatus.OK
+		);
+	}
+	
+
 	@PostMapping("")
 	public ResponseEntity<String> postMethodName(@RequestBody ReservationCreationDto creationDto) {
 		super.hasPermissionToPost();
