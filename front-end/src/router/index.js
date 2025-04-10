@@ -7,7 +7,34 @@
 // Composables
 import { createRouter, createWebHistory } from 'vue-router/auto'
 import { setupLayouts } from 'virtual:generated-layouts'
-import { routes } from 'vue-router/auto-routes'
+
+import Index from '@/pages/index.vue'
+import Room from '@/pages/room.vue'
+import Bookings from '@/pages/bookings.vue'
+import Plans from '@/pages/plans.vue'
+
+const routes = [
+	{
+		path: "/",
+		name: "/",
+		component: Index
+	},
+	{
+		path: "/room/:id",
+		name: "room",
+		component: Room
+	},
+	{
+		path: "/bookings",
+		name: "bookings",
+		component: Bookings
+	},
+	{
+		path: "/plans",
+		name: "plans",
+		component: Plans
+	}
+]
 
 const router = createRouter({
 	history: createWebHistory(import.meta.env.BASE_URL),
