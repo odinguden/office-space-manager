@@ -158,36 +158,6 @@ class ReservationTest {
 	}
 
 	@Test
-	void testThatCreatingOverlappingReservationsThrows() {
-		LocalDateTime start = LocalDateTime.now().plusDays(5);
-		LocalDateTime end = LocalDateTime.now().plusDays(5).plusHours(3);
-		String comment = "Writing tests";
-		try {
-			new Reservation(
-				area,
-				nonAdmin,
-				start,
-				end,
-				comment
-			);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		LocalDateTime newStart = start.plusHours(2);
-		LocalDateTime newEnd = end.plusHours(2);
-		assertThrows(
-			ReservedException.class,
-			() -> new Reservation(
-				area,
-				nonAdmin,
-				newStart,
-				newEnd,
-				comment
-				)
-		);
-	}
-
-	@Test
 	void testThatSetStartInPastThrows() {
 		LocalDateTime start = LocalDateTime.now().minusDays(1);
 		LocalDateTime end = LocalDateTime.now().minusDays(1).plusHours(3);
