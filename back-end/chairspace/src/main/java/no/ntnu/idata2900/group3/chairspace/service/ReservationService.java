@@ -3,7 +3,6 @@ package no.ntnu.idata2900.group3.chairspace.service;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
@@ -206,14 +205,15 @@ public class ReservationService {
 	 * Gets the percentage of a month that an area is occupied by reservations.
 	 *
 	 * @param areaId the id of the area
-	 * @param yearMonth the month to check the reservation frequency of
+	 * @param year the year to which the month belongs
+	 * @param month the month to check the reservation frequency of
 	 * @return the percentage of the day an area is occupied, as a decimal
 	 * @see #getReservationFrequencyForDay(UUID, LocalDate)
 	 */
-	public float getReservationFrequencyForMonth(UUID areaId, YearMonth yearMonth) {
+	public float getReservationFrequencyForMonth(UUID areaId, int year, int month) {
+		// Note: Month is 1-indexed (range of 1 to 12)
+		YearMonth yearMonth = YearMonth.of(year, month);
 		int lengthOfMonth = yearMonth.lengthOfMonth();
-		int year = yearMonth.getYear();
-		Month month = yearMonth.getMonth();
 
 		// We use a higher intermediary precision to increase accuracy
 		// as floats lose accuracy as numbers grow large.

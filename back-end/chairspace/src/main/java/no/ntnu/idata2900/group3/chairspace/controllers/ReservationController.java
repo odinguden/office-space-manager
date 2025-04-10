@@ -2,6 +2,7 @@ package no.ntnu.idata2900.group3.chairspace.controllers;
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -108,6 +109,60 @@ public class ReservationController extends AbstractPermissionManager {
 	}
 
 	/**
+	 * Gets the reservation frequency of the provided day, or for the given month if the day is not
+	 * specified.
+	 *
+	 * @param areaId the id of the area to get the reservation frequency of
+	 * @param year the year to which the month belongs. Defaults to the current year
+	 * @param month the month of the year. Defaults to the current month
+	 * @param day the day of the month. If omitted, this method returns the frequency for all days
+	 *     in the given month.
+	 * @return a decimal representation of the reservation frequency, between 0 and 1, where 0 is
+	 *     no reservations and 1 is a fully reserved time period.
+	 * @throws ResponseStatusException 400 if the month is not in range 1 to 12 inclusive
+	 */
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Successfully retrieved reservation frequency"
+			),
+		@ApiResponse(
+			responseCode = "400",
+			description = "If the provided month is outside of the range 1 to 12"
+			)
+	})
+	@GetMapping("/area/{areaId}/frequency")
+	public ResponseEntity<Float> getReservationFrequency(
+		@PathVariable UUID areaId,
+		@RequestParam Integer year,
+		@RequestParam Integer month,
+		@RequestParam Integer day) throws ResponseStatusException {
+		LocalDate now = LocalDate.now();
+		if (year == null) {
+			year = now.getYear();
+		}
+		if (month == null) {
+			month = now.getMonthValue();
+		}
+		if (month < 1 || month > 12) {
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST,
+				"Provided month is invalid. Received " + month + ", expected 1 < month < 12."
+			);
+		}
+
+		float frequency;
+		if (day == null) {
+			frequency = reservationService.getReservationFrequencyForMonth(areaId, year, month);
+		} else {
+			LocalDate date = LocalDate.of(year, month, day);
+			frequency = reservationService.getReservationFrequencyForDay(areaId, date);
+		}
+
+		return new ResponseEntity<>(frequency, HttpStatus.OK);
+	}
+
+	/**
 	 * Attempts to create a new reservation based on a DTO.
 	 *
 	 * @param creationDto a simple DTO containing information about the reservation to be created
@@ -137,7 +192,7 @@ public class ReservationController extends AbstractPermissionManager {
 			description = "If the reservation would overlap with an existing one"
 			)
 	})
-	public ResponseEntity<String> postMethodName(@RequestBody ReservationCreationDto creationDto) {
+	public ResponseEntity<String> postReservation(@RequestBody ReservationCreationDto creationDto) {
 		super.hasPermissionToPost();
 
 		try {
