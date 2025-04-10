@@ -67,7 +67,8 @@ public class ReservationService {
 	 * @return a list of reservation DTOs belonging to the given user id.
 	 */
 	public List<ReservationDto> getReservationsByUserId(UUID userId) {
-		List<Reservation> reservations = reservationRepository.findAllByUser(userId);
+		List<Reservation> reservations = reservationRepository
+			.findAllByUserOrderByStartDateTimeAsc(userId);
 
 		return reservations.stream().map(ReservationDto::new).toList();
 	}

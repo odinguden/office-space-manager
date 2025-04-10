@@ -36,6 +36,7 @@ public interface ReservationRepository extends CrudRepository<Reservation, UUID>
 				res.startDateTime < ?2 AND res.endDateTime > ?3
 			)
 		)
+		ORDER BY res.startDateTime ASC
 		""")
 	public List<Reservation> findReservationsForAreaInTimePeriod(
 		UUID areaId,
@@ -64,6 +65,7 @@ public interface ReservationRepository extends CrudRepository<Reservation, UUID>
 				res.startDateTime < ?2 AND res.endDateTime > ?3
 			)
 		)
+		ORDER BY res.startDateTime ASC
 		""")
 	public boolean isTimeSlotFree(UUID areaId, LocalDateTime startTime, LocalDateTime endTime);
 
@@ -74,5 +76,5 @@ public interface ReservationRepository extends CrudRepository<Reservation, UUID>
 	 * @return a list of reservations belonging to the user
 	 */
 	// TODO: Ensure this works out of the box
-	public List<Reservation> findAllByUser(UUID userId);
+	public List<Reservation> findAllByUserOrderByStartDateTimeAsc(UUID userId);
 }
