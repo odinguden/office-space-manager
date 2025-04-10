@@ -79,7 +79,7 @@ public class AreaService {
 	 */
 	public Area createAreaFromDto(AreaCreationDto areaDto)
 		throws AdminCountException, InvalidArgumentCheckedException, ElementNotFoundException {
-		AreaType areaType = areaTypeService.getEntity(areaDto.getAreaTypeIds());
+		AreaType areaType = areaTypeService.getEntity(areaDto.getAreaTypeId());
 		if (areaType == null) {
 			throw ElementNotFoundException.areaTypeNotFoundException;
 		}
@@ -98,8 +98,8 @@ public class AreaService {
 		}
 
 		areaBuilder.calendarLink(areaDto.getCalendarLink());
-		if (areaDto.getSuperArea() != null) {
-			Area area = getArea(areaDto.getSuperArea());
+		if (areaDto.getSuperAreaId() != null) {
+			Area area = getArea(areaDto.getSuperAreaId());
 			if (area == null) {
 				throw ElementNotFoundException.areaNotFoundException;
 			}
