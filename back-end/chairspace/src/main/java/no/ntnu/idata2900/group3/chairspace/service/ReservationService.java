@@ -61,6 +61,18 @@ public class ReservationService {
 	}
 
 	/**
+	 * Gets all reservations belonging to a given user ID.
+	 *
+	 * @param userId the id of the user to get the reservations of
+	 * @return a list of reservation DTOs belonging to the given user id.
+	 */
+	public List<ReservationDto> getReservationsByUserId(UUID userId) {
+		List<Reservation> reservations = reservationRepository.findAllByUser(userId);
+
+		return reservations.stream().map(ReservationDto::new).toList();
+	}
+
+	/**
 	 * Creates a reservation for the given area and user.
 	 *
 	 * @param areaId the id of the area to reserve

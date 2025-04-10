@@ -66,4 +66,13 @@ public interface ReservationRepository extends CrudRepository<Reservation, UUID>
 		)
 		""")
 	public boolean isTimeSlotFree(UUID areaId, LocalDateTime startTime, LocalDateTime endTime);
+
+	/**
+	 * Returns a list of reservations belonging to the provided user id.
+	 *
+	 * @param userId the user who's reservations are being fetched
+	 * @return a list of reservations belonging to the user
+	 */
+	// TODO: Ensure this works out of the box
+	public List<Reservation> findAllByUser(UUID userId);
 }

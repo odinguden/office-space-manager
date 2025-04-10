@@ -55,6 +55,27 @@ public class ReservationController extends AbstractPermissionManager {
 	}
 
 	/**
+	 * Gets all reservations belonging to a provided user.
+	 *
+	 * @param userId the id of the user to get the reservations of
+	 * @return a list of reservation DTOs belonging to the user
+	 */
+	@GetMapping("/user/{userId}")
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Collected a list of all reservations belonging to the given user"
+			)
+	})
+	public ResponseEntity<List<ReservationDto>> getReservationsForUser(@PathVariable UUID userId) {
+		// FIXME: Ensure that this specific query is limited to those who should have access
+		super.hasPermissionToGet();
+		List<ReservationDto> reservations = reservationService.getReservationsByUserId(userId);
+
+		return new ResponseEntity<>(reservations, HttpStatus.OK);
+	}
+
+	/**
 	 * Gets a list of all reservations for an area within the given timeframe.
 	 *
 	 * @param areaId the id of the area for which to get reservations
