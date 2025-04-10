@@ -21,7 +21,6 @@ import no.ntnu.idata2900.group3.chairspace.exceptions.AdminCountException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.NotReservableException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
-import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * Represents a reservable area in the database.
@@ -101,6 +100,7 @@ public class Area implements EntityInterface<UUID> {
 		this.features = builder.features;
 		this.reservations = new HashSet<>();
 		this.reservable = builder.reservable;
+		this.id = builder.id;
 	}
 
 	/* ---- Getters ---- */
@@ -382,6 +382,19 @@ public class Area implements EntityInterface<UUID> {
 	}
 
 	/**
+	 * Removes a area feature.
+	 *
+	 * @param areaFeature The feature to remove
+	 * @throws IllegalArgumentException if areaFeature is null
+	 */
+	public void removeAreaFeature(AreaFeature areaFeature) {
+		if (areaFeature == null) {
+			throw new IllegalArgumentException("Area feature is null when value is expected");
+		}
+		features.remove(areaFeature);
+	}
+
+	/**
 	 * Updates the description.
 	 *
 	 * @param newDescription new description as string.
@@ -402,9 +415,54 @@ public class Area implements EntityInterface<UUID> {
 	 */
 	public void updateCapacity(int newCapacity) throws InvalidArgumentCheckedException {
 		if (newCapacity < 0) {
-			throw new InvalidArgumentCheckedException("Capacity cannot be less than 1");
+			throw new InvalidArgumentCheckedException("Capacity cannot be less than 0");
 		}
 		capacity = newCapacity;
+	}
+
+	/**
+	 * Updates the calendar link.
+	 * Will set the calendar controlled status to true if a link is provided.
+	 *
+	 * @param newCalendarLink the new calendar link
+	 */
+	public void updateCalendarLink(String newCalendarLink) {
+		if (newCalendarLink == null || newCalendarLink.isEmpty()) {
+			calendarControlled = false;
+			calendarLink = null;
+		} else {
+			calendarControlled = true;
+			calendarLink = newCalendarLink;
+		}
+	}
+
+	/**
+	 * Updates the name of the area.
+	 *
+	 * @param newName the new name of the area
+	 * @throws InvalidArgumentCheckedException if newName is null or empty
+	 */
+	public void updateName(String newName) throws InvalidArgumentCheckedException {
+		if (newName == null) {
+			throw new InvalidArgumentCheckedException("Name cannot be null");
+		}
+		if (newName.isBlank()) {
+			throw new InvalidArgumentCheckedException("Name cannot be empty");
+		}
+		name = newName;
+	}
+
+	/**
+	 * Updates the area type of the area.
+	 *
+	 * @param newAreaType the new area type
+	 * @throws IllegalArgumentException if newAreaType is null
+	 */
+	public void updateAreaType(AreaType newAreaType) {
+		if (newAreaType == null) {
+			throw new IllegalArgumentException("Area type is null when value was expected");
+		}
+		areaType = newAreaType;
 	}
 
 	/**
@@ -435,12 +493,6 @@ public class Area implements EntityInterface<UUID> {
 	}
 
 	/* ---- Methods ---- */
-
-	private void isFreeIncludingSubAreas() {
-		//TODO: implement
-		// Should isFreeBetween check super area for conflicts
-		throw new NotImplementedException();
-	}
 
 	/**
 	 * Returns true if the area is free in this block of time. false if not.
@@ -516,6 +568,7 @@ public class Area implements EntityInterface<UUID> {
 		private AreaType areaType;
 		private Set<AreaFeature> features;
 		private boolean reservable;
+		private UUID id;
 		// Damn this is a lot of fields.
 		// Good im using the builder pattern then 😎
 
@@ -529,17 +582,68 @@ public class Area implements EntityInterface<UUID> {
 		 * @param areaType AreaType object
 		 * @throws InvalidArgumentCheckedException if capacity is less than 1
 		 */
-		public Builder(String name, int capacity, AreaType areaType)
-			throws InvalidArgumentCheckedException {
+		public Builder(String name, int capacity, AreaType areaType) {
 			name(name);
 			capacity(capacity);
 			areaType(areaType);
 
-			// Default value
+			// Default values
 			description = "";
 			calendarControlled = false;
 			administrators = new HashSet<>();
 			features = new HashSet<>();
+		}
+
+		/**
+		 * Builds the Area object.
+		 * Also validates the object before building.
+		 *
+		 * @return Area object
+		 * @throws AdminCountException if build is called without having an assigned administrator
+		 * @throws InvalidArgumentCheckedException if name is empty
+		 * @throws InvalidArgumentCheckedException if capacity is less than 0
+		 * @throws IllegalArgumentException if name is null
+		 * @throws IllegalArgumentException if areaType is null
+		 * @throws IllegalArgumentException if administrator is null
+		 * @see Area.Builder#administrator(User)
+		 */
+		public Area build() throws AdminCountException, InvalidArgumentCheckedException {
+			// Validate the object before building
+			if (name == null) {
+				throw new IllegalArgumentException("Name is null when value was expected");
+			}
+			if (name.isBlank()) {
+				throw new InvalidArgumentCheckedException("Name Cannot be empty");
+			}
+			if (capacity < 0) {
+				throw new InvalidArgumentCheckedException("Capacity is less than 0");
+			}
+			if (areaType == null) {
+				throw new IllegalArgumentException("AreaType is null when value was expected");
+			}
+			if (description == null) {
+				description = "";
+			}
+			for (User user : administrators) {
+				if (user == null) {
+					throw new IllegalArgumentException(
+						"Administrator is null when value was expected"
+					);
+				}
+			}
+			for (AreaFeature feature : features) {
+				if (feature == null) {
+					throw new IllegalArgumentException(
+						"Area feature is null when value was expected"
+					);
+				}
+			}
+			//If area has no administrators of itself,
+			// and super area is either null or has no administrators
+			if (administrators.isEmpty() && (superArea == null || superArea.getAdminCount() <= 0)) {
+				throw new AdminCountException("Cannot create area without administrator");
+			}
+			return new Area(this);
 		}
 
 		/* ---- Setters ---- */
@@ -549,15 +653,8 @@ public class Area implements EntityInterface<UUID> {
 		 *
 		 * @param name The name of the object
 		 * @return Builder object
-		 * @throws InvalidArgumentCheckedException when name is empty
 		 */
-		private Builder name(String name) throws InvalidArgumentCheckedException {
-			if (name == null) {
-				throw new IllegalArgumentException("Name is null when value was expected");
-			}
-			if (name.isBlank()) {
-				throw new InvalidArgumentCheckedException("Name Cannot be empty");
-			}
+		private Builder name(String name) {
 			this.name = name;
 			reservable = true;
 			return this;
@@ -570,10 +667,7 @@ public class Area implements EntityInterface<UUID> {
 		 * @return Builder object
 		 * @throws InvalidArgumentCheckedException if capacity is less than 0
 		 */
-		private Builder capacity(int capacity) throws InvalidArgumentCheckedException {
-			if (capacity < 0) {
-				throw new InvalidArgumentCheckedException("Capacity is less than 1");
-			}
+		private Builder capacity(int capacity) {
 			this.capacity = capacity;
 			return this;
 		}
@@ -585,9 +679,6 @@ public class Area implements EntityInterface<UUID> {
 		 * @return Builder object
 		 */
 		private Builder areaType(AreaType areaType) {
-			if (areaType == null) {
-				throw new IllegalArgumentException("AreaType is null when value was expected");
-			}
 			this.areaType = areaType;
 			return this;
 		}
@@ -599,9 +690,6 @@ public class Area implements EntityInterface<UUID> {
 		 * @return Builder object
 		 */
 		public Builder description(String description) {
-			if (description == null) {
-				throw new IllegalArgumentException("Description is null when value was expected");
-			}
 			this.description = description;
 			return this;
 		}
@@ -611,18 +699,16 @@ public class Area implements EntityInterface<UUID> {
 		 *
 		 * @param calendarLink as String
 		 * @return Builder object
-		 * @throws InvalidArgumentCheckedException if calendar link is null
+		 * @throws InvalidArgumentCheckedException if calendar link has invalid format
 		 */
 		public Builder calendarLink(String calendarLink) throws InvalidArgumentCheckedException {
-			if (calendarLink == null) {
-				throw new IllegalArgumentException("Calendar link is null when value was expected");
+			if (calendarLink == null || calendarLink.isEmpty()) {
+				this.calendarLink = null;
+			} else {
+				//TODO When implementing proper calendar handling, include link format check here :)
+				this.calendarLink = calendarLink;
+				this.calendarControlled = true;
 			}
-			if (calendarLink.isEmpty()) {
-				throw new InvalidArgumentCheckedException("Calendar link cannot be blank");
-			}
-			//TODO When implementing proper calendar handling, include link format check here :)
-			this.calendarLink = calendarLink;
-			this.calendarControlled = true;
 			return this;
 		}
 
@@ -656,9 +742,6 @@ public class Area implements EntityInterface<UUID> {
 		 * @return Builder object
 		 */
 		public Builder administrator(User administrator)  {
-			if (administrator == null) {
-				throw new IllegalArgumentException("Administrator is null when value was expected");
-			}
 			administrators.add(administrator);
 			return this;
 		}
@@ -670,9 +753,6 @@ public class Area implements EntityInterface<UUID> {
 		 * @return Builder object
 		 */
 		public Builder superArea(Area superArea) {
-			if (superArea == null) {
-				throw new IllegalArgumentException("Super area is null when value was expected");
-			}
 			this.superArea = superArea;
 			return this;
 		}
@@ -700,27 +780,20 @@ public class Area implements EntityInterface<UUID> {
 		 * @return Builder object
 		 */
 		public Builder feature(AreaFeature feature) {
-			if (feature == null) {
-				throw new IllegalArgumentException("Feature is null when value was expected");
-			}
 			features.add(feature);
 			return this;
 		}
 
 		/**
-		 * Builds the Area object.
+		 * Sets the id of the area that is to be built.
+		 * This parameter is nullable
 		 *
-		 * @return Area object
-		 * @throws AdminCountException if build is called without having an assigned administrator
-		 * @see Area.Builder#administrator(User)
+		 * @param id id as UUID
+		 * @return builder object
 		 */
-		public Area build() throws AdminCountException {
-			//If area has no administrators of itself,
-			// and super area is either null or has no administrators
-			if (administrators.isEmpty() && (superArea == null || superArea.getAdminCount() <= 0)) {
-				throw new AdminCountException("Cannot create area without administrator");
-			}
-			return new Area(this);
+		public Builder id(UUID id) {
+			this.id = id;
+			return this;
 		}
 
 		/**
