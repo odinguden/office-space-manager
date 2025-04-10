@@ -110,6 +110,7 @@ public class ReservationController extends AbstractPermissionManager {
 		@PathVariable UUID areaId,
 		@RequestParam LocalDateTime start,
 		@RequestParam LocalDateTime end) {
+		super.hasPermissionToGet();
 		if (start == null) {
 			start = LocalDateTime.now();
 		}
@@ -158,6 +159,7 @@ public class ReservationController extends AbstractPermissionManager {
 		@RequestParam Integer year,
 		@RequestParam Integer month,
 		@RequestParam Integer day) throws ResponseStatusException {
+		super.hasPermissionToGet();
 		LocalDate now = LocalDate.now();
 		if (year == null) {
 			year = now.getYear();
