@@ -6,7 +6,11 @@ import no.ntnu.idata2900.group3.chairspace.entity.EntityInterface;
 import org.springframework.data.repository.CrudRepository;
 
 /**
- * TODO.
+ * A base class for services that need to implement basic CRUD operations.
+ *
+ * <p>
+ * Allows services to perform all the basic CRUD operations, including create, retrieve, update,
+ * and delete. Additionally throws all potential error situations associated with those operations.
  */
 public abstract class AbstractEntityService<EntityT extends EntityInterface<IdTypeT>, IdTypeT> {
 	private CrudRepository<EntityT, IdTypeT> repository;
@@ -51,12 +55,12 @@ public abstract class AbstractEntityService<EntityT extends EntityInterface<IdTy
 	 * @return true if the entity was saved
 	 */
 	public boolean saveEntity(EntityT entity) {
-		boolean saved = true;
-		if (entity.getId() != null && repository.findById(entity.getId()).isPresent()) {
-			saved = false;
+		boolean shouldSave = entity.getId() != null
+			&& repository.findById(entity.getId()).isPresent();
+		if (shouldSave) {
+			repository.save(entity);
 		}
-		repository.save(entity);
-		return saved;
+		return shouldSave;
 	}
 
 	/**
@@ -66,23 +70,20 @@ public abstract class AbstractEntityService<EntityT extends EntityInterface<IdTy
 	 * @return success of update
 	 */
 	public boolean putEntity(EntityT entity) {
-		boolean modified = true;
+		boolean shouldModify = entity.getId() != null
+			&& repository.findById(entity.getId()).isPresent();
 
-		if (!repository.existsById(entity.getId())) {
-			modified = false;
-		} else {
+		if (shouldModify) {
 			repository.save(entity);
 		}
-
-		return modified;
+		return shouldModify;
 	}
 
 	/**
-	 * Remove an entity based on id.
-	 * Returns true if the entity was removed successfully, false otherwise.
+	 * Deletes a single entity from the database.
 	 *
-	 * @param id id of the entity to delete
-	 * @return boolean indicating success of removal
+	 * @param id the id of the entity to delete
+	 * @return true if the entity was deleted, false if it did not exist
 	 */
 	public boolean deleteEntity(IdTypeT id) {
 		boolean exists = repository.existsById(id);

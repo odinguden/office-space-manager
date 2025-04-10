@@ -42,6 +42,7 @@ import org.springframework.web.server.ResponseStatusException;
  * <hr>
  *
  * @author Sigve Bjørkedal
+ * @author Odin Lyngsgård
  * @see EntityInterface
  */
 public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT>, IdTypeT>

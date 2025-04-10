@@ -37,7 +37,7 @@ public class UserService extends AbstractEntityService<User, UUID> {
 	 */
 	public List<Area> getUserAreas(UUID id) throws ElementNotFoundException {
 		if (!userRepository.existsById(id)) {
-			throw ElementNotFoundException.userNotFoundException();
+			throw ElementNotFoundException.userNotFoundException;
 		}
 		return userRepository.getUserAreas(id);
 	}
@@ -51,7 +51,7 @@ public class UserService extends AbstractEntityService<User, UUID> {
 	 */
 	public List<Reservation> getUserReservations(UUID id) throws ElementNotFoundException {
 		if (!userRepository.existsById(id)) {
-			throw ElementNotFoundException.userNotFoundException();
+			throw ElementNotFoundException.userNotFoundException;
 		}
 		return userRepository.getUserReservations(id);
 	}
