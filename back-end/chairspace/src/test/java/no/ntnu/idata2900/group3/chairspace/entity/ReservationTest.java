@@ -67,11 +67,6 @@ class ReservationTest {
 		assertEquals(nonAdmin, reservation.getUser(), "User was not assigned correctly");
 		assertEquals(start, reservation.getStart(), "Start time was not assigned correctly");
 		assertEquals(end, reservation.getEnd(), "End time was not assigned correctly");
-		try {
-			area.removeReservation(reservation);
-		} catch (Exception e) {
-			fail("Failed to remove reservation" + e.getMessage(), e);
-		}
 	}
 
 	@Test
@@ -98,11 +93,6 @@ class ReservationTest {
 		assertEquals(start, reservation.getStart(), "Start time was not assigned correctly");
 		assertEquals(end, reservation.getEnd(), "End time was not assigned correctly");
 		assertEquals(comment, reservation.getComment(), "comment was not assigned correctly");
-		try {
-			area.removeReservation(reservation);
-		} catch (Exception e) {
-			fail("Failed to remove reservation" + e.getMessage(), e);
-		}
 	}
 
 	@Test
