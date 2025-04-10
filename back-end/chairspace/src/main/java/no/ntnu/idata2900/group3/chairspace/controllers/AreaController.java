@@ -3,24 +3,17 @@ package no.ntnu.idata2900.group3.chairspace.controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
+import no.ntnu.idata2900.group3.chairspace.dto.PaginationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.area.AreaCreationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.area.AreaDto;
 import no.ntnu.idata2900.group3.chairspace.dto.area.AreaModificationDto;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
-import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
-import no.ntnu.idata2900.group3.chairspace.entity.AreaType;
-import no.ntnu.idata2900.group3.chairspace.entity.User;
 import no.ntnu.idata2900.group3.chairspace.exceptions.AdminCountException;
+import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
-import no.ntnu.idata2900.group3.chairspace.repository.AreaFeatureRepository;
-import no.ntnu.idata2900.group3.chairspace.repository.AreaRepository;
-import no.ntnu.idata2900.group3.chairspace.repository.AreaTypeRepository;
-import no.ntnu.idata2900.group3.chairspace.repository.UserRepository;
+import no.ntnu.idata2900.group3.chairspace.exceptions.PageNotFoundException;
+import no.ntnu.idata2900.group3.chairspace.service.AreaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +25,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -49,13 +44,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/area")
 public class AreaController extends AbstractPermissionManager {
 	@Autowired
-	private AreaRepository areaRepository;
-	@Autowired
-	private AreaTypeRepository areaTypeRepository;
-	@Autowired
-	private UserRepository userRepository;
-	@Autowired
-	private AreaFeatureRepository areaFeatureRepository;
+	private AreaService areaService;
 
 	/**
 	 * Posts a new area to the database based on the data from AreaDTO.
@@ -110,8 +99,20 @@ public class AreaController extends AbstractPermissionManager {
 	})
 	public ResponseEntity<String> postEntity(@RequestBody AreaCreationDto areaDto) {
 		super.hasPermissionToPost();
-		Area area = buildArea(areaDto);
-		areaRepository.save(area);
+		try {
+			areaService.saveAreaFromCreationDto(areaDto);
+		} catch (AdminCountException | InvalidArgumentCheckedException e) {
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST,
+				e.getMessage()
+			);
+		} catch (ElementNotFoundException e) {
+			throw new ResponseStatusException(
+				HttpStatus.NOT_FOUND,
+				e.getMessage()
+			);
+		}
+
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
@@ -150,26 +151,35 @@ public class AreaController extends AbstractPermissionManager {
 	})
 	public ResponseEntity<AreaDto> getArea(@PathVariable UUID id) {
 		hasPermissionToGet();
-		Optional<Area> optionalArea = areaRepository.findById(id);
-		if (!optionalArea.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		Area area = areaService.getArea(id);
+		if (area == null) {
+			throw new ResponseStatusException(
+				HttpStatus.NOT_FOUND,
+				"Could not find area with id: " + id
+			);
 		}
-		AreaDto areaDto = new AreaDto(optionalArea.get());
+		AreaDto areaDto = new AreaDto(area);
 		return new ResponseEntity<>(areaDto, HttpStatus.OK);
 	}
 
 	/**
-	 * Returns all areas from the database as area DTO's.
+	 * Returns areas from the database in a pagination.
+	 * The maximum number of items that can be requested on a single page is 50.
 	 *
-	 * @return all areas in the database in list
+	 * @param page the requested page
+	 * @param itemsPerPage the numbers of items included on a page
+	 * @return all areas in the database in a pagination
 	 * @throws ResponseStatusException code 401 unauthorized if the request lacks authorization
 	 * @throws ResponseStatusException code 403 forbidden if the authorization
 	 *     included is not sufficient to get all areas
+	 * @throws ResponseStatusException code 400 if the requested page does not exist
+	 * @throws ResponseStatusException code 400 if the number of items requested in a page is
+	 *     more than 50
 	 */
 	@GetMapping("")
 	@Operation(
-		summary = "Gets all Areas",
-		description = "Gets all areas in the repository"
+		summary = "Gets all areas in a pagination",
+		description = "Gets all areas in the repository in a pagination"
 	)
 	@ApiResponses(value = {
 		@ApiResponse(
@@ -183,19 +193,39 @@ public class AreaController extends AbstractPermissionManager {
 		@ApiResponse(
 			responseCode = "403",
 			description = "User has insufficient permissions to read these areas"
+			),
+		@ApiResponse(
+			responseCode = "400",
+			description = "The requested page does not exist"
+			),
+		@ApiResponse(
+			responseCode = "400",
+			description = "Requested more page items that is legal"
 			)
 	})
-	public ResponseEntity<List<AreaDto>> getArea() {
-		hasPermissionToGetAll();
-		Iterator<Area> it = areaRepository.findAll().iterator();
-		List<AreaDto> areas = new ArrayList<>();
-
-		while (it.hasNext()) {
-			areas.add(
-				new AreaDto(it.next())
+	public ResponseEntity<PaginationDto<AreaDto>> getAreasInPagination(
+		@RequestParam int page, @RequestParam Integer itemsPerPage
+	) {
+		if (itemsPerPage == null) {
+			itemsPerPage = 12;
+		}
+		if (itemsPerPage > 60) {
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST,
+				"The maximum amount of items per page is 50"
 			);
 		}
-		return new ResponseEntity<>(areas, HttpStatus.OK);
+		hasPermissionToGetAll();
+		PaginationDto<AreaDto> areaPagination;
+		try {
+			areaPagination = areaService.getAreaPagination(page, itemsPerPage);
+		} catch (PageNotFoundException e) {
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST,
+				"The requested page does not exit"
+			);
+		}
+		return new ResponseEntity<>(areaPagination, HttpStatus.OK);
 	}
 
 	/**
@@ -208,6 +238,9 @@ public class AreaController extends AbstractPermissionManager {
 	 *      request has insufficient permissions to update entities.
 	 * @throws ResponseStatusException 404 not found upon attempting to update an area that does
 	 *      not exist
+	 * @throws ResponseStatusException 404 not found if new area type cannot be found
+	 * @throws ResponseStatusException 400 bad request if the user tries to change a value to
+	 *     a invalid value
 	 */
 	@PutMapping()
 	@Operation(
@@ -231,29 +264,34 @@ public class AreaController extends AbstractPermissionManager {
 			responseCode = "400",
 			description = "Bad request if not able to update"
 				+ " area with the information contained in the dto"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "If the area that is trying to be updated can not be "
+			+ "found in the database"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "If the new area type cannot be found in the database"
 			)
 	})
 	public ResponseEntity<String> putArea(@RequestBody AreaModificationDto areaDto) {
 		super.hasPermissionToPut();
-		// Throws 404 if area cannot be found
-		Area area = getAreaFromId(areaDto.getId());
+
 		try {
-			area.updateName(areaDto.getName());
+			areaService.putArea(areaDto);
 		} catch (InvalidArgumentCheckedException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST,
+				e.getMessage()
+			);
+		} catch (ElementNotFoundException e) {
+			throw new ResponseStatusException(
+				HttpStatus.NOT_FOUND,
+				e.getMessage()
+			);
 		}
-		area.updateDescription(areaDto.getDescription());
-		area.setReservable(areaDto.isReservable());
-		try {
-			area.updateCapacity(areaDto.getCapacity());
-		} catch (InvalidArgumentCheckedException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
-		// Throws 404 if area type cannot be found
-		AreaType areaType = getAreaType(areaDto.getAreaType());
-		area.updateAreaType(areaType);
-		area.updateCalendarLink(areaDto.getCalendarLink());
-		areaRepository.save(area);
+
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
@@ -293,144 +331,13 @@ public class AreaController extends AbstractPermissionManager {
 	})
 	public ResponseEntity<String> deleteArea(@PathVariable UUID id) {
 		this.hasPermissionToDelete();
-
-		Optional<Area> entity = areaRepository.findById(id);
-
-		if (!entity.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		if (areaService.removeArea(id)) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-
-		areaRepository.delete(entity.get());
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-
-	}
-
-	// ----- Methods for Area Creation -----
-
-	/**
-	 * Builds an area object from an area creation DTO.
-	 *
-	 * @param areaDto The area DTO to be used as base to build area object
-	 * @return area built from dto
-	 * @throws ResponseStatusException code 404 if the area does not exist
-	 * @throws ResponseStatusException code 404 if the area feature does not exist
-	 * @throws ResponseStatusException code 404 if the area type does not exist
-	 */
-	private Area buildArea(AreaCreationDto areaDto) {
-		AreaType areaType = getAreaType(areaDto.getAreaTypeId());
-
-		// Create builder with initial arguments
-		Area.Builder areaBuilder;
-		try {
-			areaBuilder = new Area.Builder(
-				areaDto.getName(),
-				areaDto.getCapacity(),
-				areaType
-			);
-		} catch (InvalidArgumentCheckedException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
-
-		// Adds administrators to area builder
-		for (UUID id : areaDto.getAdministratorIds()) {
-			areaBuilder.administrator(
-				getUser(id)
-			);
-		}
-
-		try {
-			areaBuilder.calendarLink(areaDto.getCalendarLink());
-		} catch (InvalidArgumentCheckedException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
-		// These do not need any checks so they're just added
-		areaBuilder.description(areaDto.getDescription());
-		areaBuilder.reservable(areaDto.isReservable());
-
-		// Add super area if exists
-		if (areaDto.getSuperAreaId() != null) {
-			areaBuilder.superArea(
-				getAreaFromId(areaDto.getSuperAreaId())
-			);
-		}
-
-		// Add area features
-		for (String areaFeature : areaDto.getAreaFeatureIds()) {
-			areaBuilder.feature(
-				getAreaFeature(areaFeature)
-			);
-		}
-
-		// Finally build area
-		Area area;
-		try {
-			area = areaBuilder.build();
-		} catch (AdminCountException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
-		return area;
-	}
-
-	/**
-	 * Gets an area from the database.
-	 *
-	 * @param id the id of the area to get
-	 * @return an area from the database
-	 * @throws ResponseStatusException code 404 if the area does not exist
-	 */
-	public Area getAreaFromId(UUID id) {
-		Optional<Area> optional = areaRepository.findById(id);
-		if (!optional.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-		}
-		return optional.get();
-	}
-
-	/**
-	 * Returns an area feature based on id.
-	 *
-	 * @param id string id
-	 * @return Area feature from the database
-	 * @throws ResponseStatusException code 404 if the area feature does not exist in the database
-	 */
-	private AreaFeature getAreaFeature(String id) {
-		Optional<AreaFeature> optionalAreaFeature = areaFeatureRepository.findById(id);
-		if (!optionalAreaFeature.isPresent()) {
-			throw new ResponseStatusException(
-				HttpStatus.NOT_FOUND,
-				"Cannot create area with feature: " + id + " as it does not exist in database"
-			);
-		}
-		return optionalAreaFeature.get();
-	}
-
-	private User getUser(UUID id) {
-		Optional<User> optionalUser = userRepository.findById(id);
-		if (!optionalUser.isPresent()) {
-			throw new ResponseStatusException(
-				HttpStatus.NOT_FOUND,
-				"Could not find user with id: " + id.toString()
-				+ ". Unable to create area with this user as administrator."
-			);
-		}
-		return optionalUser.get();
-	}
-
-	/**
-	 * Returns AreaType based on id.
-	 *
-	 * @param id id of area type
-	 * @return AreaType from database
-	 * @throws ResponseStatusException code 404 if the area type does not exist in the database
-	 */
-	private AreaType getAreaType(String id) {
-		Optional<AreaType> optionalAreaType = areaTypeRepository.findById(id);
-		if (!optionalAreaType.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-			"Cannot create area with provided area type, as it does not exist in database"
-			);
-		}
-		return optionalAreaType.get();
+		throw new ResponseStatusException(
+			HttpStatus.NOT_FOUND,
+			"Could not find area with matching id to delete"
+		);
 	}
 
 	/**
@@ -473,10 +380,14 @@ public class AreaController extends AbstractPermissionManager {
 	public ResponseEntity<String> addAreaFeatureToArea(@PathVariable UUID areaId,
 		@PathVariable String areaFeatureId) {
 		super.hasPermissionToPut();
-		Area area = getAreaFromId(areaId);
-		AreaFeature areaFeature = getAreaFeature(areaFeatureId);
-		area.addAreaFeature(areaFeature);
-		areaRepository.save(area);
+		try {
+			areaService.addFeatureToArea(areaId, areaFeatureId);
+		} catch (ElementNotFoundException e) {
+			throw new ResponseStatusException(
+				HttpStatus.NOT_FOUND,
+				e.getMessage()
+			);
+		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
@@ -522,10 +433,14 @@ public class AreaController extends AbstractPermissionManager {
 	public ResponseEntity<String> removeAreaFeatureFromArea(@PathVariable UUID areaId,
 		@PathVariable String areaFeatureId) {
 		super.hasPermissionToPut();
-		Area area = getAreaFromId(areaId);
-		AreaFeature areaFeature = getAreaFeature(areaFeatureId);
-		area.removeAreaFeature(areaFeature);
-		areaRepository.save(area);
+		try {
+			areaService.removeFeatureFromArea(areaId, areaFeatureId);
+		} catch (ElementNotFoundException e) {
+			throw new ResponseStatusException(
+				HttpStatus.NOT_FOUND,
+				e.getMessage()
+			);
+		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
@@ -546,7 +461,7 @@ public class AreaController extends AbstractPermissionManager {
 	 * @throws ResponseStatusException code 400 bad request if the super area is not valid
 	 * @throws ResponseStatusException code 400 bad request if the super area has no administrators
 	 */
-	@PutMapping("/replaceSuperArea/{areaId}/{superAreaId}")
+	@PutMapping("/setSuperArea/{areaId}/{superAreaId}")
 	@Operation(
 		summary = "Replaces the super area of an area",
 		description = "Attempts to replace the super area of an area"
@@ -582,22 +497,22 @@ public class AreaController extends AbstractPermissionManager {
 				+ "administrators"
 			)
 	})
-	public ResponseEntity<String> replaceSuperArea(@PathVariable UUID areaId,
+	public ResponseEntity<String> setSuperArea(@PathVariable UUID areaId,
 		@PathVariable UUID superAreaId) {
 		super.hasPermissionToPut();
-		Area area = getAreaFromId(areaId);
-		Area superArea = getAreaFromId(superAreaId);
 		try {
-			area.setSuperArea(superArea);
-			// Ideally we should catch and handle the exceptions separately.areaFeatureController
-			// But since we're just returning the error message to the client.
-			// We handle them both the same way.
-			// And also a super area should never have no administrators.
-			// So AdminCountException should never be thrown.
+			areaService.setSuperArea(areaId, superAreaId);
+		} catch (ElementNotFoundException e) {
+			throw new ResponseStatusException(
+				HttpStatus.NOT_FOUND,
+				e.getMessage()
+			);
 		} catch (InvalidArgumentCheckedException | AdminCountException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST,
+				e.getMessage()
+			);
 		}
-		areaRepository.save(area);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
@@ -643,13 +558,19 @@ public class AreaController extends AbstractPermissionManager {
 	})
 	public ResponseEntity<String> removeSuperArea(@PathVariable UUID areaId) {
 		super.hasPermissionToPut();
-		Area area = getAreaFromId(areaId);
 		try {
-			area.removeSuperArea();
+			areaService.removeSuperArea(areaId);
+		} catch (ElementNotFoundException e) {
+			throw new ResponseStatusException(
+				HttpStatus.NOT_FOUND,
+				e.getMessage()
+			);
 		} catch (AdminCountException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+			throw new ResponseStatusException(
+				HttpStatus.BAD_REQUEST,
+				e.getMessage()
+			);
 		}
-		areaRepository.save(area);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 }

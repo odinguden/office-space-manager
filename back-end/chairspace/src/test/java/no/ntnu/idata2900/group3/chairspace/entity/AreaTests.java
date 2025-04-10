@@ -88,33 +88,41 @@ class AreaTests {
 
 	@Test
 	void testThatBuilderThrowsIfNoName() {
+		Area.Builder areaBuilder = new Area.Builder(null, 1232, areaType);
+		areaBuilder.administrator(adminUser);
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> new Area.Builder(null, 1232, areaType)
+			() -> areaBuilder.build()
 		);
 	}
 
 	@Test
 	void testThatBuilderThrowsIfBlank() {
+		Area.Builder areaBuilder = new Area.Builder("", 1232, areaType);
+		areaBuilder.administrator(adminUser);
 		assertThrows(
 			InvalidArgumentCheckedException.class,
-			() -> new Area.Builder("", 1232, areaType)
+			() -> areaBuilder.build()
 		);
 	}
 
 	@Test
 	void testThatBuilderThrowsIfNegativeCapacity() {
+		Area.Builder areaBuilder = new Area.Builder("Test", -3, areaType);
+		areaBuilder.administrator(adminUser);
 		assertThrows(
 			InvalidArgumentCheckedException.class,
-			() -> new Area.Builder("Test", -3, areaType)
+			() -> areaBuilder.build()
 		);
 	}
 
 	@Test
 	void testThatBuilderThrowsIfNoAreaType() {
+		Area.Builder areaBuilder = new Area.Builder("Test", 1232, null);
+		areaBuilder.administrator(adminUser);
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> new Area.Builder("Test", 1232, null)
+			() -> areaBuilder.build()
 		);
 	}
 
@@ -167,33 +175,23 @@ class AreaTests {
 	@Test
 	void testThatBuilderThrowsIfNullAdminIsProvided() {
 		Area.Builder builder;
-		try {
-			builder = new Area.Builder("Test", 1232, areaType);
-		} catch (Exception e) {
-			fail("Failed to create builder: " + e.getMessage(), e);
-			return;
-		}
+		builder = new Area.Builder("Test", 1232, areaType);
+		builder.administrator(null);
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> builder.administrator(null)
+			() -> builder.build()
 		);
 	}
-
-	// Deleted testThatBuilderThrowsIfNullDescriptionIsProvided
-	// as an existing branch has implemented it correctly
 
 	@Test
 	void testThatBuilderThrowsIfNullAreaFeatureIsProvided() {
 		Area.Builder builder;
-		try {
-			builder = new Area.Builder("Test", 1232, areaType);
-		} catch (Exception e) {
-			fail("Failed to create builder: " + e.getMessage(), e);
-			return;
-		}
+		builder = new Area.Builder("Test", 1232, areaType);
+		builder.feature(null);
+		builder.administrator(adminUser);
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> builder.feature(null)
+			() -> builder.build()
 		);
 	}
 

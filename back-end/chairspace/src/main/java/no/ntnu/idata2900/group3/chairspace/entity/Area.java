@@ -479,17 +479,68 @@ public class Area implements EntityInterface<UUID> {
 		 * @param areaType AreaType object
 		 * @throws InvalidArgumentCheckedException if capacity is less than 1
 		 */
-		public Builder(String name, int capacity, AreaType areaType)
-			throws InvalidArgumentCheckedException {
+		public Builder(String name, int capacity, AreaType areaType) {
 			name(name);
 			capacity(capacity);
 			areaType(areaType);
 
-			// Default value
+			// Default values
 			description = "";
 			calendarControlled = false;
 			administrators = new HashSet<>();
 			features = new HashSet<>();
+		}
+
+		/**
+		 * Builds the Area object.
+		 * Also validates the object before building.
+		 *
+		 * @return Area object
+		 * @throws AdminCountException if build is called without having an assigned administrator
+		 * @throws InvalidArgumentCheckedException if name is empty
+		 * @throws InvalidArgumentCheckedException if capacity is less than 0
+		 * @throws IllegalArgumentException if name is null
+		 * @throws IllegalArgumentException if areaType is null
+		 * @throws IllegalArgumentException if administrator is null
+		 * @see Area.Builder#administrator(User)
+		 */
+		public Area build() throws AdminCountException, InvalidArgumentCheckedException {
+			// Validate the object before building
+			if (name == null) {
+				throw new IllegalArgumentException("Name is null when value was expected");
+			}
+			if (name.isBlank()) {
+				throw new InvalidArgumentCheckedException("Name Cannot be empty");
+			}
+			if (capacity < 0) {
+				throw new InvalidArgumentCheckedException("Capacity is less than 0");
+			}
+			if (areaType == null) {
+				throw new IllegalArgumentException("AreaType is null when value was expected");
+			}
+			if (description == null) {
+				description = "";
+			}
+			for (User user : administrators) {
+				if (user == null) {
+					throw new IllegalArgumentException(
+						"Administrator is null when value was expected"
+					);
+				}
+			}
+			for (AreaFeature feature : features) {
+				if (feature == null) {
+					throw new IllegalArgumentException(
+						"Area feature is null when value was expected"
+					);
+				}
+			}
+			//If area has no administrators of itself,
+			// and super area is either null or has no administrators
+			if (administrators.isEmpty() && (superArea == null || superArea.getAdminCount() <= 0)) {
+				throw new AdminCountException("Cannot create area without administrator");
+			}
+			return new Area(this);
 		}
 
 		/* ---- Setters ---- */
@@ -499,15 +550,8 @@ public class Area implements EntityInterface<UUID> {
 		 *
 		 * @param name The name of the object
 		 * @return Builder object
-		 * @throws InvalidArgumentCheckedException when name is empty
 		 */
-		private Builder name(String name) throws InvalidArgumentCheckedException {
-			if (name == null) {
-				throw new IllegalArgumentException("Name is null when value was expected");
-			}
-			if (name.isBlank()) {
-				throw new InvalidArgumentCheckedException("Name Cannot be empty");
-			}
+		private Builder name(String name) {
 			this.name = name;
 			reservable = true;
 			return this;
@@ -520,10 +564,7 @@ public class Area implements EntityInterface<UUID> {
 		 * @return Builder object
 		 * @throws InvalidArgumentCheckedException if capacity is less than 0
 		 */
-		private Builder capacity(int capacity) throws InvalidArgumentCheckedException {
-			if (capacity < 0) {
-				throw new InvalidArgumentCheckedException("Capacity is less than 1");
-			}
+		private Builder capacity(int capacity) {
 			this.capacity = capacity;
 			return this;
 		}
@@ -535,9 +576,6 @@ public class Area implements EntityInterface<UUID> {
 		 * @return Builder object
 		 */
 		private Builder areaType(AreaType areaType) {
-			if (areaType == null) {
-				throw new IllegalArgumentException("AreaType is null when value was expected");
-			}
 			this.areaType = areaType;
 			return this;
 		}
@@ -549,9 +587,6 @@ public class Area implements EntityInterface<UUID> {
 		 * @return Builder object
 		 */
 		public Builder description(String description) {
-			if (description == null) {
-				throw new IllegalArgumentException("Description is null when value was expected");
-			}
 			this.description = description;
 			return this;
 		}
@@ -604,9 +639,6 @@ public class Area implements EntityInterface<UUID> {
 		 * @return Builder object
 		 */
 		public Builder administrator(User administrator)  {
-			if (administrator == null) {
-				throw new IllegalArgumentException("Administrator is null when value was expected");
-			}
 			administrators.add(administrator);
 			return this;
 		}
@@ -645,27 +677,8 @@ public class Area implements EntityInterface<UUID> {
 		 * @return Builder object
 		 */
 		public Builder feature(AreaFeature feature) {
-			if (feature == null) {
-				throw new IllegalArgumentException("Feature is null when value was expected");
-			}
 			features.add(feature);
 			return this;
-		}
-
-		/**
-		 * Builds the Area object.
-		 *
-		 * @return Area object
-		 * @throws AdminCountException if build is called without having an assigned administrator
-		 * @see Area.Builder#administrator(User)
-		 */
-		public Area build() throws AdminCountException {
-			//If area has no administrators of itself,
-			// and super area is either null or has no administrators
-			if (administrators.isEmpty() && (superArea == null || superArea.getAdminCount() <= 0)) {
-				throw new AdminCountException("Cannot create area without administrator");
-			}
-			return new Area(this);
 		}
 
 		/**

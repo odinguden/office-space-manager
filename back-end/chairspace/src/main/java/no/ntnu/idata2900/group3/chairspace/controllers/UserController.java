@@ -4,12 +4,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
-import no.ntnu.idata2900.group3.chairspace.repository.UserRepository;
+import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
+import no.ntnu.idata2900.group3.chairspace.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,16 +25,18 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * Controller for user entity.
  */
-//TODO: When this class is updated for authentication, there will need to be better feedback when deleting users that administer areas or reservations
+//TODO: When this class is updated for authentication,
+// there will need to be better feedback when
+// deleting users that administer areas or reservations
 @CrossOrigin(origins = "$frontend.url")
 @RestController
 @RequestMapping("/user")
 public class UserController extends AbstractController<User, UUID> {
 	@Autowired
-	private UserRepository userRepository;
+	private UserService userService;
 
-	protected UserController(UserRepository userRepository) {
-		super(userRepository);
+	protected UserController(UserService userService) {
+		super(userService);
 	}
 
 	/**
@@ -61,14 +63,12 @@ public class UserController extends AbstractController<User, UUID> {
 	public ResponseEntity<List<Area>> getUserAreas(@PathVariable UUID id) {
 		// TODO: authenticate user
 		// TODO: Return DTO for area instead of the entire area class
-		Optional<User> optionalUser = userRepository.findById(id);
-
-		if (!optionalUser.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		List<Area> areas;
+		try {
+			areas = userService.getUserAreas(id);
+		} catch (ElementNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
-
-		List<Area> areas = userRepository.getUserAreas(id);
-
 		return new ResponseEntity<>(areas, HttpStatus.OK);
 	}
 
@@ -96,14 +96,12 @@ public class UserController extends AbstractController<User, UUID> {
 	@GetMapping("/{id}/reservations")
 	public ResponseEntity<List<Reservation>> getUserReservations(@PathVariable UUID id) {
 		// TODO: authenticate user
-		Optional<User> optionalUser = userRepository.findById(id);
-
-		if (!optionalUser.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		List<Reservation> reservations;
+		try {
+			reservations = userService.getUserReservations(id);
+		} catch (ElementNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
-
-		List<Reservation> reservations = userRepository.getUserReservations(id);
 		return new ResponseEntity<>(reservations, HttpStatus.OK);
 	}
-	
 }

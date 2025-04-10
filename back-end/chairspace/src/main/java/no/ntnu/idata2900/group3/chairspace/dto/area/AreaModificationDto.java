@@ -2,10 +2,11 @@ package no.ntnu.idata2900.group3.chairspace.dto.area;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.UUID;
+import no.ntnu.idata2900.group3.chairspace.entity.Area;
 
 /**
  * A data transfer object used for modification of area objects.
- * Contains all the fields that can be modified non-explicitly.
+ * Contains all the fields from {@link Area} that can be modified without consequences .
  */
 public class AreaModificationDto {
 	@JsonProperty
@@ -17,9 +18,9 @@ public class AreaModificationDto {
 	@JsonProperty
 	private String calendarLink;
 	@JsonProperty
-	private int capacity;
+	private Integer capacity;
 	@JsonProperty
-	private boolean reservable;
+	private Boolean reservable;
 	@JsonProperty
 	private String areaType;
 
@@ -42,7 +43,7 @@ public class AreaModificationDto {
 	/**
 	 * Returns the name of the area.
 	 *
-	 * @return returns the name of the area
+	 * @return the name of the area
 	 */
 	public String getName() {
 		return name;
@@ -58,8 +59,7 @@ public class AreaModificationDto {
 	}
 
 	/**
-	 * Returns the calendar link of the area.
-	 * Returns null if the area does not have a calendar link.
+	 * Returns the calendar link of the area or null if it doesn't have any.
 	 *
 	 * @return returns the calendar link of the area
 	 */
@@ -72,16 +72,16 @@ public class AreaModificationDto {
 	 *
 	 * @return returns the capacity of the area
 	 */
-	public int getCapacity() {
+	public Integer getCapacity() {
 		return capacity;
 	}
 
 	/**
-	 * Returns true if the area is reservable, false otherwise.
+	 * Returns true if the area is reservable.
 	 *
-	 * @return returns true if the area is reservable, false otherwise
+	 * @return returns true if the area is reservable
 	 */
-	public boolean isReservable() {
+	public Boolean isReservable() {
 		return reservable;
 	}
 

@@ -5,7 +5,7 @@ import java.util.UUID;
 
 /**
  * DTO to be used when creating Areas.
- * Contains felids for relevant data needed for the construction of a new Area.
+ * Contains fields for relevant data needed for the construction of a new Area.
  * This dto will only utilize the ID's for relevant entity.
  */
 public class AreaCreationDto {
@@ -19,44 +19,42 @@ public class AreaCreationDto {
 	private String description;
 	private boolean reservable;
 
-	/**
-	 * No-args constructor.
-	 */
 	public AreaCreationDto() {
 		// Empty constructor for serialization/deserialization
 	}
 
 	/**
-	 * Returns the uuid of administrator.
+	 * Returns list containing id of administrators.
 	 *
-	 * @return uuid of admin.
+	 * @return id's of administrators.
 	 */
 	public List<UUID> getAdministratorIds() {
 		return administratorIds;
 	}
 
 	/**
-	 * Returns the ID of the super area.
+	 * Returns the ID of the area that is to be set to the
+	 * created areas super area.
 	 *
-	 * @return UUID
+	 * @return the id of the super area
 	 */
 	public UUID getSuperAreaId() {
 		return superAreaId;
 	}
 
 	/**
-	 * Returns the name of the area type.
+	 * Returns the name / id of the area type.
 	 *
-	 * @return name as string
+	 * @return id of the area type
 	 */
 	public String getAreaTypeId() {
 		return areaTypeId;
 	}
 
 	/**
-	 * Returns the name of the area features in a list of strings.
+	 * Returns the name/id of the area features in a list of strings.
 	 *
-	 * @return names of area features
+	 * @return id of area features
 	 */
 	public List<String> getAreaFeatureIds() {
 		return areaFeatureIds;
@@ -102,7 +100,7 @@ public class AreaCreationDto {
 	/**
 	 * Returns reservable status of area.
 	 *
-	 * @return reservable status of area
+	 * @return true if the area can be reserved
 	 */
 	public boolean isReservable() {
 		return reservable;
