@@ -224,13 +224,15 @@ public class ReservationService {
 	 * @return the time clamped between min and max.
 	 */
 	private LocalDateTime clampTime(LocalDateTime time, LocalDateTime min, LocalDateTime max) {
-		// Multiple returns. Your mom.
+		LocalDateTime clampedTime = time;
+
 		if (min != null && time.isBefore(min)) {
-			return min;
+			clampedTime = min;
 		} else if (max != null && time.isAfter(max)) {
-			return max;
+			clampedTime = max;
 		}
-		return time;
+
+		return clampedTime;
 	}
 
 	private float getMillisBetween(LocalDateTime start, LocalDateTime end) {
