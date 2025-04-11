@@ -39,9 +39,7 @@ public class AreaDto {
 	 */
 	public AreaDto(Area area) {
 		if (area == null) {
-			throw new IllegalArgumentException(
-				"Area was null when value was expected"
-			);
+			throw new IllegalArgumentException("Area was null when value was expected");
 		}
 
 		this.id = area.getId();
