@@ -75,6 +75,5 @@ public interface ReservationRepository extends CrudRepository<Reservation, UUID>
 	 * @param userId the user who's reservations are being fetched
 	 * @return a list of reservations belonging to the user
 	 */
-	// TODO: Ensure this works out of the box
-	public List<Reservation> findAllByUserOrderByStartDateTimeAsc(UUID userId);
+	public List<Reservation> findAllByUserIdOrderByStartDateTimeAsc(UUID userId);
 }
