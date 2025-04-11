@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.dto.reservation.ReservationCreationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.reservation.ReservationDto;
+import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.NotReservableException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
@@ -56,7 +57,12 @@ public class ReservationController extends AbstractPermissionManager {
 	})
 	public ResponseEntity<ReservationDto> getReservation(@PathVariable UUID id) {
 		super.hasPermissionToGet();
-		ReservationDto reservationDto = reservationService.getReservationById(id);
+		ReservationDto reservationDto;
+		try {
+			reservationDto = reservationService.getReservationById(id);
+		} catch (ElementNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+		}
 		return new ResponseEntity<>(reservationDto, HttpStatus.OK);
 	}
 
@@ -137,6 +143,7 @@ public class ReservationController extends AbstractPermissionManager {
 	 *     no reservations and 1 is a fully reserved time period.
 	 * @throws ResponseStatusException 400 if the month is not in range 1 to 12 inclusive
 	 */
+	@GetMapping("/area/{areaId}/frequency")
 	@Operation(
 		summary = "Gets the reservation frequency for the given time.",
 		description = "Get the reservation frequency of the given day if specified, or the given"
@@ -153,7 +160,6 @@ public class ReservationController extends AbstractPermissionManager {
 			description = "If the provided month is outside of the range 1 to 12"
 			)
 	})
-	@GetMapping("/area/{areaId}/frequency")
 	public ResponseEntity<Float> getReservationFrequency(
 		@PathVariable UUID areaId,
 		@RequestParam Integer year,

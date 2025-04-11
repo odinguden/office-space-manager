@@ -12,6 +12,7 @@ import no.ntnu.idata2900.group3.chairspace.dto.reservation.ReservationDto;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
+import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.NotReservableException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
@@ -47,12 +48,12 @@ public class ReservationService {
 	 *
 	 * @param id the id of the reservation to get a DTO of
 	 * @return the reservation with the id as a DTO
+	 * @throws ElementNotFoundException if there is no item with the given ID
 	 */
-	public ReservationDto getReservationById(UUID id) {
+	public ReservationDto getReservationById(UUID id) throws ElementNotFoundException {
 		Optional<Reservation> reservation = reservationRepository.findById(id);
 		if (!reservation.isPresent()) {
-			// FIXME: Replace with NoSuchEntity exception or whatnot when merged
-			throw new IllegalArgumentException();
+			throw ElementNotFoundException.RESERVATION_NOT_FOUND;
 		}
 
 		return new ReservationDto(reservation.get());
