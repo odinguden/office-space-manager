@@ -25,6 +25,9 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ReservationService {
+	/**
+	 * The amount of milliseconds in a single full day.
+	 */
 	public static final int MS_IN_DAY = 24 * 60 * 60 * 1000;
 
 	@Autowired
@@ -211,6 +214,15 @@ public class ReservationService {
 		return (float) (totalMilliseconds / millisecondsInMonth);
 	}
 
+	/**
+	 * Clamps the time to a minimum and maximum time.
+	 *
+	 * @param time the time to be clamped
+	 * @param min the lowest permissible value for the time. If missing, does not enforce a boundary
+	 * @param max the highest permissible value for the time. If missing, does not enforce a
+	 *     boundary
+	 * @return the time clamped between min and max.
+	 */
 	private LocalDateTime clampTime(LocalDateTime time, LocalDateTime min, LocalDateTime max) {
 		// Multiple returns. Your mom.
 		if (min != null && time.isBefore(min)) {
