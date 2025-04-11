@@ -19,6 +19,9 @@ public class AreaCreationDto {
 	private String description;
 	private boolean reservable;
 
+	/**
+	 * No-args constructor.
+	 */
 	public AreaCreationDto() {
 		// Empty constructor for serialization/deserialization
 	}
