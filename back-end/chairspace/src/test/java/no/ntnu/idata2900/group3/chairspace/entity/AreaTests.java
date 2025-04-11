@@ -8,12 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Iterator;
 import no.ntnu.idata2900.group3.chairspace.exceptions.AdminCountException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
-import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -92,7 +90,7 @@ class AreaTests {
 		areaBuilder.administrator(adminUser);
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> areaBuilder.build()
+			areaBuilder::build
 		);
 	}
 
@@ -102,7 +100,7 @@ class AreaTests {
 		areaBuilder.administrator(adminUser);
 		assertThrows(
 			InvalidArgumentCheckedException.class,
-			() -> areaBuilder.build()
+			areaBuilder::build
 		);
 	}
 
@@ -112,7 +110,7 @@ class AreaTests {
 		areaBuilder.administrator(adminUser);
 		assertThrows(
 			InvalidArgumentCheckedException.class,
-			() -> areaBuilder.build()
+			areaBuilder::build
 		);
 	}
 
@@ -122,7 +120,7 @@ class AreaTests {
 		areaBuilder.administrator(adminUser);
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> areaBuilder.build()
+			areaBuilder::build
 		);
 	}
 
@@ -179,7 +177,7 @@ class AreaTests {
 		builder.administrator(null);
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> builder.build()
+			builder::build
 		);
 	}
 
@@ -191,7 +189,7 @@ class AreaTests {
 		builder.administrator(adminUser);
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> builder.build()
+			builder::build
 		);
 	}
 
