@@ -54,7 +54,6 @@ public class Area implements EntityInterface<UUID> {
 	private Area superArea;
 	@ManyToOne
 	private AreaType areaType;
-	@OneToMany(mappedBy = "area")
 	private int capacity;
 	private boolean calendarControlled;
 	private String calendarLink;
