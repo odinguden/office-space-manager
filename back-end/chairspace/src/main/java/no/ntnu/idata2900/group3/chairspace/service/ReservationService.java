@@ -16,9 +16,7 @@ import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.NotReservableException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
-import no.ntnu.idata2900.group3.chairspace.repository.AreaRepository;
 import no.ntnu.idata2900.group3.chairspace.repository.ReservationRepository;
-import no.ntnu.idata2900.group3.chairspace.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,11 +28,11 @@ public class ReservationService {
 	public static final int MS_IN_DAY = 24 * 60 * 60 * 1000;
 
 	@Autowired
+	UserService userService;
+	@Autowired
+	AreaService areaService;
+	@Autowired
 	ReservationRepository reservationRepository;
-	@Autowired
-	private AreaRepository areaRepository;
-	@Autowired
-	private UserRepository userRepository;
 
 	/**
 	 * No args constructor for JPA.
@@ -97,8 +95,8 @@ public class ReservationService {
 			throw ReservedException.reservationOverlapException();
 		}
 
-		Area area = getArea(areaId);
-		User user = getUser(userId);
+		Area area = areaService.getArea(areaId);
+		User user = userService.getEntity(userId);
 
 		return new Reservation(area, user, start, end, comment);
 	}
@@ -134,23 +132,6 @@ public class ReservationService {
 		boolean isDeletable = reservationRepository.existsById(id);
 		reservationRepository.deleteById(id);
 		return isDeletable;
-	}
-
-	// TODO: Remove these when area and user have their own services
-	private Area getArea(UUID id) throws InvalidArgumentCheckedException {
-		Area area = areaRepository.findById(id).orElse(null);
-		if (area == null) {
-			throw new InvalidArgumentCheckedException("Area not found");
-		}
-		return area;
-	}
-
-	private User getUser(UUID id) throws InvalidArgumentCheckedException {
-		User user = userRepository.findById(id).orElse(null);
-		if (user == null) {
-			throw new InvalidArgumentCheckedException("User not found");
-		}
-		return user;
 	}
 
 	/**
