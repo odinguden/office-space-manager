@@ -68,7 +68,7 @@ public class ReservationService {
 	 */
 	public List<ReservationDto> getReservationsByUserId(UUID userId) {
 		List<Reservation> reservations = reservationRepository
-			.findAllByUserOrderByStartDateTimeAsc(userId);
+			.findAllByUserIdOrderByStartDateTimeAsc(userId);
 
 		return reservations.stream().map(ReservationDto::new).toList();
 	}
