@@ -45,6 +45,32 @@ public interface ReservationRepository extends CrudRepository<Reservation, UUID>
 	);
 
 	/**
+	 * Returns a list of all reservations, regardless of area, that fall within the given timespace.
+	 * This includes reservations that are only partially within the timespace, as well as
+	 * reservations that start before the timespace and end after it.
+	 *
+	 * @param startTime the time to start search from
+	 * @param endTime the time to end search from
+	 * @return a list of all reservations for the given area that fall between start and end
+	 */
+	@Query("""
+		SELECT res
+		FROM Reservation res
+		WHERE res.startDateTime BETWEEN ?1 AND ?2
+			OR
+			res.endDateTime BETWEEN ?1 and ?2
+			OR
+			(
+				res.startDateTime < ?1 AND res.endDateTime > ?2
+			)
+		ORDER BY res.area.id, res.startDateTime ASC
+		""")
+	public List<Reservation> findAllReservationsInTimePeriod(
+		LocalDateTime startTime,
+		LocalDateTime endTime
+	);
+
+	/**
 	 * Checks if the time slot is occupied by an existing reservation.
 	 *
 	 * @param areaId the area to check for

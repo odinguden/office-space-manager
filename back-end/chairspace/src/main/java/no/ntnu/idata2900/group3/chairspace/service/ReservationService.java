@@ -4,9 +4,16 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import no.ntnu.idata2900.group3.chairspace.dto.area.AreaDto;
 import no.ntnu.idata2900.group3.chairspace.dto.reservation.ReservationCreationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.reservation.ReservationDto;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
@@ -160,6 +167,50 @@ public class ReservationService {
 	}
 
 	/**
+	 * Returns a list of areaDTOs that contain a free timeslot between start and end that lasts for
+	 * at least duration.
+	 *
+	 * @param start the start of the time window to check
+	 * @param end the end of the time window to check
+	 * @param duration the minimum duration a gap must have
+	 * @return a list of areaDTOs that contain a free timeslot between start and end that lasts for
+	 *      at least the length of duration.
+	 */
+	public List<AreaDto> getAreasThatContainFreeTimeSlot(
+		LocalDateTime start,
+		LocalDateTime end,
+		Duration duration
+	) {
+		Map<UUID, AreaDto> reservableAreas = new HashMap<>();
+		// We need to get all reservable areas to know whether areas that have never been reserved
+		// are free.
+		Iterable<Area> allAreasIterable = areaService.getReservableAreas();
+		// Assume everything is free until it isn't
+		// This logic ensures that areas without any reservations are still counted as "free"
+		allAreasIterable.iterator().forEachRemaining(
+			area -> reservableAreas.put(area.getId(), new AreaDto(area))
+		);
+
+		List<Reservation> allReservations = reservationRepository
+			.findAllReservationsInTimePeriod(start, end);
+
+		Map<UUID, List<Reservation>> areaReservationsMap = allReservations.stream()
+			.collect(Collectors.groupingBy(reservation -> reservation.getArea().getId()));
+
+		for (Map.Entry<UUID, List<Reservation>> entry : areaReservationsMap.entrySet()) {
+			UUID id = entry.getKey();
+			List<Reservation> reservations = entry.getValue();
+
+			// Check if the room is at all reservable with the criteria. If not, remove it.
+			if (!isAnyGapGreaterThanDuration(reservations, start, end, duration)) {
+				reservableAreas.remove(id);
+			}
+		}
+
+		return new ArrayList<>(reservableAreas.values());
+	}
+
+	/**
 	 * Gets the percentage of a day that an area is occupied by reservations.
 	 *
 	 * @param areaId the id of the area
@@ -239,5 +290,52 @@ public class ReservationService {
 		Duration duration = Duration.between(start, end);
 
 		return duration.toMillis();
+	}
+
+	private boolean isAnyGapGreaterThanDuration(
+		List<Reservation> reservations,
+		LocalDateTime searchStart,
+		LocalDateTime searchEnd,
+		Duration minGap
+	) {
+		// All of these checks should in theory always mean that there is a sufficient gap
+		if (reservations == null
+			|| minGap == null
+			|| reservations.isEmpty()
+			|| minGap.toMillis() <= 0) {
+			return true;
+		}
+
+		boolean hasGap = false;
+		LocalDateTime prevTime = searchStart;
+		Iterator<Reservation> reservationIterator = reservations.iterator();
+
+		while (!hasGap && reservationIterator.hasNext()) {
+			Reservation reservation = reservationIterator.next();
+
+			if (isGapGreaterThanDuration(prevTime, reservation.getStart(), minGap)) {
+				hasGap = true;
+			}
+
+			// Prevents finding durations that fall outside of the search range, while
+			// still taking the gap from the last reservation to the end of the search into account
+			prevTime = reservation.getEnd().isBefore(searchEnd) ? reservation.getEnd() : searchEnd;
+		}
+
+		// Checks the edge case in which the last reservation for the room ends before the search
+		// end. Simply checks the gap between the last reservation and the search end.
+		if (!hasGap && isGapGreaterThanDuration(prevTime, searchEnd, minGap)) {
+			hasGap = true;
+		}
+
+		return hasGap;
+	}
+
+	private boolean isGapGreaterThanDuration(
+		LocalDateTime start,
+		LocalDateTime end,
+		Duration duration
+	) {
+		return Duration.between(start, end).compareTo(duration) >= 0;
 	}
 }

@@ -53,6 +53,15 @@ public class AreaService {
 	}
 
 	/**
+	 * Gets all areas that are reservable.
+	 *
+	 * @return iterable of all areas that are reservable
+	 */
+	public Iterable<Area> getReservableAreas() {
+		return areaRepository.findAllByReservable(true);
+	}
+
+	/**
 	 * Get area by id. Returns null if area is not found.
 	 *
 	 * @param id UUID of the area to get
