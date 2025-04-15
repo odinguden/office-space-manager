@@ -4,16 +4,10 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
-import no.ntnu.idata2900.group3.chairspace.dto.area.AreaDto;
 import no.ntnu.idata2900.group3.chairspace.dto.reservation.ReservationCreationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.reservation.ReservationDto;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
@@ -167,47 +161,24 @@ public class ReservationService {
 	}
 
 	/**
-	 * Returns a list of areaDTOs that contain a free timeslot between start and end that lasts for
-	 * at least duration.
+	 * Checks if an area has a gap between start and end that is greater than the given minGap.
 	 *
-	 * @param start the start of the time window to check
-	 * @param end the end of the time window to check
-	 * @param duration the minimum duration a gap must have
-	 * @return a list of areaDTOs that contain a free timeslot between start and end that lasts for
-	 *      at least the length of duration.
+	 * @param areaId the id of the area to check
+	 * @param start the start of the timeslot to check
+	 * @param end the end of the timeslot to check
+	 * @param minGap the minimum length required for the gap
+	 * @return true if the area has a free timeslot that lasts longer than the provided minGap.
 	 */
-	public List<AreaDto> getAreasThatContainFreeTimeSlot(
+	public boolean doesAreaHaveFreeTimeslot(
+		UUID areaId,
 		LocalDateTime start,
 		LocalDateTime end,
-		Duration duration
+		Duration minGap
 	) {
-		Map<UUID, AreaDto> reservableAreas = new HashMap<>();
-		// We need to get all reservable areas to know whether areas that have never been reserved
-		// are free.
-		Iterable<Area> allAreasIterable = areaService.getReservableAreas();
-		// Assume everything is free until it isn't
-		// This logic ensures that areas without any reservations are still counted as "free"
-		allAreasIterable.iterator().forEachRemaining(
-			area -> reservableAreas.put(area.getId(), new AreaDto(area))
-		);
+		List<Reservation> reservations = reservationRepository
+			.findReservationsForAreaInTimePeriod(areaId, start, end);
 
-		List<Reservation> allReservations = reservationRepository
-			.findAllReservationsInTimePeriod(start, end);
-
-		Map<UUID, List<Reservation>> areaReservationsMap = allReservations.stream()
-			.collect(Collectors.groupingBy(reservation -> reservation.getArea().getId()));
-
-		for (Map.Entry<UUID, List<Reservation>> entry : areaReservationsMap.entrySet()) {
-			UUID id = entry.getKey();
-			List<Reservation> reservations = entry.getValue();
-
-			// Check if the room is at all reservable with the criteria. If not, remove it.
-			if (!isAnyGapGreaterThanDuration(reservations, start, end, duration)) {
-				reservableAreas.remove(id);
-			}
-		}
-
-		return new ArrayList<>(reservableAreas.values());
+		return isAnyGapGreaterThanDuration(reservations, start, end, minGap);
 	}
 
 	/**

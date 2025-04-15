@@ -1,7 +1,12 @@
 package no.ntnu.idata2900.group3.chairspace.service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.dto.PaginationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.area.AreaCreationDto;
@@ -32,6 +37,8 @@ public class AreaService {
 	AreaTypeService areaTypeService;
 	@Autowired
 	AreaFeatureService areaFeatureService;
+	@Autowired
+	ReservationService reservationService;
 
 	/**
 	 * No-args constructor for AreaService.
@@ -70,6 +77,37 @@ public class AreaService {
 	public Area getArea(UUID id) {
 		// Get area by id from the repository
 		return areaRepository.findById(id).orElse(null);
+	}
+
+	/**
+	 * Returns a list of areaDTOs that contain a free timeslot between start and end that lasts for
+	 * at least duration.
+	 *
+	 * @param start the start of the time window to check
+	 * @param end the end of the time window to check
+	 * @param minGap the minimum duration a gap must have
+	 * @return a list of areaDTOs that contain a free timeslot between start and end that lasts for
+	 *      at least the length of duration.
+	 */
+	public List<AreaDto> getAreasWithReservationGap(
+		LocalDateTime start,
+		LocalDateTime end,
+		Duration minGap
+	) {
+		Iterator<Area> areas = this.getReservableAreas().iterator();
+		Set<Area> reservableAreas = new HashSet<>();
+		areas.forEachRemaining(reservableAreas::add);
+
+		while (areas.hasNext()) {
+			Area area = areas.next();
+			if (!reservationService.doesAreaHaveFreeTimeslot(area.getId(), start, end, minGap)) {
+				reservableAreas.remove(area);
+			}
+		}
+
+		return reservableAreas.stream()
+			.map(AreaDto::new)
+			.toList();
 	}
 
 	/* ---- DTO methods  ---- */
