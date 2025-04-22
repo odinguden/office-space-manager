@@ -53,6 +53,15 @@ public class AreaService {
 	}
 
 	/**
+	 * Gets all areas that are reservable.
+	 *
+	 * @return iterable of all areas that are reservable
+	 */
+	public Iterable<Area> getReservableAreas() {
+		return areaRepository.findAllByReservable(true);
+	}
+
+	/**
 	 * Get area by id. Returns null if area is not found.
 	 *
 	 * @param id UUID of the area to get
@@ -79,9 +88,9 @@ public class AreaService {
 	 */
 	public Area createAreaFromDto(AreaCreationDto areaDto)
 		throws AdminCountException, InvalidArgumentCheckedException, ElementNotFoundException {
-		AreaType areaType = areaTypeService.getEntity(areaDto.getAreaTypeIds());
+		AreaType areaType = areaTypeService.getEntity(areaDto.getAreaTypeId());
 		if (areaType == null) {
-			throw ElementNotFoundException.areaTypeNotFoundException;
+			throw ElementNotFoundException.AREA_TYPE_NOT_FOUND;
 		}
 		Area.Builder areaBuilder = new Area.Builder(
 			areaDto.getName(),
@@ -92,16 +101,16 @@ public class AreaService {
 		for (UUID id : areaDto.getAdministratorIds()) {
 			User user = userService.getEntity(id);
 			if (user == null) {
-				throw ElementNotFoundException.userNotFoundException;
+				throw ElementNotFoundException.USER_NOT_FOUND;
 			}
 			areaBuilder.administrator(user);
 		}
 
 		areaBuilder.calendarLink(areaDto.getCalendarLink());
-		if (areaDto.getSuperArea() != null) {
-			Area area = getArea(areaDto.getSuperArea());
+		if (areaDto.getSuperAreaId() != null) {
+			Area area = getArea(areaDto.getSuperAreaId());
 			if (area == null) {
-				throw ElementNotFoundException.areaNotFoundException;
+				throw ElementNotFoundException.AREA_NOT_FOUND;
 			}
 			areaBuilder.superArea(area);
 		}
@@ -156,11 +165,11 @@ public class AreaService {
 	public void addFeatureToArea(UUID areaId, String featureId) throws ElementNotFoundException {
 		Area area = getArea(areaId);
 		if (area == null) {
-			throw ElementNotFoundException.areaNotFoundException;
+			throw ElementNotFoundException.AREA_NOT_FOUND;
 		}
 		AreaFeature areaFeature = areaFeatureService.getEntity(featureId);
 		if (areaFeature == null) {
-			throw ElementNotFoundException.areaFeatureNotFoundException;
+			throw ElementNotFoundException.AREA_FEATURE_NOT_FOUND;
 		}
 		area.addAreaFeature(areaFeature);
 		areaRepository.save(area);
@@ -178,11 +187,11 @@ public class AreaService {
 		throws ElementNotFoundException {
 		Area area = getArea(areaId);
 		if (area == null) {
-			throw ElementNotFoundException.areaNotFoundException;
+			throw ElementNotFoundException.AREA_NOT_FOUND;
 		}
 		AreaFeature areaFeature = areaFeatureService.getEntity(featureId);
 		if (areaFeature == null) {
-			throw ElementNotFoundException.areaFeatureNotFoundException;
+			throw ElementNotFoundException.AREA_FEATURE_NOT_FOUND;
 		}
 		area.removeAreaFeature(areaFeature);
 		areaRepository.save(area);
@@ -203,11 +212,11 @@ public class AreaService {
 		throws ElementNotFoundException, InvalidArgumentCheckedException, AdminCountException {
 		Area area = getArea(areaId);
 		if (area == null) {
-			throw ElementNotFoundException.areaNotFoundException;
+			throw ElementNotFoundException.AREA_NOT_FOUND;
 		}
 		Area superArea = getArea(superAreaId);
 		if (superArea == null) {
-			throw ElementNotFoundException.areaNotFoundException;
+			throw ElementNotFoundException.AREA_NOT_FOUND;
 		}
 		area.setSuperArea(superArea);
 		areaRepository.save(area);
@@ -223,7 +232,7 @@ public class AreaService {
 	public void removeSuperArea(UUID areaId) throws ElementNotFoundException, AdminCountException {
 		Area area = getArea(areaId);
 		if (area == null) {
-			throw ElementNotFoundException.areaNotFoundException;
+			throw ElementNotFoundException.AREA_NOT_FOUND;
 		}
 		area.removeSuperArea();
 		areaRepository.save(area);
@@ -256,7 +265,7 @@ public class AreaService {
 		throws InvalidArgumentCheckedException, ElementNotFoundException {
 		Area area = getArea(areaDto.getId());
 		if (area == null) {
-			throw ElementNotFoundException.areaNotFoundException;
+			throw ElementNotFoundException.AREA_NOT_FOUND;
 		}
 		if (areaDto.getName() != null) {
 			area.updateName(areaDto.getName());
@@ -273,7 +282,7 @@ public class AreaService {
 			AreaType areaType = areaTypeService.getEntity(areaDto.getAreaType());
 			if (areaType == null) {
 				// A lot of indentation but seems like a waste to put all this in it's own method
-				throw ElementNotFoundException.areaTypeNotFoundException;
+				throw ElementNotFoundException.AREA_TYPE_NOT_FOUND;
 			}
 			area.updateAreaType(areaType);
 		}

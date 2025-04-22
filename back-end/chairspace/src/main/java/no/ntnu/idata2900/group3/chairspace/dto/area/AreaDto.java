@@ -39,9 +39,7 @@ public class AreaDto {
 	 */
 	public AreaDto(Area area) {
 		if (area == null) {
-			throw new IllegalArgumentException(
-				"Area was null when value was expected"
-			);
+			throw new IllegalArgumentException("Area was null when value was expected");
 		}
 
 		this.id = area.getId();
@@ -59,13 +57,11 @@ public class AreaDto {
 		for (User user : admins) {
 			this.administratorIds.add(user.getId());
 		}
+
 		Iterator<AreaFeature> it = area.getFeatures();
+
 		this.areaFeatures = new ArrayList<>();
-		while (it.hasNext()) {
-			areaFeatures.add(it.next());
-		}
-
-
+		it.forEachRemaining(areaFeatures::add);
 	}
 
 	private void setSuperAreas(Area area) {
@@ -74,9 +70,7 @@ public class AreaDto {
 		Area nextSuper = area.getSuperArea();
 
 		while (nextSuper != null) {
-			superAreas.add(
-				new SimpleSuperAreaDto(nextSuper)
-			);
+			superAreas.add(new SimpleSuperAreaDto(nextSuper));
 			nextSuper = nextSuper.getSuperArea();
 		}
 	}

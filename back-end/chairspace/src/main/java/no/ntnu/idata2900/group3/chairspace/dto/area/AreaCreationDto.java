@@ -10,8 +10,8 @@ import java.util.UUID;
  */
 public class AreaCreationDto {
 	private List<UUID> administratorIds;
-	private UUID superArea;
-	private String areaTypeIds;
+	private UUID superAreaId;
+	private String areaTypeId;
 	private List<String> areaFeatureIds;
 	private int capacity;
 	private String calendarLink;
@@ -20,7 +20,7 @@ public class AreaCreationDto {
 	private boolean reservable;
 
 	/**
-	 * Empty constructor for serialization.
+	 * No-args constructor.
 	 */
 	public AreaCreationDto() {
 		// Empty constructor for serialization/deserialization
@@ -41,8 +41,8 @@ public class AreaCreationDto {
 	 *
 	 * @return the id of the super area
 	 */
-	public UUID getSuperArea() {
-		return superArea;
+	public UUID getSuperAreaId() {
+		return superAreaId;
 	}
 
 	/**
@@ -50,8 +50,8 @@ public class AreaCreationDto {
 	 *
 	 * @return id of the area type
 	 */
-	public String getAreaTypeIds() {
-		return areaTypeIds;
+	public String getAreaTypeId() {
+		return areaTypeId;
 	}
 
 	/**
