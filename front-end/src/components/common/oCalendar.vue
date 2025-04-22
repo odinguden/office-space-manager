@@ -31,10 +31,10 @@ const selectedMonth = ref(now.getMonth())
 			</o-cycle-input>
 		</header>
 		<v-divider />
-		<o-calendar-month
-			class="calendar-content"
+		<o-calendar-month-view
 			:year="selectedYear"
 			:month="selectedMonth"
+			clickable-days
 		/>
 	</v-sheet>
 </template>
