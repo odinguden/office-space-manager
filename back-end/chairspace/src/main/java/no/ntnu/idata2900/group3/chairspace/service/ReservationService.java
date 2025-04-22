@@ -224,16 +224,17 @@ public class ReservationService {
 
 		// We use a higher intermediary precision to increase accuracy
 		// as floats lose accuracy as numbers grow large.
-		double millisecondsInMonth = (MS_IN_DAY * lengthOfMonth);
-		double totalMilliseconds = 0;
+		double totalFrequency = 0;
 
 		for (int day = 1; day <= yearMonth.lengthOfMonth(); day++) {
 			LocalDate thisDate = LocalDate.of(year, month, day);
 
-			totalMilliseconds += getReservationFrequencyForDay(areaId, thisDate);
+			totalFrequency += getReservationFrequencyForDay(areaId, thisDate);
 		}
 
-		return (float) (totalMilliseconds / millisecondsInMonth);
+		// Since max frequency where every day is fully occupied is the same as
+		// the length of the month, this gets the percentage for the full month
+		return (float) (totalFrequency / lengthOfMonth);
 	}
 
 	/**
