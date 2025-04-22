@@ -3,6 +3,10 @@ package no.ntnu.idata2900.group3.chairspace.controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.dto.PaginationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.area.AreaCreationDto;
@@ -14,6 +18,8 @@ import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.PageNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.service.AreaService;
+import no.ntnu.idata2900.group3.chairspace.service.ReservationService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +51,8 @@ import org.springframework.web.server.ResponseStatusException;
 public class AreaController extends AbstractPermissionManager {
 	@Autowired
 	private AreaService areaService;
+	@Autowired
+	private ReservationService reservationService;
 
 	/**
 	 * Posts a new area to the database based on the data from AreaDTO.
@@ -354,7 +362,7 @@ public class AreaController extends AbstractPermissionManager {
 	 * @throws ResponseStatusException code 404 not found upon attempting to add an areaFeature that
 	 *      does not exist
 	 */
-	@PostMapping("/addAreaFeature/{areaId}/{areaFeatureId}")
+	@PostMapping("/add-area-feature/{areaId}/{areaFeatureId}")
 	@Operation(
 		summary = "Adds an area feature to an area",
 		description = "Attempts to add an area feature to an area"
@@ -407,7 +415,7 @@ public class AreaController extends AbstractPermissionManager {
 	 */
 	//Made this a put mapping since it modifies the area object
 	// and is not a delete operation. It is not a delete operation since the area feature
-	@PutMapping("/removeAreaFeature/{areaId}/{areaFeatureId}")
+	@PutMapping("/remove-area-feature/{areaId}/{areaFeatureId}")
 	@Operation(
 		summary = "Removes an area feature from an area",
 		description = "Attempts to remove an area feature from an area"
@@ -461,7 +469,7 @@ public class AreaController extends AbstractPermissionManager {
 	 * @throws ResponseStatusException code 400 bad request if the super area is not valid
 	 * @throws ResponseStatusException code 400 bad request if the super area has no administrators
 	 */
-	@PutMapping("/setSuperArea/{areaId}/{superAreaId}")
+	@PutMapping("/set-super-area/{areaId}/{superAreaId}")
 	@Operation(
 		summary = "Replaces the super area of an area",
 		description = "Attempts to replace the super area of an area"
@@ -528,7 +536,7 @@ public class AreaController extends AbstractPermissionManager {
 	 * @throws ResponseStatusException code 404 not found upon attempting to update an area that
 	 *      does not exist
 	 */
-	@PutMapping("removesuperarea/{areaId}")
+	@PutMapping("remove-super-area/{areaId}")
 	@Operation(
 		summary = "Removes the super area of an area",
 		description = "Attempts to remove the super area of an area"
@@ -572,6 +580,43 @@ public class AreaController extends AbstractPermissionManager {
 			);
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	/**
+	 * Gets a list of all areas that contain a free time slot within the given period of time
+	 * that lasts for the given duration of time.
+	 *
+	 * @param start the start time to search from
+	 * @param end the end time to search until
+	 * @param duration the minimum size of a gap
+	 * @return 200 OK with a list of DTOs that have a gap
+	 */
+	@GetMapping("/get-free-areas")
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Found area(s) that match"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users are not permitted to perform this action"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to perform this action"
+			),
+	})
+	public ResponseEntity<List<AreaDto>> getAreasWithFreeTimeSlotLike(
+		@RequestParam LocalDateTime start,
+		@RequestParam LocalDateTime end,
+		@RequestParam Duration duration
+	) {
+		hasPermissionToGet();
+
+		return new ResponseEntity<>(
+			reservationService.getAreasThatContainFreeTimeSlot(start, end, duration),
+			HttpStatus.OK
+		);
 	}
 }
 
