@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 import no.ntnu.idata2900.group3.chairspace.dto.area.AreaDto;
 import no.ntnu.idata2900.group3.chairspace.dto.reservation.ReservationCreationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.reservation.ReservationDto;

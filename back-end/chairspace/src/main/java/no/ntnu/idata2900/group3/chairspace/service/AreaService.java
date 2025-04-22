@@ -1,7 +1,9 @@
 package no.ntnu.idata2900.group3.chairspace.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.dto.PaginationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.area.AreaCreationDto;
@@ -305,5 +307,33 @@ public class AreaService {
 			areaRepository.deleteById(id);
 		}
 		return exist;
+	}
+
+	/* -------- Search Methods -------- */
+
+	/**
+	 * Searches for areas based on the given criteria.
+	 *
+	 * @param capacity the minimum capacity of the area
+	 * @param areaType the type of area to search for
+	 * @param areaFeatures the features of the area to search for
+	 * @param startDateTime the time to start search from
+	 * @param endDateTime the time to end search from
+	 * @return a list of areas that fit the given criteria
+	 */
+	public Iterable<Area> øsearchWithOptionalParams(
+		int capacity,
+		String areaType,
+		Set<String> areaFeatures,
+		LocalDateTime startDateTime,
+		LocalDateTime endDateTime
+	) {
+		return areaRepository.searchWithOptionalParams(
+			capacity,
+			areaType,
+			areaFeatures,
+			startDateTime,
+			endDateTime
+		);
 	}
 }
