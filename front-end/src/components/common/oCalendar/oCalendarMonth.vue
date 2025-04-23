@@ -32,12 +32,14 @@ function isOutOfMonth(day) {
 		</v-sheet>
 		<o-calendar-week
 			v-for="week in weeks"
+			:key="week"
 			:days="week.days"
 			:week-number="week.number"
 		>
 			<template v-slot="{ day }">
 				<o-calendar-day
 					:day="day"
+					:key="day"
 					:disabled="isOutOfMonth(day)"
 				/>
 			</template>

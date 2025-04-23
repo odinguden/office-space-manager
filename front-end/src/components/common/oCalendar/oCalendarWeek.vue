@@ -14,7 +14,10 @@ const props = defineProps({
 		</slot>
 		<div v-for="day in props.days">
 			<slot :day="day">
-				<o-calendar-day :day="day"/>
+				<o-calendar-day
+					:day="day"
+					:key="day"
+				/>
 			</slot>
 		</div>
 	</v-sheet>

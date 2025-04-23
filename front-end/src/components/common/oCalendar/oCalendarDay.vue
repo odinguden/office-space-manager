@@ -7,7 +7,11 @@ const vDate = useDate()
 const oDate = useODate()
 
 const props = defineProps({
-	"day": Date
+	"day": Date,
+	"frequency": {
+		type: Number,
+		default: () => Math.random()
+	}
 })
 
 // Checks whether this day is the current day
@@ -35,6 +39,7 @@ const dateName = computed(() => {
 		density="comfortable"
 		:variant="isToday ? 'flat' : 'text'"
 		:color="isToday ? 'primary' : undefined"
+		:style="{'--frequency': props.frequency}"
 		@click=""
 	>
 		<span>
@@ -45,6 +50,7 @@ const dateName = computed(() => {
 
 <style scoped lang="scss">
 .day {
+	--frequency: 0;
 	--day-opacity: 1;
 	aspect-ratio: 1;
 	border-radius: 100em;
@@ -59,9 +65,6 @@ const dateName = computed(() => {
 	justify-content: center;
 
 	transition: none;
-
-	&:hover, &:active, &:focus {
-		background: rgba(var(--v-theme-on-surface), var(--v-focus-opacity))
-	}
+	background-color: rgba(var(--v-theme-error), var(--frequency));
 }
 </style>
