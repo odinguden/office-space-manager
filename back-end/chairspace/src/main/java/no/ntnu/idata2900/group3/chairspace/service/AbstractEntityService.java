@@ -55,8 +55,8 @@ public abstract class AbstractEntityService<EntityT extends EntityInterface<IdTy
 	 * @return true if the entity was saved
 	 */
 	public boolean saveEntity(EntityT entity) {
-		boolean shouldSave = entity.getId() != null
-			&& !repository.findById(entity.getId()).isPresent();
+		boolean shouldSave = entity.getId() == null
+			|| !repository.findById(entity.getId()).isPresent();
 		if (shouldSave) {
 			repository.save(entity);
 		}

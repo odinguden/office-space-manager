@@ -212,7 +212,7 @@ public class AreaController extends AbstractPermissionManager {
 			)
 	})
 	public ResponseEntity<PaginationDto<AreaDto>> getAreasInPagination(
-		@RequestParam int page, @RequestParam Integer itemsPerPage
+		@RequestParam int page, @RequestParam(required = false) Integer itemsPerPage
 	) {
 		if (itemsPerPage == null) {
 			itemsPerPage = 12;
