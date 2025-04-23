@@ -3,8 +3,6 @@ package no.ntnu.idata2900.group3.chairspace.controllers;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
-import no.ntnu.idata2900.group3.chairspace.dto.SearchDto;
 import no.ntnu.idata2900.group3.chairspace.dto.area.AreaDto;
 import no.ntnu.idata2900.group3.chairspace.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;

@@ -1,9 +1,13 @@
 package no.ntnu.idata2900.group3.chairspace.repository;
 
+import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
+import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
+import no.ntnu.idata2900.group3.chairspace.entity.AreaType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 
@@ -24,22 +28,31 @@ public interface AreaRepository extends CrudRepository<Area, UUID> {
 	 * Finds all reservable areas that fit the given criteria.
 	 *
 	 * @param capacity the minimum capacity of the area
+	 * @param superArea the super area to search in
 	 * @param areaType the type of area to search for
 	 * @param areaFeatures the features of the area to search for
-	 * @param startDateTime the time to start search from
-	 * @param endDateTime the time to end search from
+	 * @param featureCount the number of features to search for
 	 * @return a list of areas that fit the given criteria
 	 */
-	@Query("""
+	@Query(value = """
 		SELECT area
 		FROM Area area
-
+		LEFT JOIN area.features areaFeature
+		WHERE area.reservable = true
+		AND (:freeAreas IS NULL OR area IN (:freeAreas))
+		AND (:capacity IS NULL OR area.capacity >= :capacity)
+		AND (:superArea IS NULL OR area.superArea = :superArea)
+		AND (:areaType IS NULL OR area.areaType = :areaType)
+		AND (:features IS NULL OR areaFeature IN (:features))
+		GROUP BY area
+		HAVING (:featureCount IS NULL OR COUNT(areaFeature) >= :featureCount)
 		""")
 	Iterable<Area> searchWithOptionalParams(
-		int capacity,
-		String areaType,
-		String areaFeatures,
-		String startDateTime,
-		String endDateTime
+		@Param("capacity") Integer capacity,
+		@Param("superArea") Area superArea,
+		@Param("areaType") AreaType areaType,
+		@Param("features") List<AreaFeature> areaFeatures,
+		@Param("freeAreas") List<Area> freeAreas,
+		@Param("featureCount") Integer featureCount
 	);
 }
