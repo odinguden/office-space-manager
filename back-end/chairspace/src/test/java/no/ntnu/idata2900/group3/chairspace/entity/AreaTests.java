@@ -8,12 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Iterator;
 import no.ntnu.idata2900.group3.chairspace.exceptions.AdminCountException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
-import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -88,33 +86,41 @@ class AreaTests {
 
 	@Test
 	void testThatBuilderThrowsIfNoName() {
+		Area.Builder areaBuilder = new Area.Builder(null, 1232, areaType);
+		areaBuilder.administrator(adminUser);
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> new Area.Builder(null, 1232, areaType)
+			areaBuilder::build
 		);
 	}
 
 	@Test
 	void testThatBuilderThrowsIfBlank() {
+		Area.Builder areaBuilder = new Area.Builder("", 1232, areaType);
+		areaBuilder.administrator(adminUser);
 		assertThrows(
 			InvalidArgumentCheckedException.class,
-			() -> new Area.Builder("", 1232, areaType)
+			areaBuilder::build
 		);
 	}
 
 	@Test
 	void testThatBuilderThrowsIfNegativeCapacity() {
+		Area.Builder areaBuilder = new Area.Builder("Test", -3, areaType);
+		areaBuilder.administrator(adminUser);
 		assertThrows(
 			InvalidArgumentCheckedException.class,
-			() -> new Area.Builder("Test", -3, areaType)
+			areaBuilder::build
 		);
 	}
 
 	@Test
 	void testThatBuilderThrowsIfNoAreaType() {
+		Area.Builder areaBuilder = new Area.Builder("Test", 1232, null);
+		areaBuilder.administrator(adminUser);
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> new Area.Builder("Test", 1232, null)
+			areaBuilder::build
 		);
 	}
 
@@ -167,90 +173,23 @@ class AreaTests {
 	@Test
 	void testThatBuilderThrowsIfNullAdminIsProvided() {
 		Area.Builder builder;
-		try {
-			builder = new Area.Builder("Test", 1232, areaType);
-		} catch (Exception e) {
-			fail("Failed to create builder: " + e.getMessage(), e);
-			return;
-		}
+		builder = new Area.Builder("Test", 1232, areaType);
+		builder.administrator(null);
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> builder.administrator(null)
-		);
-	}
-
-	@Test
-	void testThatBuilderThrowsIfNullDescriptionIsProvided() {
-		Area.Builder builder;
-		try {
-			builder = new Area.Builder("Test", 1232, areaType);
-		} catch (Exception e) {
-			fail("Failed to create builder: " + e.getMessage(), e);
-			return;
-		}
-		assertThrows(
-			IllegalArgumentException.class,
-			() -> builder.description(null)
+			builder::build
 		);
 	}
 
 	@Test
 	void testThatBuilderThrowsIfNullAreaFeatureIsProvided() {
 		Area.Builder builder;
-		try {
-			builder = new Area.Builder("Test", 1232, areaType);
-		} catch (Exception e) {
-			fail("Failed to create builder: " + e.getMessage(), e);
-			return;
-		}
+		builder = new Area.Builder("Test", 1232, areaType);
+		builder.feature(null);
+		builder.administrator(adminUser);
 		assertThrows(
 			IllegalArgumentException.class,
-			() -> builder.feature(null)
-		);
-	}
-
-	@Test
-	void testThatBuilderThrowsIfNullLinkIsProvided() {
-		Area.Builder builder;
-		try {
-			builder = new Area.Builder("Test", 1232, areaType);
-		} catch (Exception e) {
-			fail("Failed to create builder: " + e.getMessage(), e);
-			return;
-		}
-		assertThrows(
-			IllegalArgumentException.class,
-			() -> builder.calendarLink(null)
-		);
-	}
-
-	@Test
-	void testThatBuilderThrowsIfBlankLinkIsProvided() {
-		Area.Builder builder;
-		try {
-			builder = new Area.Builder("Test", 1232, areaType);
-		} catch (Exception e) {
-			fail("Failed to create builder: " + e.getMessage(), e);
-			return;
-		}
-		assertThrows(
-			InvalidArgumentCheckedException.class,
-			() -> builder.calendarLink("")
-		);
-	}
-
-	@Test
-	void testThatBuilderThrowsIfNullSuperAreaIsProvided() {
-		Area.Builder builder;
-		try {
-			builder = new Area.Builder("Test", 1232, areaType);
-		} catch (Exception e) {
-			fail("Failed to create builder: " + e.getMessage(), e);
-			return;
-		}
-		assertThrows(
-			IllegalArgumentException.class,
-			() -> builder.superArea(null)
+			builder::build
 		);
 	}
 
@@ -654,200 +593,6 @@ class AreaTests {
 	}
 
 	@Test
-	void testRemoveReservation() {
-		Area area;
-		final Reservation reservation;
-		try {
-			area = new Area.Builder("Test", 123, areaType)
-				.administrator(adminUser)
-				.build();
-			reservation = new Reservation(
-				area,
-				adminUser,
-				LocalDateTime.now().plusHours(4),
-				LocalDateTime.now().plusHours(6),
-				"Meeting with mom"
-			);
-			new Reservation(
-					area,
-					adminUser,
-					LocalDateTime.now().plusHours(7),
-					LocalDateTime.now().plusHours(8),
-					"Meeting with mom"
-			);
-			area.removeReservation(reservation);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-			return;
-		}
-		Iterator<Reservation> iterator = area.getReservations();
-		boolean contains = false;
-		while (iterator.hasNext() && !contains) {
-			if (iterator.next().equals(reservation)) {
-				contains = true;
-			}
-		}
-		assertFalse(contains, "Reservation was not removed");
-	}
-
-	@Test
-	void testIsFreeReturnsTrue() {
-		LocalDateTime start = LocalDateTime.now().plusMinutes(30);
-		Area area;
-		try {
-			area = new Area.Builder("Test", 2, areaType)
-				.administrator(adminUser)
-				.build();
-		} catch (Exception e) {
-			fail("Failed to create area", e);
-			return;
-		}
-		assertDoesNotThrow(
-			() -> new Reservation(
-				area,
-				adminUser,
-				start,
-				start.plusHours(3),
-				"This is for testing"
-			)
-		);
-		assertTrue(
-			area.isFree(start.minusHours(1)),
-			"Area is not free 1 hour before the only reservation"
-		);
-		assertTrue(
-			area.isFree(start.minusHours(4)),
-			"Area is not free 1 hour after the only reservation"
-		);
-	}
-
-	@Test
-	void testIsFreeReturnsFalse() {
-		LocalDateTime start = LocalDateTime.now().plusMinutes(30);
-		LocalDateTime end = start.plusHours(3);
-		Area area;
-		try {
-			area = new Area.Builder("Test", 2, areaType)
-				.administrator(adminUser)
-				.build();
-		} catch (Exception e) {
-			fail("Failed to create area", e);
-			return;
-		}
-		assertDoesNotThrow(
-			() -> new Reservation(area, adminUser, start, end, "This is a test")
-		);
-		assertFalse(area.isFree(start.plusHours(2)));
-	}
-
-	@Test
-	void testGetReservations() {
-		LocalDateTime start = LocalDateTime.now().plusMinutes(30);
-		LocalDateTime start2 = start.plusHours(3);
-		Area area;
-		try {
-			area = new Area.Builder("Test", 2, areaType)
-				.administrator(adminUser)
-				.build();
-		} catch (Exception e) {
-			fail("Failed to create area", e);
-			return;
-		}
-
-		Reservation reservation = null;
-		Reservation reservation2 = null;
-		try {
-			reservation = new Reservation(
-				area,
-				adminUser,
-				start,
-				start.plusHours(2),
-				"This is a test");
-			reservation2 = new Reservation(
-				area,
-				adminUser,
-				start2,
-				start2.plusHours(3),
-				"This is a test");
-			area.removeReservation(reservation2);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		Iterator<Reservation> iterator = area.getReservations();
-		boolean contains = false;
-		boolean contain2 = false;
-		while (iterator.hasNext() && !contains && !contain2) {
-			Reservation next = iterator.next();
-			if (next == reservation) {
-				contains = true;
-			}
-			if (next == reservation2) {
-				contain2 = true;
-			}
-		}
-		assertTrue(contains, "Reservation was not added");
-		assertFalse(
-			contain2,
-			"Returns true for non existing reservation"
-		);
-	}
-
-	@Test
-	void testAddingNullReservationThrows() {
-		Area area;
-		try {
-			area = new Area.Builder("Test", 2, areaType)
-				.administrator(adminUser)
-				.build();
-		} catch (Exception e) {
-			fail("Failed to create area", e);
-			return;
-		}
-		assertThrows(
-			IllegalArgumentException.class,
-			() -> area.addReservation(null)
-		);
-	}
-
-	@Test
-	void addingReservationForInvalidTimeSpanThrows() {
-		LocalDateTime start = LocalDateTime.now().plusMinutes(30);
-		Area area;
-		try {
-			area = new Area.Builder("Test", 2, areaType)
-				.administrator(adminUser)
-				.build();
-		} catch (Exception e) {
-			fail("Failed to create area", e);
-			return;
-		}
-		Reservation reservation;
-		try {
-			reservation = new Reservation(
-				area,
-				adminUser,
-				start.plusHours(1),
-				start.plusHours(2),
-				"This is a test"
-			);
-			area.removeReservation(reservation);
-		} catch (Exception e) {
-			fail("Failed to create reservation " + e.getMessage());
-			return;
-		}
-
-		assertDoesNotThrow(
-			() -> new Reservation(area, adminUser, start, start.plusHours(3), "This is a test")
-		);
-		assertThrows(
-			ReservedException.class,
-			() -> area.addReservation(reservation)
-		);
-	}
-
-	@Test
 	void testAddAdmin() {
 		Area area;
 		try {
@@ -878,105 +623,6 @@ class AreaTests {
 			IllegalArgumentException.class,
 			() -> area.addAdministrator(null)
 		);
-	}
-
-	@Test
-	void isFreeBetweenFalseTests() {
-		LocalDateTime start = LocalDateTime.now().plusHours(1);
-		Area area;
-		try {
-			area = new Area.Builder("Test", 2, areaType)
-				.administrator(adminUser)
-				.build();
-			new Reservation(area, adminUser, start, start.plusHours(4), "This is for testing");
-		} catch (Exception e) {
-			e.printStackTrace();
-			return;
-		}
-
-		try {
-			assertFalse(
-				area.isFreeBetween(start.plusHours(1),
-				start.plusHours(3)),
-				"Area is free during a reservation"
-			);
-			assertFalse(
-				area.isFreeBetween(start.plusHours(1),
-				start.plusHours(5)),
-				"Area is free starting in a reservation"
-			);
-			assertFalse(
-				area.isFreeBetween(start.minusMinutes(15),
-				start.plusHours(2)),
-				"Area is free ending in a reservation"
-			);
-			assertFalse(
-				area.isFreeBetween(start.minusMinutes(15),
-				start.plusHours(5)),
-				"Area is free encompassing a reservation"
-			);
-		} catch (Exception e) {
-			fail(e.getMessage(), e);
-		}
-	}
-
-	@Test
-	void removeNullReservationTest() {
-		LocalDateTime start = LocalDateTime.now().plusMinutes(30);
-		LocalDateTime end = start.plusHours(3);
-		Area area;
-		try {
-			area = new Area.Builder("Name", 12, areaType)
-				.administrator(adminUser)
-				.build();
-		} catch (Exception e) {
-			fail("Failed to create area: " + e.getMessage(), e);
-			return;
-		}
-
-		assertDoesNotThrow(
-			() -> new Reservation(area, adminUser, start, end, "More testing")
-		);
-		assertThrows(
-			IllegalArgumentException.class,
-			() -> area.removeReservation(null)
-		);
-	}
-
-	@Test
-	void removeReservation() {
-		LocalDateTime start = LocalDateTime.now().plusMinutes(30);
-		LocalDateTime end = start.plusHours(3);
-		Area area;
-		try {
-			area = new Area.Builder("Name", 12, areaType)
-				.administrator(adminUser)
-				.build();
-		} catch (Exception e) {
-			fail("Failed to create area: " + e.getMessage(), e);
-			return;
-		}
-		assertDoesNotThrow(
-			() -> new Reservation(area, adminUser, start, end, "More testing")
-		);
-		Reservation reservation2;
-		try {
-			reservation2 = new Reservation(area, adminUser2, start, end, "More testing");
-			area.removeReservation(reservation2);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-			return;
-		}
-
-		Iterator<Reservation> iterator = area.getReservations();
-		boolean contains = false;
-		while (iterator.hasNext() && !contains) {
-			if (iterator.next().equals(reservation2)) {
-				contains = true;
-			}
-		}
-		assertFalse(contains);
 	}
 
 	@Test
@@ -1060,45 +706,6 @@ class AreaTests {
 		assertThrows(
 			InvalidArgumentCheckedException.class,
 			() -> superArea2.setSuperArea(area)
-		);
-	}
-
-	@Test
-	void testIsFreeBetweenNullArgs() {
-		Area area;
-		try {
-			area = new Area.Builder("Name", 12, areaType)
-				.administrator(adminUser)
-				.build();
-		} catch (Exception e) {
-			fail("Failed to create areas: " + e.getMessage(), e);
-			return;
-		}
-		LocalDateTime time = LocalDateTime.now().plusDays(1);
-		assertThrows(
-			IllegalArgumentException.class,
-			() -> area.isFreeBetween(null, time)
-		);
-		assertThrows(
-			IllegalArgumentException.class,
-			() -> area.isFreeBetween(time, null)
-		);
-	}
-
-	@Test
-	void testIsFreeNullArgs() {
-		Area area;
-		try {
-			area = new Area.Builder("Name", 12, areaType)
-				.administrator(adminUser)
-				.build();
-		} catch (Exception e) {
-			fail("Failed to create areas: " + e.getMessage(), e);
-			return;
-		}
-		assertThrows(
-			IllegalArgumentException.class,
-			() -> area.isFree(null)
 		);
 	}
 

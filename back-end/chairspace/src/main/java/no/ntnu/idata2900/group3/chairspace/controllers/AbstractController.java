@@ -3,11 +3,9 @@ package no.ntnu.idata2900.group3.chairspace.controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import no.ntnu.idata2900.group3.chairspace.entity.EntityInterface;
-import org.springframework.data.repository.CrudRepository;
+import no.ntnu.idata2900.group3.chairspace.service.AbstractEntityService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -44,19 +42,20 @@ import org.springframework.web.server.ResponseStatusException;
  * <hr>
  *
  * @author Sigve Bjørkedal
+ * @author Odin Lyngsgård
  * @see EntityInterface
  */
 public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT>, IdTypeT>
 	extends AbstractPermissionManager {
-	CrudRepository<EntityT, IdTypeT> repository;
+	private AbstractEntityService<EntityT, IdTypeT> entityService;
 
 	/**
 	 * Creates a new controller based on the input repository.
 	 *
 	 * @param repository the repository containing the entities handled by this controller
 	 */
-	protected AbstractController(CrudRepository<EntityT, IdTypeT> repository) {
-		this.repository = repository;
+	protected AbstractController(AbstractEntityService<EntityT, IdTypeT> entityService) {
+		this.entityService = entityService;
 	}
 
 	/**
@@ -95,13 +94,13 @@ public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT
 	public ResponseEntity<EntityT> getEntity(@PathVariable IdTypeT id) {
 		this.hasPermissionToGet();
 
-		Optional<EntityT> entity = repository.findById(id);
+		EntityT entity = entityService.getEntity(id);
 
-		if (!entity.isPresent()) {
+		if (entity == null) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
 
-		return new ResponseEntity<>(entity.get(), HttpStatus.OK);
+		return new ResponseEntity<>(entity, HttpStatus.OK);
 	}
 
 	/**
@@ -134,13 +133,7 @@ public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT
 	})
 	public ResponseEntity<List<EntityT>> getEntities() {
 		this.hasPermissionToGetAll();
-
-		Iterable<EntityT> entities = repository.findAll();
-		List<EntityT> entityList = new ArrayList<>();
-
-		entities.forEach(entityList::add);
-
-		return new ResponseEntity<>(entityList, HttpStatus.OK);
+		return new ResponseEntity<>(entityService.getAll(), HttpStatus.OK);
 	}
 
 	/**
@@ -178,12 +171,9 @@ public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT
 	})
 	public ResponseEntity<String> postEntity(@RequestBody EntityT object) {
 		this.hasPermissionToPost();
-
-		if (object.getId() != null && repository.findById(object.getId()).isPresent()) {
+		if (!entityService.saveEntity(object)) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT);
 		}
-
-		repository.save(object);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
@@ -223,12 +213,9 @@ public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT
 	})
 	public ResponseEntity<String> putEntity(@RequestBody EntityT object) {
 		this.hasPermissionToPut();
-
-		if (!repository.findById(object.getId()).isPresent()) {
+		if (!entityService.putEntity(object)) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
-
-		repository.save(object);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
@@ -267,14 +254,9 @@ public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT
 	})
 	public ResponseEntity<String> deleteEntity(@PathVariable IdTypeT id) {
 		this.hasPermissionToDelete();
-
-		Optional<EntityT> entity = repository.findById(id);
-
-		if (!entity.isPresent()) {
+		if (!entityService.deleteEntity(id)) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
-
-		repository.delete(entity.get());
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 }

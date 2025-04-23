@@ -23,4 +23,14 @@ public final class NotReservableException extends Exception {
 	public static NotReservableException overlapException() {
 		return new NotReservableException("Cannot create reservation for non reservable area");
 	}
+
+	/**
+	 * Constructs a new NotReservableException with message
+	 *     "Area is not reservable".
+	 *
+	 * @return not reservable exception with message
+	 */
+	public static NotReservableException areaNotReservableException() {
+		return new NotReservableException("Area is not reservable");
+	}
 }
