@@ -315,25 +315,27 @@ public class AreaService {
 	 * Searches for areas based on the given criteria.
 	 *
 	 * @param capacity the minimum capacity of the area
+	 * @param superArea the super area to search within
 	 * @param areaType the type of area to search for
 	 * @param areaFeatures the features of the area to search for
 	 * @param startDateTime the time to start search from
 	 * @param endDateTime the time to end search from
 	 * @return a list of areas that fit the given criteria
 	 */
-	public Iterable<Area> øsearchWithOptionalParams(
-		int capacity,
-		String areaType,
-		Set<String> areaFeatures,
-		LocalDateTime startDateTime,
-		LocalDateTime endDateTime
+	public Iterable<Area> searchWithOptionalParams(
+		Integer capacity,
+		Area superArea,
+		AreaType areaType,
+		List<AreaFeature> areaFeatures,
+		List<Area> freeAreas
 	) {
 		return areaRepository.searchWithOptionalParams(
 			capacity,
+			superArea,
 			areaType,
 			areaFeatures,
-			startDateTime,
-			endDateTime
+			freeAreas,
+			areaFeatures != null ? areaFeatures.size() : 0
 		);
 	}
 }
