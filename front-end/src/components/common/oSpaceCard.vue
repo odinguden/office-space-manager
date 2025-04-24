@@ -18,7 +18,7 @@ const props = defineProps({
 			<p>{{ area.description }}</p>
 		</div>
 		<div class="card-extras">
-			<o-space-extras />
+			<o-space-extras :features="area.areaFeatures" />
 		</div>
 		<div class="one-span-two">
 			<slot name="timeline">
