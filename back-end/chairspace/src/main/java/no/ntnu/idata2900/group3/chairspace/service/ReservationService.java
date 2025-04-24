@@ -93,7 +93,7 @@ public class ReservationService {
 	 * @throws ReservedException if the area is already reserved for the given time period
 	 * @throws NotReservableException if the area is not reservable
 	 */
-	public Reservation createReservation(
+	public void createReservation(
 		UUID areaId,
 		UUID userId,
 		LocalDateTime start,
@@ -107,7 +107,7 @@ public class ReservationService {
 		Area area = areaService.getArea(areaId);
 		User user = userService.getEntity(userId);
 
-		return new Reservation(area, user, start, end, comment);
+		reservationRepository.save(new Reservation(area, user, start, end, comment));
 	}
 
 	/**
@@ -120,9 +120,9 @@ public class ReservationService {
 	 * @throws NotReservableException if the reservation is made for an area that does not allow
 	 *     reservations to be made.
 	 */
-	public Reservation createReservationByCreationDto(ReservationCreationDto dto)
+	public void createReservationByCreationDto(ReservationCreationDto dto)
 		throws InvalidArgumentCheckedException, ReservedException, NotReservableException {
-		return this.createReservation(
+		this.createReservation(
 			dto.getArea(),
 			dto.getUser(),
 			dto.getStartTime(),

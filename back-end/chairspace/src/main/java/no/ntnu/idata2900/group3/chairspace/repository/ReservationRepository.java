@@ -91,7 +91,6 @@ public interface ReservationRepository extends CrudRepository<Reservation, UUID>
 				res.startDateTime < ?2 AND res.endDateTime > ?3
 			)
 		)
-		ORDER BY res.startDateTime ASC
 		""")
 	public boolean isTimeSlotFree(UUID areaId, LocalDateTime startTime, LocalDateTime endTime);
 
