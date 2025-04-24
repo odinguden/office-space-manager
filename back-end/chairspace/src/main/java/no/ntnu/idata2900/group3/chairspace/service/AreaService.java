@@ -345,26 +345,23 @@ public class AreaService {
 
 	/**
 	 * Gets all sub areas of a given area.
-	 * Will return null if the super area is not found in the database.
+	 * Will return null if the super area is not found in the database or if the given id is null.
 	 *
 	 * @param superAreaID the id of the area to get sub areas from
 	 * @return a list of sub areas of the given area
 	 */
-	private List<UUID> getSubAreas(UUID superAreaId) {
-		Area area = getArea(superAreaId);
-
+	public List<UUID> getSubAreas(UUID superAreaId) {
 		List<UUID> subAreaIds = null;
-		if (area != null) {
+		if (superAreaId != null) {
 			subAreaIds = getSubAreasRecursive(superAreaId);
 		}
-
 		return subAreaIds;
 	}
 
 	private List<UUID> getSubAreasRecursive(UUID areaId) {
 		List<UUID> subAreaIds = areaRepository.getSubAreaIds(areaId);
-
-		for (UUID subAreaId : subAreaIds) {
+		List<UUID> subAreaIdsCopy = new ArrayList<>(subAreaIds);
+		for (UUID subAreaId : subAreaIdsCopy) {
 			subAreaIds.addAll(getSubAreasRecursive(subAreaId));
 		}
 		return subAreaIds;
