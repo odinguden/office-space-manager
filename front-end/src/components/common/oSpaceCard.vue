@@ -52,6 +52,10 @@ const props = defineProps({
 		grid-column: 2;
 
 		word-break: break-word;
+		hyphens: auto;
+		-ms-hyphens: auto;
+		-moz-hyphens: auto;
+		-webkit-hyphens: auto;
 	}
 
 	.card-extras {
