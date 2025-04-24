@@ -3,7 +3,9 @@ package no.ntnu.idata2900.group3.chairspace.controllers;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import no.ntnu.idata2900.group3.chairspace.dto.PaginationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.area.AreaDto;
+import no.ntnu.idata2900.group3.chairspace.exceptions.PageNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 
 /**
@@ -26,33 +29,46 @@ public class SearchController {
 	private SearchService searchService;
 
 	/**
-	 * Searches for areas based on the given criteria.
+	 * Handles GET requests to search for areas based on various parameters.
+	 * The parameters page and itemsPerPage are required for pagination.
+	 * The other parameters are optional and can be used to filter the search results.
 	 *
-	 * @param capacity minimum capacity of the area
-	 * @param superAreaId ID of the super area
-	 * @param areaTypeId ID of the area type
-	 * @param areaFeatureIds list of area feature IDs
-	 * @param startDateTime start date and time for the search
-	 * @param endDateTime end date and time for the search
-	 * @return a list of areas that match the criteria
+	 * @param page the page number to retrieve (required)
+	 * @param itemsPerPage the number of items per page (required)
+	 * @param capacity the capacity of the area (optional)
+	 * @param superAreaId the ID of the super area (optional)
+	 * @param areaTypeId the ID of the area type (optional)
+	 * @param areaFeatureIds the list of area feature IDs (optional)
+	 * @param startDateTime the start date and time for the search (optional)
+	 * @param endDateTime the end date and time for the search (optional)
+	 * @return a ResponseEntity containing a PaginationDto with the search results
 	 */
 	@GetMapping("")
-	public ResponseEntity<List<AreaDto>> doSearch(
+	public ResponseEntity<PaginationDto<AreaDto>> doSearch(
+		@RequestParam() int page,
+		@RequestParam(name = "items-per-page") int itemsPerPage,
 		@RequestParam(required = false) Integer capacity,
-		@RequestParam(required = false) UUID superAreaId,
-		@RequestParam(required = false) String areaTypeId,
-		@RequestParam(required = false) List<String> areaFeatureIds,
-		@RequestParam(required = false) LocalDateTime startDateTime,
-		@RequestParam(required = false) LocalDateTime endDateTime
+		@RequestParam(name = "super-area-id", required = false) UUID superAreaId,
+		@RequestParam(name = "area-type-id", required = false) String areaTypeId,
+		@RequestParam(name = "feature-id", required = false) List<String> areaFeatureIds,
+		@RequestParam(name = "start-time", required = false) LocalDateTime startDateTime,
+		@RequestParam(name = "end-time", required = false) LocalDateTime endDateTime
 	) {
-		List<AreaDto> areas = searchService.doSearch(
-				capacity,
-				superAreaId,
-				areaTypeId,
-				areaFeatureIds,
-				startDateTime,
-				endDateTime
-		);
+		PaginationDto<AreaDto> areas = null;
+		try {
+			areas = searchService.doSearch(
+					page,
+					itemsPerPage,
+					capacity,
+					superAreaId,
+					areaTypeId,
+					areaFeatureIds,
+					startDateTime,
+					endDateTime
+			);
+		} catch (PageNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+		}
 		return new ResponseEntity<>(areas, HttpStatus.OK);
 	}
 }

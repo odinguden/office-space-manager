@@ -4,14 +4,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import no.ntnu.idata2900.group3.chairspace.dto.PaginationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.area.AreaDto;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
-import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
-import no.ntnu.idata2900.group3.chairspace.entity.AreaType;
+import no.ntnu.idata2900.group3.chairspace.exceptions.PageNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Service to handle search requests.
@@ -21,52 +19,37 @@ public class SearchService {
 	@Autowired
 	private AreaService areaService;
 	@Autowired
-	private AreaTypeService areaTypeService;
-	@Autowired
-	private AreaFeatureService areaFeatureService;
-	@Autowired
 	private ReservationService reservationService;
 
 
-	public List<AreaDto> doSearch(
+	/**
+	 * Searches for areas that fit the given criteria.
+	 * Page and itemsPerPage are used for pagination and are not optional.
+	 * The reset of the parameters are optional
+	 * and can be null.
+	 * If they are null, they will be ignored in the search.
+	 *
+	 * @param page the page to get
+	 * @param itemsPerPage the number of items per page
+	 * @param capacity the minimum capacity of the area
+	 * @param superAreaId the super area to search in
+	 * @param areaTypeId the type of area to search for
+	 * @param areaFeatureIds the features of the area to search for
+	 * @param startDateTime the start date and time of the reservation
+	 * @param endDateTime the end date and time of the reservation
+	 * @return a list of areas that fit the given criteria
+	 * @throws PageNotFoundException if the page is not found
+	 */
+	public PaginationDto<AreaDto> doSearch(
+		int page,
+		int itemsPerPage,
 		Integer capacity,
 		UUID superAreaId,
 		String areaTypeId,
 		List<String> areaFeatureIds,
 		LocalDateTime startDateTime,
 		LocalDateTime endDateTime
-	) {
-		AreaType areaType = null;
-		if (areaTypeId != null) {
-			areaType = areaTypeService.getEntity(areaTypeId);
-			if (areaType == null) {
-				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Area type not found");
-			}
-		}
-
-		Area superArea = null;
-		if (superAreaId != null) {
-			superArea = areaService.getArea(superAreaId);
-			if (superArea == null) {
-				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Super area not found");
-			}
-		}
-
-		// TODO, fix to much nesting
-		List<AreaFeature> areaFeatures = new ArrayList<>();
-		if (areaFeatureIds != null) {
-			for (String areaFeatureId : areaFeatureIds) {
-				AreaFeature areaFeature = areaFeatureService.getEntity(areaFeatureId);
-				if (areaFeature == null) {
-					throw new ResponseStatusException(
-						HttpStatus.NOT_FOUND,
-						"Area feature not found"
-						);
-				}
-				areaFeatures.add(areaFeature);
-			}
-		}
-
+	) throws PageNotFoundException {
 		// Might be useful to make a method that returns Area objects instead of AreaDto objects
 		// This would let save us processing time for searching the database
 		List<AreaDto> rawAreaList = reservationService.getAreasThatContainFreeTimeSlot(
@@ -75,24 +58,26 @@ public class SearchService {
 			null
 		);
 
-		List<Area> freeAreas = new ArrayList<>();
+		List<UUID> freeAreas = new ArrayList<>();
 		for (AreaDto areaDto : rawAreaList) {
-			freeAreas.add(areaService.getArea(areaDto.getId()));
+			freeAreas.add(areaDto.getId());
 		}
-
 
 		Iterable<Area> areas = areaService.searchWithOptionalParams(
 			capacity,
-			superArea,
-			areaType,
-			areaFeatures,
+			superAreaId,
+			areaTypeId,
+			areaFeatureIds,
 			freeAreas
 		);
 		List<AreaDto> areaDtos = new ArrayList<>();
 		for (Area area : areas) {
 			areaDtos.add(new AreaDto(area));
 		}
-		return areaDtos;
+
+		PaginationDto<AreaDto> areaDtosPage = new PaginationDto<>(areaDtos, itemsPerPage, page);
+
+		return areaDtosPage;
 	}
 
 
