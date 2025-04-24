@@ -1,9 +1,7 @@
 package no.ntnu.idata2900.group3.chairspace.service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.dto.PaginationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.area.AreaCreationDto;
@@ -312,30 +310,63 @@ public class AreaService {
 	/* -------- Search Methods -------- */
 
 	/**
-	 * Searches for areas based on the given criteria.
+	 * Searches for areas based on the given parameters.
+	 * If any of the parameters are null, they will be ignored in the search.
+	 *
+	 * <p>
+	 * Note that this method does not check for the validity of the parameters.
+	 * If any of the parameters are invalid, or does otherwise not exist in the database,
+	 * the method will return nothing.
 	 *
 	 * @param capacity the minimum capacity of the area
-	 * @param superArea the super area to search within
-	 * @param areaType the type of area to search for
-	 * @param areaFeatures the features of the area to search for
-	 * @param startDateTime the time to start search from
-	 * @param endDateTime the time to end search from
-	 * @return a list of areas that fit the given criteria
+	 * @param superAreaId the id of the super area to search in
+	 * @param areaTypeId the id of the area type to search for
+	 * @param areaFeatureIds the ids of the area features to search for
+	 * @param freeAreaIds the ids of the free areas to search for
+	 * @return an iterable of areas that match the search criteria
 	 */
 	public Iterable<Area> searchWithOptionalParams(
 		Integer capacity,
-		Area superArea,
-		AreaType areaType,
-		List<AreaFeature> areaFeatures,
-		List<Area> freeAreas
+		UUID superAreaId,
+		String areaTypeId,
+		List<String> areaFeatureIds,
+		List<UUID> freeAreaIds
 	) {
+		List<UUID> subAreaIds = getSubAreas(superAreaId);
 		return areaRepository.searchWithOptionalParams(
 			capacity,
-			superArea,
-			areaType,
-			areaFeatures,
-			freeAreas,
-			areaFeatures != null ? areaFeatures.size() : 0
+			subAreaIds,
+			areaTypeId,
+			areaFeatureIds,
+			freeAreaIds,
+			areaFeatureIds != null ? areaFeatureIds.size() : 0
 		);
+	}
+
+	/**
+	 * Gets all sub areas of a given area.
+	 * Will return null if the super area is not found in the database.
+	 *
+	 * @param superAreaID the id of the area to get sub areas from
+	 * @return a list of sub areas of the given area
+	 */
+	private List<UUID> getSubAreas(UUID superAreaId) {
+		Area area = getArea(superAreaId);
+
+		List<UUID> subAreaIds = null;
+		if (area != null) {
+			subAreaIds = getSubAreasRecursive(superAreaId);
+		}
+
+		return subAreaIds;
+	}
+
+	private List<UUID> getSubAreasRecursive(UUID areaId) {
+		List<UUID> subAreaIds = areaRepository.getSubAreaIds(areaId);
+
+		for (UUID subAreaId : subAreaIds) {
+			subAreaIds.addAll(getSubAreasRecursive(subAreaId));
+		}
+		return subAreaIds;
 	}
 }
