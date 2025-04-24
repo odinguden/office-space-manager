@@ -14,7 +14,7 @@ if (route.query["page"] !== undefined) {
 }
 
 function updatePagination() {
-	router.replace(`/index?page=${currentPage.value}`)
+	window.history.replaceState({}, "", `/index?page=${currentPage.value}`)
 	area.getAreaPagination(currentPage.value - 1).then(response => {
 		areas.value = response.pageContent
 		pages.value = response.numberOfPages

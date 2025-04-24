@@ -5,7 +5,7 @@ const NAV_TARGETS = {
 		{
 			name: "Home",
 			icon: "mdi-home",
-			link: "/"
+			link: "/index"
 		},
 		{
 			name: "My space",
