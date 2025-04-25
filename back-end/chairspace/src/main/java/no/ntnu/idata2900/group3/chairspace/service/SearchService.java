@@ -1,5 +1,6 @@
 package no.ntnu.idata2900.group3.chairspace.service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,27 +38,28 @@ public class SearchService {
 	 * @param areaFeatureIds the features of the area to search for
 	 * @param startDateTime the start date and time of the reservation
 	 * @param endDateTime the end date and time of the reservation
+	 * @param duration the duration of the reservation
 	 * @return a list of areas that fit the given criteria
 	 * @throws PageNotFoundException if the page is not found
 	 */
 	public PaginationDto<AreaDto> doSearch(
 		int page,
-		int itemsPerPage,
+		Integer itemsPerPage,
 		Integer capacity,
 		UUID superAreaId,
 		String areaTypeId,
 		List<String> areaFeatureIds,
 		LocalDateTime startDateTime,
-		LocalDateTime endDateTime
+		LocalDateTime endDateTime,
+		Duration duration
 	) throws PageNotFoundException {
 		// Might be useful to make a method that returns Area objects instead of AreaDto objects
 		// This would let save us processing time for searching the database
 		List<AreaDto> rawAreaList = reservationService.getAreasThatContainFreeTimeSlot(
 			startDateTime,
 			endDateTime,
-			null
-		);
-
+			duration
+			);
 		List<UUID> freeAreas = new ArrayList<>();
 		for (AreaDto areaDto : rawAreaList) {
 			freeAreas.add(areaDto.getId());
@@ -75,11 +77,10 @@ public class SearchService {
 			areaDtos.add(new AreaDto(area));
 		}
 
-		PaginationDto<AreaDto> areaDtosPage = new PaginationDto<>(areaDtos, itemsPerPage, page);
+		if (itemsPerPage == null || itemsPerPage <= 0) {
+			itemsPerPage = 12;
+		}
 
-		return areaDtosPage;
+		return new PaginationDto<>(areaDtos, itemsPerPage, page);
 	}
-
-
-
 }
