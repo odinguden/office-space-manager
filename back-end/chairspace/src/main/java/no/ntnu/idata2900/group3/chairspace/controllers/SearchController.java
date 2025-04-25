@@ -1,5 +1,6 @@
 package no.ntnu.idata2900.group3.chairspace.controllers;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -41,19 +42,25 @@ public class SearchController {
 	 * @param areaFeatureIds the list of area feature IDs (optional)
 	 * @param startDateTime the start date and time for the search (optional)
 	 * @param endDateTime the end date and time for the search (optional)
+	 * @param duration the duration for the search (optional)
 	 * @return a ResponseEntity containing a PaginationDto with the search results
 	 */
+	//TODO swagger documentation
 	@GetMapping("")
 	public ResponseEntity<PaginationDto<AreaDto>> doSearch(
 		@RequestParam() int page,
-		@RequestParam(name = "items-per-page") int itemsPerPage,
+		@RequestParam(name = "items-per-page", required = false) Integer itemsPerPage,
 		@RequestParam(required = false) Integer capacity,
 		@RequestParam(name = "super-area-id", required = false) UUID superAreaId,
 		@RequestParam(name = "area-type-id", required = false) String areaTypeId,
 		@RequestParam(name = "feature-id", required = false) List<String> areaFeatureIds,
-		@RequestParam(name = "start-time", required = false) LocalDateTime startDateTime,
-		@RequestParam(name = "end-time", required = false) LocalDateTime endDateTime
+		@RequestParam(name = "start-time") LocalDateTime startDateTime,
+		@RequestParam(name = "end-time") LocalDateTime endDateTime,
+		@RequestParam() Duration duration
 	) {
+		if (endDateTime == null) {
+			endDateTime = startDateTime.plus(duration);
+		}
 		PaginationDto<AreaDto> areas = null;
 		try {
 			areas = searchService.doSearch(
@@ -64,7 +71,8 @@ public class SearchController {
 					areaTypeId,
 					areaFeatureIds,
 					startDateTime,
-					endDateTime
+					endDateTime,
+					duration
 			);
 		} catch (PageNotFoundException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
