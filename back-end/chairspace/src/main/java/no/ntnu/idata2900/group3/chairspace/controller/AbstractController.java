@@ -1,4 +1,4 @@
-package no.ntnu.idata2900.group3.chairspace.controllers;
+package no.ntnu.idata2900.group3.chairspace.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
 
-// TODO: Implement security
 
 /**
  * A base for controllers that need to implement basic CRUD operations.
