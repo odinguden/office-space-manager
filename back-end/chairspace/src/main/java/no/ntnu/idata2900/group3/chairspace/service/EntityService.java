@@ -3,6 +3,10 @@ package no.ntnu.idata2900.group3.chairspace.service;
 import java.util.List;
 import java.util.stream.StreamSupport;
 import no.ntnu.idata2900.group3.chairspace.entity.EntityInterface;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -22,9 +26,12 @@ import org.springframework.data.repository.CrudRepository;
  * @see #delete
  */
 public abstract class EntityService<EntityT extends EntityInterface<IdT>, IdT> {
-	protected final CrudRepository<EntityT, IdT> repository;
+	/** The default amount of items per page. Must be greater than 0. */
+	public static final int DEFAULT_PAGE_SIZE = 12;
 
-	protected EntityService(CrudRepository<EntityT, IdT> repository) {
+	protected final JpaRepository<EntityT, IdT> repository;
+
+	protected EntityService(JpaRepository<EntityT, IdT> repository) {
 		this.repository = repository;
 	}
 
@@ -56,6 +63,28 @@ public abstract class EntityService<EntityT extends EntityInterface<IdT>, IdT> {
 	public List<EntityT> getAll() {
 		Iterable<EntityT> iterableItems = this.repository.findAll();
 		return iterableToList(iterableItems);
+	}
+
+	/**
+	 * Gets a page of entities from the repository.
+	 *
+	 * @param page the page to get
+	 * @return a page of 12 entities
+	 */
+	public Page<EntityT> getAllPaged(int page) {
+		return this.getAllPaged(page, DEFAULT_PAGE_SIZE);
+	}
+
+	/**
+	 * Gets a page of entities from the repository.
+	 *
+	 * @param page the page to get
+	 * @param size the amount of entries per page
+	 * @return a page of entities
+	 */
+	public Page<EntityT> getAllPaged(int page, int size) {
+		Pageable paging = PageRequest.of(page, size);
+		return repository.findAll(paging);
 	}
 
 	/**

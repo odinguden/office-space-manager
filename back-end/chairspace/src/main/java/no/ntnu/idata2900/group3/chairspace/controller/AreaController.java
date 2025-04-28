@@ -3,12 +3,12 @@ package no.ntnu.idata2900.group3.chairspace.controller;
 import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.assembler.AreaAssembler;
-import no.ntnu.idata2900.group3.chairspace.dto.Pagination;
 import no.ntnu.idata2900.group3.chairspace.dto.area.SimpleArea;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.exceptions.AdminCountException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.service.AreaService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -72,21 +72,16 @@ public class AreaController extends PermissionManager {
 	 * @return 200 OK with a pagination containing all areas as simple areas
 	 */
 	@GetMapping("")
-	public ResponseEntity<Pagination<SimpleArea>> getAll(
+	public ResponseEntity<Page<SimpleArea>> getAll(
 		@RequestParam(required = false) Integer page
 	) {
-		if (page == null) {
+		if (page == null || page < 0) {
 			page = 0;
 		}
 		this.hasPermissionToGetAll();
-		List<SimpleArea> areas = areaService.getAll()
-			.stream()
-			.map(areaAssembler::toSimpleArea)
-			.toList();
-
-		Pagination<SimpleArea> pagination = new Pagination<>(areas, page);
-
-		return new ResponseEntity<>(pagination, HttpStatus.OK);
+		Page<Area> areas = areaService.getAllPaged(page);
+		Page<SimpleArea> simpleAreas = areas.map(areaAssembler::toSimpleArea);
+		return new ResponseEntity<>(simpleAreas, HttpStatus.OK);
 	}
 
 	/**
