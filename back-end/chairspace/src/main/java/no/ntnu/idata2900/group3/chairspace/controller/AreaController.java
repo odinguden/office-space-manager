@@ -53,13 +53,12 @@ public class AreaController extends PermissionManager {
 	public ResponseEntity<SimpleArea> get(@PathVariable UUID id) {
 		this.hasPermissionToGet();
 		Area area = this.areaService.get(id);
+
 		if (area == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<>(
-			areaAssembler.toSimpleArea(area),
-			HttpStatus.OK
-		);
+
+		return new ResponseEntity<>(areaAssembler.toSimpleArea(area), HttpStatus.OK);
 	}
 
 	/**
