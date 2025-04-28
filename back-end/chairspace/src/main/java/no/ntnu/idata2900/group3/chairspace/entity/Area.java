@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.exceptions.AdminCountException;
@@ -236,6 +237,16 @@ public class Area implements EntityInterface<UUID> {
 	}
 
 	/**
+	 * Checks if a area exists as a super area of this area.
+	 *
+	 * @param areaId id of area to check
+	* @return true if area exists as super of this area
+	 */
+	public boolean isSuperArea(UUID areaId) {
+		return superArea != null && (superArea.getId() == areaId || superArea.isSuperArea(areaId));
+	}
+
+	/**
 	 * Returns true if the area is reservable, false if not.
 	 *
 	 * @return reservable status
@@ -340,24 +351,22 @@ public class Area implements EntityInterface<UUID> {
 			if (description == null) {
 				description = "";
 			}
-			for (User user : administrators) {
-				if (user == null) {
-					throw new IllegalArgumentException(
-						"Administrator is null when value was expected"
-					);
-				}
+			boolean hasNullUser = administrators.stream().anyMatch(Objects::isNull);
+			if (hasNullUser) {
+				throw new IllegalArgumentException("Administrator is null when value was expected");
 			}
-			for (AreaFeature feature : features) {
-				if (feature == null) {
-					throw new IllegalArgumentException(
-						"Area feature is null when value was expected"
-					);
-				}
+			boolean hasNullFeature = features.stream().anyMatch(Objects::isNull);
+			if (hasNullFeature) {
+				throw new IllegalArgumentException("Area feature is null when value was expected");
 			}
 			//If area has no administrators of itself,
 			// and super area is either null or has no administrators
 			if (administrators.isEmpty() && (superArea == null || superArea.getAdminCount() <= 0)) {
 				throw new AdminCountException("Cannot create area without administrator");
+			}
+
+			if (superArea != null && this.id != null && superArea.isSuperArea(this.id)) {
+				throw new IllegalStateException("Area cannot be super area of itself");
 			}
 			return new Area(this);
 		}
