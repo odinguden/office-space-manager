@@ -12,7 +12,6 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.exceptions.AdminCountException;
@@ -199,8 +198,8 @@ public class Area implements EntityInterface<UUID> {
 	 * @return The features of this area
 	 * @see AreaFeature
 	 */
-	public Iterator<AreaFeature> getFeatures() {
-		return features.iterator();
+	public Set<AreaFeature> getFeatures() {
+		return features;
 	}
 
 	/**
@@ -243,184 +242,6 @@ public class Area implements EntityInterface<UUID> {
 	 */
 	public boolean isReservable() {
 		return reservable;
-	}
-
-
-	/* ---- Setters ---- */
-
-	/**
-	 * Adds a user to the assigned administrators of this area.
-	 *
-	 * @param newAdmin the new user to be added to admin list
-	 */
-	public void addAdministrator(User newAdmin) {
-		if (newAdmin == null) {
-			throw new IllegalArgumentException("Administrator is null when value was expected");
-		}
-		administrators.add(newAdmin);
-	}
-
-	/**
-	 * Removes a administrator from the set of administrators.
-	 *
-	 * @param toRemove User to remove
-	 * @throws AdminCountException If you are trying to remove the last user of the area.
-	 */
-	public void removeAdministrator(User toRemove) throws AdminCountException {
-		if (toRemove == null) {
-			throw new IllegalArgumentException("User to remove is null when value was expected");
-		}
-		if (getAdminCount() <= 1) {
-			throw new AdminCountException("Cannot remove the last administrator of a area");
-		}
-		administrators.remove(toRemove);
-	}
-
-	/**
-	 * Removes the existing super area.
-	 * Will not perform the action if the area has no administrators of it's own.
-	 * This is to ensure that a area always has a administrator.
-	 *
-	 * @throws AdminCountException if area has no administrators of it's own
-	 */
-	public void removeSuperArea() throws AdminCountException {
-		if (getAreaSpecificAdministrators().isEmpty()) {
-			throw new AdminCountException(
-				"Cannot remove super area as this area has not administrators of it's own"
-			);
-		}
-		this.superArea = null;
-	}
-
-	/**
-	 * Sets the super area of the area.
-	 *
-	 * @param area Super area
-	 * @throws InvalidArgumentCheckedException if this area already has a super area
-	 * @throws InvalidArgumentCheckedException If you are trying to assign a area to become
-	 *     a super area of itself
-	 * @throws AdminCountException if you try to set the super area to null while this area has no
-	 *     administrators of itself
-
-	 */
-	public void setSuperArea(Area area)
-		throws InvalidArgumentCheckedException, AdminCountException {
-		if (this.superArea != null) {
-			throw new IllegalStateException("This area already has a super area");
-		} else if (area == null) {
-			removeSuperArea();
-		} else if (area.isSuperArea(this) || area == this) {
-			throw new InvalidArgumentCheckedException("Cannot make a space it's own superspace");
-		} else {
-			this.superArea = area;
-		}
-	}
-
-	/**
-	 * Adds a area feature.
-	 *
-	 * @param areaFeature The feature to add
-	 */
-	public void addAreaFeature(AreaFeature areaFeature) {
-		if (areaFeature == null) {
-			throw new IllegalArgumentException("Area feature is null when value is expected");
-		}
-		features.add(areaFeature);
-	}
-
-	/**
-	 * Removes a area feature.
-	 *
-	 * @param areaFeature The feature to remove
-	 * @throws IllegalArgumentException if areaFeature is null
-	 */
-	public void removeAreaFeature(AreaFeature areaFeature) {
-		if (areaFeature == null) {
-			throw new IllegalArgumentException("Area feature is null when value is expected");
-		}
-		features.remove(areaFeature);
-	}
-
-	/**
-	 * Updates the description.
-	 *
-	 * @param newDescription new description as string.
-	 */
-	public void updateDescription(String newDescription) {
-		if (newDescription == null) {
-			throw new IllegalArgumentException("newDescription is null when value was expected");
-		}
-		description = newDescription;
-	}
-
-	/**
-	 * Updates the capacity.
-	 * Throws an exception if the new capacity is less than 0.
-	 *
-	 * @param newCapacity the updated capacity
-	 * @throws InvalidArgumentCheckedException if newCapacity is less than 0
-	 */
-	public void updateCapacity(int newCapacity) throws InvalidArgumentCheckedException {
-		if (newCapacity < 0) {
-			throw new InvalidArgumentCheckedException("Capacity cannot be less than 0");
-		}
-		capacity = newCapacity;
-	}
-
-	/**
-	 * Updates the calendar link.
-	 * Will set the calendar controlled status to true if a link is provided.
-	 *
-	 * @param newCalendarLink the new calendar link
-	 */
-	public void updateCalendarLink(String newCalendarLink) {
-		if (newCalendarLink == null || newCalendarLink.isEmpty()) {
-			calendarControlled = false;
-			calendarLink = null;
-		} else {
-			calendarControlled = true;
-			calendarLink = newCalendarLink;
-		}
-	}
-
-	/**
-	 * Updates the name of the area.
-	 *
-	 * @param newName the new name of the area
-	 * @throws InvalidArgumentCheckedException if newName is null or empty
-	 */
-	public void updateName(String newName) throws InvalidArgumentCheckedException {
-		if (newName == null) {
-			throw new InvalidArgumentCheckedException("Name cannot be null");
-		}
-		if (newName.isBlank()) {
-			throw new InvalidArgumentCheckedException("Name cannot be empty");
-		}
-		name = newName;
-	}
-
-	/**
-	 * Updates the area type of the area.
-	 *
-	 * @param newAreaType the new area type
-	 * @throws IllegalArgumentException if newAreaType is null
-	 */
-	public void updateAreaType(AreaType newAreaType) {
-		if (newAreaType == null) {
-			throw new IllegalArgumentException("Area type is null when value was expected");
-		}
-		areaType = newAreaType;
-	}
-
-	/**
-	 * Toggles the reservable state of the area.
-	 * Will not delete existing reservations.
-	 * But will make it impossible to make new reservations.
-	 *
-	 * @param reservable the new reservable state
-	 */
-	public void setReservable(boolean reservable) {
-		this.reservable = reservable;
 	}
 
 	/* ---- Methods ---- */
@@ -560,7 +381,6 @@ public class Area implements EntityInterface<UUID> {
 		 *
 		 * @param capacity as int
 		 * @return Builder object
-		 * @throws InvalidArgumentCheckedException if capacity is less than 0
 		 */
 		private Builder capacity(int capacity) {
 			this.capacity = capacity;
@@ -594,9 +414,8 @@ public class Area implements EntityInterface<UUID> {
 		 *
 		 * @param calendarLink as String
 		 * @return Builder object
-		 * @throws InvalidArgumentCheckedException if calendar link has invalid format
 		 */
-		public Builder calendarLink(String calendarLink) throws InvalidArgumentCheckedException {
+		public Builder calendarLink(String calendarLink) {
 			if (calendarLink == null || calendarLink.isEmpty()) {
 				this.calendarLink = null;
 			} else {

@@ -2,9 +2,13 @@ package no.ntnu.idata2900.group3.chairspace.dto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 /**
  * A subset of items generated as though it was a page in a book.
+ *
+ * @author Odin Lyngsgård
+ * @author Sigve Bjørkedal
  */
 public class Pagination<EntityTypeT> {
 	/** The default amount of items per page. Must be greater than 0. */
@@ -14,7 +18,7 @@ public class Pagination<EntityTypeT> {
 	private final int pages;
 	private final int numItems;
 	private final int pageSize;
-	private final List<EntityTypeT> content;
+	private List<EntityTypeT> content;
 
 	/**
 	 * Creates a new pagination containing content for the provided page. Each page has 12 items.
@@ -24,6 +28,10 @@ public class Pagination<EntityTypeT> {
 	 *     will be empty.
 	 */
 	public Pagination(List<EntityTypeT> items, int page) {
+		if (items == null) {
+			throw new IllegalArgumentException();
+		}
+
 		this.pageNum = page;
 		this.pageSize = DEFAULT_PAGE_SIZE;
 		this.numItems = items.size();
@@ -41,7 +49,7 @@ public class Pagination<EntityTypeT> {
 	 * @throws IllegalArgumentException if {@code pageSize} is less than 1
 	 */
 	public Pagination(List<EntityTypeT> items, int page, int pageSize) {
-		if (pageSize < 1) {
+		if (pageSize < 1 || items == null) {
 			throw new IllegalArgumentException();
 		}
 
@@ -73,7 +81,7 @@ public class Pagination<EntityTypeT> {
 	 * @return a list containing the contents of the page
 	 */
 	private List<EntityTypeT> generateContent(List<EntityTypeT> items) {
-		if (this.pageNum < 0 || this.pageNum >= this.pages) {
+		if (this.pageNum < 0 || this.pageNum >= this.pages || items == null) {
 			return new ArrayList<>();
 		}
 
@@ -83,4 +91,13 @@ public class Pagination<EntityTypeT> {
 		return items.subList(startIdx, stopIdx);
 	}
 
+	/**
+	 * Maps the content on the current page using the input mapping function. This allows for
+	 * modifying only the relevant items.
+	 *
+	 * @param mapper mapping function for the content.
+	 */
+	public void map(UnaryOperator<EntityTypeT> mapper) {
+		this.content = this.content.stream().map(mapper).toList();
+	}
 }

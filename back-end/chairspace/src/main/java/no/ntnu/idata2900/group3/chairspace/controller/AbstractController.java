@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
 import no.ntnu.idata2900.group3.chairspace.entity.EntityInterface;
-import no.ntnu.idata2900.group3.chairspace.service.AbstractEntityService;
+import no.ntnu.idata2900.group3.chairspace.service.EntityService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,33 +27,23 @@ import org.springframework.web.server.ResponseStatusException;
  * </p>
  *
  * <p>
- * Additionally includes modifiable security measures to prevent unauthorized users from performing
- * miscellaneous operations. These security measures come in the form of methods that can be
- * overridden to modify security behaviour for specific repositories:
+ * Additionally includes modifiable security behaviour. See {@link PermissionManager}.
  * </p>
- * <ul>
- * 	<li>{@link #hasPermissionToGet}</li>
- * 	<li>{@link #hasPermissionToGetAll}</li>
- * 	<li>{@link #hasPermissionToPost}</li>
- * 	<li>{@link #hasPermissionToPut}</li>
- * 	<li>{@link #hasPermissionToDelete}</li>
- * </ul>
- * <hr>
  *
  * @author Sigve Bjørkedal
  * @author Odin Lyngsgård
  * @see EntityInterface
  */
 public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT>, IdTypeT>
-	extends AbstractPermissionManager {
-	private AbstractEntityService<EntityT, IdTypeT> entityService;
+	extends PermissionManager {
+	private EntityService<EntityT, IdTypeT> entityService;
 
 	/**
 	 * Creates a new controller based on the input repository.
 	 *
 	 * @param repository the repository containing the entities handled by this controller
 	 */
-	protected AbstractController(AbstractEntityService<EntityT, IdTypeT> entityService) {
+	protected AbstractController(EntityService<EntityT, IdTypeT> entityService) {
 		this.entityService = entityService;
 	}
 
@@ -93,7 +83,7 @@ public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT
 	public ResponseEntity<EntityT> getEntity(@PathVariable IdTypeT id) {
 		this.hasPermissionToGet();
 
-		EntityT entity = entityService.getEntity(id);
+		EntityT entity = entityService.get(id);
 
 		if (entity == null) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -170,7 +160,7 @@ public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT
 	})
 	public ResponseEntity<String> postEntity(@RequestBody EntityT object) {
 		this.hasPermissionToPost();
-		if (!entityService.saveEntity(object)) {
+		if (!entityService.create(object)) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT);
 		}
 		return new ResponseEntity<>(HttpStatus.CREATED);
@@ -212,7 +202,7 @@ public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT
 	})
 	public ResponseEntity<String> putEntity(@RequestBody EntityT object) {
 		this.hasPermissionToPut();
-		if (!entityService.putEntity(object)) {
+		if (!entityService.update(object)) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -253,7 +243,7 @@ public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT
 	})
 	public ResponseEntity<String> deleteEntity(@PathVariable IdTypeT id) {
 		this.hasPermissionToDelete();
-		if (!entityService.deleteEntity(id)) {
+		if (!entityService.delete(id)) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
