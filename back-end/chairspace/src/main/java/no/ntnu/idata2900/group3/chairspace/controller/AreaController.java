@@ -1,12 +1,9 @@
 package no.ntnu.idata2900.group3.chairspace.controller;
 
-import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.assembler.AreaAssembler;
-import no.ntnu.idata2900.group3.chairspace.dto.area.SimpleArea;
+import no.ntnu.idata2900.group3.chairspace.dto.SimpleArea;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
-import no.ntnu.idata2900.group3.chairspace.exceptions.AdminCountException;
-import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.service.AreaService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -97,7 +94,7 @@ public class AreaController extends PermissionManager {
 
 		try {
 			area = areaAssembler.assembleArea(simpleArea);
-		} catch (AdminCountException | InvalidArgumentCheckedException e) {
+		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		}
 
@@ -120,7 +117,7 @@ public class AreaController extends PermissionManager {
 		Area area;
 		try {
 			area = areaAssembler.mergeWithExisting(simpleArea.id(), simpleArea);
-		} catch (AdminCountException | InvalidArgumentCheckedException e) {
+		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		}
 

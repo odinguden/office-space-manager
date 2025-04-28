@@ -1,14 +1,15 @@
 package no.ntnu.idata2900.group3.chairspace.assembler;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import no.ntnu.idata2900.group3.chairspace.dto.SimpleArea;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaType;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
 import no.ntnu.idata2900.group3.chairspace.exceptions.AdminCountException;
+import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.service.AreaService;
 import no.ntnu.idata2900.group3.chairspace.service.UserService;
@@ -28,10 +29,7 @@ public class AreaAssembler {
 	 * @param areaService the area service connected to this assembler
 	 * @param userService the user service connected to this assembler
 	 */
-	public AreaAssembler(
-			AreaService areaService,
-			UserService userService
-	) {
+	public AreaAssembler(AreaService areaService, UserService userService) {
 		this.areaService = areaService;
 		this.userService = userService;
 	}
@@ -44,21 +42,12 @@ public class AreaAssembler {
 	 * @throws AdminCountException if the input simple area has no admins
 	 * @throws InvalidArgumentCheckedException if the input simple area has fields that are invalid
 	 *     for a domain area.
+	 * @throws ElementNotFoundException if any ID in the process refers to a non-existent entity.
 	 */
 	public Area assembleArea(SimpleArea area)
-		throws AdminCountException, InvalidArgumentCheckedException {
-		Area superArea = null;
-		if (area.superAreas() != null && !area.superAreas().isEmpty()) {
-			superArea = areaService.get(area.superAreas().get(0).id());
-		}
-
-		Set<User> administrators = null;
-		if (area.administratorIds() != null && !area.administratorIds().isEmpty()) {
-			administrators = area.administratorIds()
-				.stream()
-				.map(userService::get)
-				.collect(Collectors.toSet());
-		}
+		throws AdminCountException, InvalidArgumentCheckedException, ElementNotFoundException {
+		Area superArea = unpackSuperArea(area);
+		Set<User> administrators = unpackAdministrators(area);
 
 		Area.Builder areaBuilder = new Area.Builder(area.name(), area.capacity(), area.areaType());
 
@@ -82,26 +71,21 @@ public class AreaAssembler {
 	 * @throws AdminCountException if the input simple area has no admins and a non-null admin list
 	 * @throws InvalidArgumentCheckedException if the input simple area has fields that are invalid
 	 *     for a domain area.
+	 * @throws ElementNotFoundException if any ID in the process refers to a non-existent entity.
 	 */
 	public Area mergeWithExisting(UUID existingId, SimpleArea area)
-		throws AdminCountException, InvalidArgumentCheckedException {
+		throws AdminCountException, InvalidArgumentCheckedException, ElementNotFoundException {
 		Area existingArea = areaService.get(existingId);
 		if (existingArea == null) {
-			throw new IllegalArgumentException();
+			throw ElementNotFoundException.AREA_NOT_FOUND;
 		}
 
-		Area superArea = existingArea.getSuperArea();
-		if (area.superAreas() != null && !area.superAreas().isEmpty()) {
-			superArea = areaService.get(area.superAreas().get(0).id());
-		}
+		Area superArea = pickOrElse(unpackSuperArea(area), existingArea.getSuperArea());
 
-		Set<User> administrators = existingArea.getAreaSpecificAdministrators();
-		if (area.administratorIds() != null && !area.administratorIds().isEmpty()) {
-			administrators = area.administratorIds()
-				.stream()
-				.map(userService::get)
-				.collect(Collectors.toSet());
-		}
+		Set<User> administrators = pickOrElse(
+			unpackAdministrators(area),
+			existingArea.getAreaSpecificAdministrators()
+		);
 
 		String name = pickOrElse(area.name(), existingArea.getName());
 		String description = pickOrElse(area.description(), existingArea.getDescription());
@@ -154,5 +138,41 @@ public class AreaAssembler {
 	 */
 	private String pickOrElse(String primary, String fallback) {
 		return primary == null || primary.isBlank() ? fallback : primary;
+	}
+
+	private Area unpackSuperArea(SimpleArea simpleArea) throws ElementNotFoundException {
+		boolean doesAreaExist = simpleArea != null
+			&& simpleArea.superAreas() != null
+			&& !simpleArea.superAreas().isEmpty()
+			&& simpleArea.superAreas().get(0) != null;
+
+		Area area = null;
+
+		if (doesAreaExist) {
+			area = areaService.get(simpleArea.superAreas().get(0).id());
+			if (area == null) {
+				throw ElementNotFoundException.AREA_NOT_FOUND;
+			}
+		}
+
+		return area;
+	}
+
+	private Set<User> unpackAdministrators(SimpleArea simpleArea) throws ElementNotFoundException {
+		Set<User> admins = new HashSet<>();
+
+		if (simpleArea != null && simpleArea.administratorIds() != null) {
+			for (UUID id : simpleArea.administratorIds()) {
+				User user = userService.get(id);
+
+				if (user == null) {
+					throw ElementNotFoundException.USER_NOT_FOUND;
+				}
+
+				admins.add(user);
+			}
+		}
+
+		return admins;
 	}
 }
