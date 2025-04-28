@@ -13,7 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
  * @author Sigve Bjørkedal
  * @author Odin Lyngsgård
  */
-public abstract class AbstractPermissionManager {
+public abstract class PermissionManager {
 
 	/**
 	 * Checks if the current session user has permission to get a single entity.
