@@ -76,11 +76,6 @@ public class SearchService {
 		for (Area area : areas) {
 			areaDtos.add(new AreaDto(area));
 		}
-
-		if (itemsPerPage == null || itemsPerPage <= 0) {
-			itemsPerPage = 12;
-		}
-
 		return new PaginationDto<>(areaDtos, itemsPerPage, page);
 	}
 }

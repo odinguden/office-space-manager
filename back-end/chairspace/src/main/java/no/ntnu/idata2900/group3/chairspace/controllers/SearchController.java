@@ -58,9 +58,6 @@ public class SearchController {
 		@RequestParam(name = "end-time") LocalDateTime endDateTime,
 		@RequestParam() Duration duration
 	) {
-		if (endDateTime == null) {
-			endDateTime = startDateTime.plus(duration);
-		}
 		PaginationDto<AreaDto> areas = null;
 		try {
 			areas = searchService.doSearch(
