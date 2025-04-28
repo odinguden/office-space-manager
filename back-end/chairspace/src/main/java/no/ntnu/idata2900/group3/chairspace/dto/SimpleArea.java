@@ -1,4 +1,4 @@
-package no.ntnu.idata2900.group3.chairspace.dto.area;
+package no.ntnu.idata2900.group3.chairspace.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.ArrayList;
@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
+import no.ntnu.idata2900.group3.chairspace.entity.AreaType;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
 
 /**
@@ -24,11 +25,12 @@ public record SimpleArea(
 	String description,
 	Set<UUID> administratorIds,
 	List<SimpleArea> superAreas,
-	String areaTypeId,
-	Set<String> areaFeatureIds,
+	AreaType areaType,
+	Set<AreaFeature> areaFeatures,
 	Integer capacity,
 	String calendarLink,
-	Boolean reservable
+	Boolean reservable,
+	List<SimpleReservation> reservations
 ) {
 	/**
 	 * A builder for simple areas.
@@ -39,11 +41,12 @@ public record SimpleArea(
 		private String description;
 		private Set<UUID> administratorIds;
 		private List<SimpleArea> superAreas;
-		private String areaTypeId;
-		private Set<String> areaFeatureIds;
+		private AreaType areaType;
+		private Set<AreaFeature> areaFeatures;
 		private Integer capacity;
 		private String calendarLink;
 		private Boolean reservable;
+		private List<SimpleReservation> reservations;
 
 		/**
 		 * Creates a new builder and prefills it with information from the input Area.
@@ -58,7 +61,7 @@ public record SimpleArea(
 				.description(area.getDescription())
 				.administrators(area.getAdministrators())
 				.addSuperAreaRecursive(area)
-				.areaTypeId(area.getAreaType().getId())
+				.areaType(area.getAreaType())
 				.areaFeatures(area.getFeatures())
 				.capacity(area.getCapacity())
 				.calendarLink(area.getCalendarLink())
@@ -79,16 +82,17 @@ public record SimpleArea(
 		 */
 		public SimpleArea build() {
 			return new SimpleArea(
-				id,
-				name,
-				description,
-				administratorIds,
-				superAreas,
-				areaTypeId,
-				areaFeatureIds,
-				capacity,
-				calendarLink,
-				reservable
+				this.id,
+				this.name,
+				this.description,
+				this.administratorIds,
+				this.superAreas,
+				this.areaType,
+				this.areaFeatures,
+				this.capacity,
+				this.calendarLink,
+				this.reservable,
+				this.reservations
 			);
 		}
 
@@ -159,7 +163,7 @@ public record SimpleArea(
 		 */
 		public Builder addSuperArea(Area area) {
 			SimpleArea simpleSuperArea = new Builder()
-				.areaTypeId(area.getAreaType().getId())
+				.areaType(area.getAreaType())
 				.name(area.getName())
 				.id(area.getId())
 				.build();
@@ -199,39 +203,24 @@ public record SimpleArea(
 		}
 
 		/**
-		 * Sets the areaTypeId of this builder.
+		 * Sets the areaType of this builder.
 		 *
-		 * @param areaTypeId the areaTypeId to set
+		 * @param areaType the areaType to set
 		 * @return this builder
 		 */
-		public Builder areaTypeId(String areaTypeId) {
-			this.areaTypeId = areaTypeId;
+		public Builder areaType(AreaType areaType) {
+			this.areaType = areaType;
 			return this;
 		}
 
 		/**
-		 * Sets the areaFeatureIds of this builder from a set of area features.
+		 * Sets the areaFeatures of this builder.
 		 *
-		 * @param areaFeatures the area features to set
+		 * @param areaFeatures the areaFeatures to set
 		 * @return this builder
 		 */
 		public Builder areaFeatures(Set<AreaFeature> areaFeatures) {
-			this.areaFeatureIds(
-				areaFeatures.stream()
-					.map(AreaFeature::getId)
-					.collect(Collectors.toSet())
-			);
-			return this;
-		}
-
-		/**
-		 * Sets the areaFeatureIds of this builder.
-		 *
-		 * @param areaFeatureIds the areaFeatureIds to set
-		 * @return this builder
-		 */
-		public Builder areaFeatureIds(Set<String> areaFeatureIds) {
-			this.areaFeatureIds = areaFeatureIds;
+			this.areaFeatures = areaFeatures;
 			return this;
 		}
 
@@ -265,6 +254,17 @@ public record SimpleArea(
 		 */
 		public Builder reservable(Boolean reservable) {
 			this.reservable = reservable;
+			return this;
+		}
+
+		/**
+		 * Sets the reservations of this builder.
+		 *
+		 * @param reservations the reservations to set
+		 * @return this builder
+		 */
+		public Builder reservations(List<SimpleReservation> reservations) {
+			this.reservations = reservations;
 			return this;
 		}
 	}

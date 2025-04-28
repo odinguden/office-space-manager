@@ -3,16 +3,14 @@ package no.ntnu.idata2900.group3.chairspace.assembler;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import no.ntnu.idata2900.group3.chairspace.dto.area.SimpleArea;
+import no.ntnu.idata2900.group3.chairspace.dto.SimpleArea;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaType;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
 import no.ntnu.idata2900.group3.chairspace.exceptions.AdminCountException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
-import no.ntnu.idata2900.group3.chairspace.service.AreaFeatureService;
 import no.ntnu.idata2900.group3.chairspace.service.AreaService;
-import no.ntnu.idata2900.group3.chairspace.service.AreaTypeService;
 import no.ntnu.idata2900.group3.chairspace.service.UserService;
 import org.springframework.stereotype.Component;
 
@@ -22,27 +20,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class AreaAssembler {
 	private final AreaService areaService;
-	private final AreaTypeService areaTypeService;
-	private final AreaFeatureService areaFeatureService;
 	private final UserService userService;
 
 	/**
 	 * Creates a new Area Assembler.
 	 *
 	 * @param areaService the area service connected to this assembler
-	 * @param areaTypeService the area type service connected to this assembler
-	 * @param areaFeatureService the area feature service connected to this assembler
 	 * @param userService the user service connected to this assembler
 	 */
 	public AreaAssembler(
 			AreaService areaService,
-			AreaTypeService areaTypeService,
-			AreaFeatureService areaFeatureService,
 			UserService userService
 	) {
 		this.areaService = areaService;
-		this.areaTypeService = areaTypeService;
-		this.areaFeatureService = areaFeatureService;
 		this.userService = userService;
 	}
 
@@ -57,11 +47,6 @@ public class AreaAssembler {
 	 */
 	public Area assembleArea(SimpleArea area)
 		throws AdminCountException, InvalidArgumentCheckedException {
-		AreaType areaType = null;
-		if (area.areaTypeId() != null && !area.areaTypeId().isBlank()) {
-			areaType = areaTypeService.get(area.areaTypeId());
-		}
-
 		Area superArea = null;
 		if (area.superAreas() != null && !area.superAreas().isEmpty()) {
 			superArea = areaService.get(area.superAreas().get(0).id());
@@ -75,20 +60,12 @@ public class AreaAssembler {
 				.collect(Collectors.toSet());
 		}
 
-		Set<AreaFeature> areaFeatures = null;
-		if (area.areaFeatureIds() != null && !area.areaFeatureIds().isEmpty()) {
-			areaFeatures = area.areaFeatureIds()
-				.stream()
-				.map(areaFeatureService::get)
-				.collect(Collectors.toSet());
-		}
-
-		Area.Builder areaBuilder = new Area.Builder(area.name(), area.capacity(), areaType);
+		Area.Builder areaBuilder = new Area.Builder(area.name(), area.capacity(), area.areaType());
 
 		areaBuilder.description(area.description())
 			.superArea(superArea)
 			.administrators(administrators)
-			.features(areaFeatures)
+			.features(area.areaFeatures())
 			.calendarLink(area.calendarLink())
 			.reservable(area.reservable())
 			.id(area.id());
@@ -113,11 +90,6 @@ public class AreaAssembler {
 			throw new IllegalArgumentException();
 		}
 
-		AreaType areaType = existingArea.getAreaType();
-		if (area.areaTypeId() != null && !area.areaTypeId().isBlank()) {
-			areaType = areaTypeService.get(area.areaTypeId());
-		}
-
 		Area superArea = existingArea.getSuperArea();
 		if (area.superAreas() != null && !area.superAreas().isEmpty()) {
 			superArea = areaService.get(area.superAreas().get(0).id());
@@ -131,19 +103,13 @@ public class AreaAssembler {
 				.collect(Collectors.toSet());
 		}
 
-		Set<AreaFeature> areaFeatures = existingArea.getFeatures();
-		if (area.areaFeatureIds() != null && !area.areaFeatureIds().isEmpty()) {
-			areaFeatures = area.areaFeatureIds()
-				.stream()
-				.map(areaFeatureService::get)
-				.collect(Collectors.toSet());
-		}
-
 		String name = pickOrElse(area.name(), existingArea.getName());
 		String description = pickOrElse(area.description(), existingArea.getDescription());
 		Integer capacity = pickOrElse(area.capacity(), existingArea.getCapacity());
 		String calendarLink = pickOrElse(area.calendarLink(), existingArea.getCalendarLink());
 		boolean reservable = pickOrElse(area.reservable(), existingArea.isReservable());
+		AreaType areaType = pickOrElse(area.areaType(), existingArea.getAreaType());
+		Set<AreaFeature> areaFeatures = pickOrElse(area.areaFeatures(), existingArea.getFeatures());
 
 		Area.Builder areaBuilder = new Area.Builder(name, capacity, areaType);
 		areaBuilder.description(description)
