@@ -10,12 +10,6 @@ const props = defineProps({
 	scopeEnd: Date
 })
 
-console.log(props.scopeStart, props.scopeEnd)
-
-const scopeDuration = computed(() => {
-	return props.scopeEnd.getTime() - props.scopeStart.getTime()
-})
-
 const timeline = computed(() => {
 	const timeline = []
 
@@ -62,14 +56,6 @@ const timeline = computed(() => {
 
 	return timeline
 })
-
-console.log(timeline.value)
-
-
-function getStart(reservation) {
-	return Math.max(reservation.startPercent, 0)
-}
-
 
 function getDuration(reservation) {
 	const start = reservation.startPercent

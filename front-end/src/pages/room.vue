@@ -1,5 +1,4 @@
 <script setup>
-import { onMounted } from 'vue';
 import Area from '@/plugins/Area';
 import { useRoute } from 'vue-router';
 
