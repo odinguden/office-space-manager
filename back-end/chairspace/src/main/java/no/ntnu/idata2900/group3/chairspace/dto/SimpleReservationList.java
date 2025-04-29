@@ -10,6 +10,4 @@ public record SimpleReservationList(
 	LocalDateTime scopeStart,
 	LocalDateTime scopeEnd,
 	List<SimpleReservation> reservations
-) {
-	
-}
+) {}
