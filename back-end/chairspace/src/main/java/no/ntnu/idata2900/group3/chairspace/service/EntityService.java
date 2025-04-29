@@ -98,8 +98,7 @@ public abstract class EntityService<EntityT extends EntityInterface<IdT>, IdT> {
 			return false;
 		}
 
-		this.save(entity);
-		return true;
+		return this.save(entity);
 	}
 
 	/**
@@ -113,8 +112,7 @@ public abstract class EntityService<EntityT extends EntityInterface<IdT>, IdT> {
 			return false;
 		}
 
-		this.save(entity);
-		return true;
+		return this.save(entity);
 	}
 
 	/**
@@ -122,8 +120,9 @@ public abstract class EntityService<EntityT extends EntityInterface<IdT>, IdT> {
 	 *
 	 * @param entity entity to save.
 	 */
-	protected void save(EntityT entity) {
+	protected boolean save(EntityT entity) {
 		this.repository.save(entity);
+		return true;
 	}
 
 	/**
