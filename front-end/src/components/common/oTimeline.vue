@@ -19,50 +19,44 @@ const scopeDuration = computed(() => {
 const timeline = computed(() => {
 	const timeline = []
 
-	const scopeStartMs = props.scopeStart.getTime()
-	let prevTime = 0;
+	const startScope = props.scopeStart.getTime()
+	const endScope = props.scopeEnd.getTime()
+	const totalMs = endScope - startScope
+
+	let lastEnd = new Date(startScope)
 
 	for (let reservation of props.reservations) {
-		const startTime = Date.parse(reservation.startTime) - scopeStartMs
-		const endTime = Date.parse(reservation.endTime) - scopeStartMs
-		const startPercent = startTime / scopeDuration.value
-		const endPercent = endTime / scopeDuration.value
-		const prevTimePercent = (prevTime) / scopeDuration.value
-		console.log(startPercent, endPercent, endPercent-startPercent)
+		const start = new Date(reservation.startTime)
+		const end = new Date(reservation.endTime)
 
-		if (prevTime < startTime) {
+		if (start > lastEnd) {
 			timeline.push({
 				type: 'gap',
-				startPercent: prevTimePercent,
-				endPercent: startPercent,
-				durationPercent: startPercent - prevTimePercent,
-				startDate: new Date(prevTime + scopeStartMs),
-				endDate: new Date(startTime + scopeStartMs)
+				start: lastEnd,
+				end: start,
+				startPercent: (lastEnd - startScope) / totalMs,
+				durationPercent: (start - lastEnd) / totalMs
 			})
 		}
 
 		timeline.push({
 			type: 'event',
-			startPercent,
-			endPercent,
-			durationPercent: endPercent - startPercent,
-			startDate: new Date(startTime + scopeStartMs),
-			endDate: new Date(endTime + scopeStartMs)
+			start,
+			end,
+			startPercent: (start - startScope) / totalMs,
+			durationPercent: (end - start) / totalMs
 		})
 
-		prevTime = endTime
+		lastEnd = end
 	}
 
-	if (prevTime < props.scopeEnd.getTime()) {
-		const startPercent = prevTime / scopeDuration.value
-		const endPercent = 1
+	if (lastEnd < endScope) {
 		timeline.push({
 			type: 'gap',
-			startPercent: startPercent,
-			endPercent: endPercent,
-			durationPercent: endPercent - startPercent,
-			startDate: new Date(prevTime + scopeStartMs),
-			endDate: new Date(props.scopeEnd.getTime())
+			start: lastEnd,
+			end: new Date(endScope),
+			startPercent: (lastEnd - startScope) / totalMs,
+			durationPercent: (endScope - lastEnd) / totalMs
 		})
 	}
 
@@ -76,8 +70,14 @@ function getStart(reservation) {
 	return Math.max(reservation.startPercent, 0)
 }
 
-function getEnd(reservation) {
-	return Math.min(reservation.durationPercent, 1 - reservation.startPercent)
+
+function getDuration(reservation) {
+	const start = reservation.startPercent
+	const end = start + reservation.durationPercent
+
+	const duration = Math.min(end, 1) - Math.max(start, 0)
+
+	return Math.max(duration, 0);
 }
 
 function formatTime(time) {
@@ -85,7 +85,7 @@ function formatTime(time) {
 }
 
 function getTooltip(reservation) {
-	const tip = `${formatTime(reservation.startDate)} - ${formatTime(reservation.endDate)}`
+	const tip = `${formatTime(reservation.start)} - ${formatTime(reservation.end)}`
 	return tip;
 }
 </script>
@@ -104,8 +104,7 @@ function getTooltip(reservation) {
 						'gap': reservation.type === 'gap'
 					}"
 					:style="{
-						'--reservation-start': getStart(reservation),
-						'--reservation-length': getEnd(reservation)
+						'--reservation-length': getDuration(reservation)
 					}"
 				/>
 			</template>
