@@ -20,6 +20,11 @@ const routes = [
 		component: Index
 	},
 	{
+		path: "/index",
+		name: "index",
+		component: Index
+	},
+	{
 		path: "/room/:id",
 		name: "room",
 		component: Room
