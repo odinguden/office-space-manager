@@ -34,6 +34,16 @@ public class AreaService extends EntityService<Area, UUID> {
 		this.reservationService = reservationService;
 	}
 
+	@Override
+	// Override to ensure areas cannot be saved with themselves as their super area
+	protected boolean save(Area area) {
+		if (area.isSuperArea(area)) {
+			return false;
+		}
+
+		return super.save(area);
+	}
+
 	/**
 	 * Retrieves all areas that have a gap like or longer than the input duration.
 	 *
