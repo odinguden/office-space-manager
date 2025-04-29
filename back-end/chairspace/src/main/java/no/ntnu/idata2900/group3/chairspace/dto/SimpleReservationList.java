@@ -8,9 +8,9 @@ import java.util.List;
  * A container for a list of {@link SimpleReservation}s. Defines the time scope of such a list.
  */
 public record SimpleReservationList(
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyy-MM-dd'T'HH:mm:ss")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	LocalDateTime scopeStart,
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyy-MM-dd'T'HH:mm:ss")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	LocalDateTime scopeEnd,
 	List<SimpleReservation> reservations
 ) {}
