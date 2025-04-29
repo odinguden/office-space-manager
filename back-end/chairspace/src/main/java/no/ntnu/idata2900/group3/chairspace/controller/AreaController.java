@@ -1,5 +1,6 @@
 package no.ntnu.idata2900.group3.chairspace.controller;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.assembler.AreaAssembler;
 import no.ntnu.idata2900.group3.chairspace.dto.SimpleArea;
@@ -35,7 +36,7 @@ public class AreaController extends PermissionManager {
 	/**
 	 * Creates a new area controller.
 	 *
-	 * @param areaService autowired area service.
+	 * @param areaService autowired area service
 	 * @param areaAssembler autowired area assembler
 	 */
 	public AreaController(AreaService areaService, AreaAssembler areaAssembler) {
@@ -77,6 +78,31 @@ public class AreaController extends PermissionManager {
 		this.hasPermissionToGetAll();
 		Page<Area> areas = areaService.getAllPaged(page);
 		Page<SimpleArea> simpleAreas = areas.map(areaAssembler::toSimpleArea);
+		return new ResponseEntity<>(simpleAreas, HttpStatus.OK);
+	}
+
+	/**
+	 * Returns a list of areas that contain reservations, specifically for the homepage.
+	 *
+	 * @param page the page of the pagination to retrieve areas from.
+	 * @return 200 OK with a pagination of areas with reservations for the next 12 hours
+	 */
+	@GetMapping("/home")
+	public ResponseEntity<Page<SimpleArea>> getHome(
+		@RequestParam(required = false) Integer page
+	) {
+		if (page == null || page < 0) {
+			page = 0;
+		}
+
+		LocalDateTime start = LocalDateTime.now();
+		LocalDateTime end = LocalDateTime.now().plusHours(12);
+
+		this.hasPermissionToGetAll();
+		Page<Area> areas = areaService.getAllPaged(page);
+		Page<SimpleArea> simpleAreas = areas.map(
+			area -> areaAssembler.toSimpleAreaWithReservations(area, start, end)
+		);
 		return new ResponseEntity<>(simpleAreas, HttpStatus.OK);
 	}
 
