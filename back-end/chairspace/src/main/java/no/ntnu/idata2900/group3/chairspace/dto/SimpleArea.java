@@ -30,7 +30,7 @@ public record SimpleArea(
 	Integer capacity,
 	String calendarLink,
 	Boolean reservable,
-	List<SimpleReservation> reservations
+	SimpleReservationList reservations
 ) {
 	/**
 	 * A builder for simple areas.
@@ -46,7 +46,7 @@ public record SimpleArea(
 		private Integer capacity;
 		private String calendarLink;
 		private Boolean reservable;
-		private List<SimpleReservation> reservations;
+		private SimpleReservationList reservations;
 
 		/**
 		 * Creates a new builder and prefills it with information from the input Area.
@@ -263,7 +263,7 @@ public record SimpleArea(
 		 * @param reservations the reservations to set
 		 * @return this builder
 		 */
-		public Builder reservations(List<SimpleReservation> reservations) {
+		public Builder reservations(SimpleReservationList reservations) {
 			this.reservations = reservations;
 			return this;
 		}

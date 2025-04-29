@@ -1,17 +1,23 @@
 package no.ntnu.idata2900.group3.chairspace.assembler;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.dto.SimpleArea;
+import no.ntnu.idata2900.group3.chairspace.dto.SimpleReservation;
+import no.ntnu.idata2900.group3.chairspace.dto.SimpleReservationList;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaFeature;
 import no.ntnu.idata2900.group3.chairspace.entity.AreaType;
+import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
 import no.ntnu.idata2900.group3.chairspace.exceptions.AdminCountException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.service.AreaService;
+import no.ntnu.idata2900.group3.chairspace.service.ReservationService;
 import no.ntnu.idata2900.group3.chairspace.service.UserService;
 import org.springframework.stereotype.Component;
 
@@ -22,16 +28,23 @@ import org.springframework.stereotype.Component;
 public class AreaAssembler {
 	private final AreaService areaService;
 	private final UserService userService;
+	private final ReservationService reservationService;
 
 	/**
 	 * Creates a new Area Assembler.
 	 *
 	 * @param areaService the area service connected to this assembler
 	 * @param userService the user service connected to this assembler
+	 * @param reservationService the reservation service connected to this assembler
 	 */
-	public AreaAssembler(AreaService areaService, UserService userService) {
+	public AreaAssembler(
+		AreaService areaService,
+		UserService userService,
+		ReservationService reservationService
+	) {
 		this.areaService = areaService;
 		this.userService = userService;
+		this.reservationService = reservationService;
 	}
 
 	/**
@@ -115,7 +128,30 @@ public class AreaAssembler {
 	 */
 	public SimpleArea toSimpleArea(Area area) {
 		return SimpleArea.Builder.fromArea(area).build();
+	}
 
+	/**
+	 * Converts a domain area to a simple area and includes the area's reservations.
+	 *
+	 * @param area the area to simplify
+	 * @return the area represented by a simple area object
+	 */
+	public SimpleArea toSimpleAreaWithReservations(Area area, LocalDateTime start, LocalDateTime end) {
+		List<SimpleReservation> reservations = getReservationsForArea(area.getId(), start, end)
+			.stream()
+			.map(SimpleReservation.Builder::fromReservation)
+			.map(SimpleReservation.Builder::build)
+			.toList();
+
+		SimpleReservationList simpleReservationList = new SimpleReservationList(
+			start,
+			end,
+			reservations
+		);
+
+		return SimpleArea.Builder.fromArea(area)
+			.reservations(simpleReservationList)
+			.build();
 	}
 
 	/**
@@ -174,5 +210,11 @@ public class AreaAssembler {
 		}
 
 		return admins;
+	}
+
+	private List<Reservation> getReservationsForArea(
+		UUID areaId, LocalDateTime start, LocalDateTime end
+	) {
+		return reservationService.getReservationsForAreaBetween(areaId, start, end);
 	}
 }
