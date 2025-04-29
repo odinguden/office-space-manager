@@ -26,6 +26,8 @@ public class SecurityConfiguration {
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/login").permitAll() // Allow all to access login endpoint
 				.requestMatchers("/api-docs/**").permitAll() // TODO Remove later
+				.requestMatchers("swagger-ui/**").permitAll() // TODO Remove later
+				.requestMatchers("/v3/api-docs/**").permitAll() // TODO Remove later
 				.anyRequest().authenticated()
 			)
 			.exceptionHandling(e -> e
@@ -33,7 +35,10 @@ public class SecurityConfiguration {
 			)
 			.oauth2Login(oauth2 -> oauth2
 			.loginPage("/login") //set login endpoint
-			);
+			)
+			.logout()
+			.logoutSuccessUrl("/logout") //set logout endpoint
+			.permitAll();
 			return http.build();
 	}
 }
