@@ -29,6 +29,36 @@ public class ReservationService extends EntityService<Reservation, UUID> {
 		this.reservationRepository = repository;
 	}
 
+	@Override
+	public boolean create(Reservation reservation) {
+		boolean canAdd = reservationRepository.isTimeSlotFree(
+			reservation.getArea().getId(),
+			reservation.getStart(),
+			reservation.getEnd()
+		);
+
+		if (canAdd) {
+			canAdd = super.create(reservation);
+		}
+
+		return canAdd;
+	}
+
+	@Override
+	public boolean update(Reservation reservation) {
+		boolean canAdd = reservationRepository.isTimeSlotFree(
+			reservation.getArea().getId(),
+			reservation.getStart(),
+			reservation.getEnd()
+		);
+
+		if (canAdd) {
+			canAdd = super.update(reservation);
+		}
+
+		return canAdd;
+	}
+
 	/**
 	 * Gets all reservations belonging to a given user ID.
 	 *
