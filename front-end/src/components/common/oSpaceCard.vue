@@ -12,7 +12,7 @@ const props = defineProps({
 	>
 		<v-icon>mdi-desk</v-icon>
 		<div class="card-header">
-			<h1><router-link to="/room/0">{{ area.name }}</router-link></h1>
+			<h1><router-link :to="`/room/${area.id}`">{{ area.name }}</router-link></h1>
 		</div>
 		<div class="card-content">
 			<p>{{ area.description }}</p>

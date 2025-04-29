@@ -11,18 +11,27 @@ const props = defineProps({
 <template>
 	<div class="breadcrumbs" :style="{'--divider': '>'}">
 		<span v-for="item, idx in items">
-			<router-link to="/room/0">
-				<v-icon v-if="item instanceof Object && item.icon !== undefined">
+			<router-link
+				v-if="item.link"
+				:to="item.link"
+			>
+				<v-icon v-if="item.icon !== undefined">
 					{{ item.icon }}
 				</v-icon>
-				{{ item instanceof Object ? item.text : item }}
+				{{ item.text }}
 			</router-link>
+			<span v-else>
+				<v-icon v-if="item.icon !== undefined">
+					{{ item.icon }}
+				</v-icon>
+				{{ item.text }}
+			</span>
 		</span>
 	</div>
 </template>
 
 <style scoped lang="scss">
-.breadcrumbs > span:not(:last-child)::after {
+.breadcrumbs > span::before {
 	content: ' > ';
 	opacity: var(--v-medium-emphasis-opacity);
 }
