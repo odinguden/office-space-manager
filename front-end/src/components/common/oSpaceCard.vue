@@ -1,5 +1,7 @@
 <script setup>
-const isFavorite = ref(Math.random() > 0.7)
+const props = defineProps({
+	area: Object
+})
 </script>
 
 <template>
@@ -10,25 +12,13 @@ const isFavorite = ref(Math.random() > 0.7)
 	>
 		<v-icon>mdi-desk</v-icon>
 		<div class="card-header">
-			<h1><router-link to="/room/0">A123</router-link></h1>
-			<v-btn
-				icon
-				flat
-				variant="text"
-				density="comfortable"
-				:color="isFavorite ? 'warning' : ''"
-				@click="isFavorite = !isFavorite"
-			>
-				<v-icon class="favorite" :class="{'is-favorite': isFavorite}">
-					mdi-star{{ isFavorite ? '' : '-outline' }}
-				</v-icon>
-			</v-btn>
+			<h1><router-link to="/room/0">{{ area.name }}</router-link></h1>
 		</div>
 		<div class="card-content">
-			<p>Something about this room</p>
+			<p>{{ area.description }}</p>
 		</div>
 		<div class="card-extras">
-			<o-space-extras />
+			<o-space-extras :features="area.areaFeatures" />
 		</div>
 		<div class="one-span-two">
 			<slot name="timeline">
@@ -47,6 +37,7 @@ const isFavorite = ref(Math.random() > 0.7)
 .space-card {
 	display: grid;
 	grid-template-columns: auto 1fr;
+	grid-template-rows: auto 1fr;
 	gap: 8px 16px;
 	align-items: center;
 
@@ -59,6 +50,12 @@ const isFavorite = ref(Math.random() > 0.7)
 
 	.card-content {
 		grid-column: 2;
+
+		word-break: break-word;
+		hyphens: auto;
+		-ms-hyphens: auto;
+		-moz-hyphens: auto;
+		-webkit-hyphens: auto;
 	}
 
 	.card-extras {
