@@ -23,7 +23,11 @@ const props = defineProps({
 		<div class="one-span-two">
 			<slot name="timeline">
 				<div class="card-timeline">
-					<o-timeline/>
+					<o-timeline
+						:scope-start="new Date(area.reservations.scopeStart)"
+						:scope-end="new Date(area.reservations.scopeEnd)"
+						:reservations="area.reservations.reservations"
+					/>
 				</div>
 			</slot>
 		</div>

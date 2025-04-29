@@ -1,53 +1,83 @@
 <script setup>
+import { computed } from 'vue'
 import { useDate } from 'vuetify'
 
 const vDate = useDate()
 
-const mockTimeline = [
-	{
-		type: "gap",
-		start: 0,
-		duration: 0.2
-	},
-	{
-		type: "event",
-		start: 0.2,
-		duration: 0.1
-	},
-	{
-		type: "gap",
-		start: 0.3,
-		duration: 0.05
-	},
-	{
-		type: "event",
-		start: 0.35,
-		duration: 0.35
-	},
-	{
-		type: "gap",
-		start: 0.7,
-		duration: 0.2
-	},
-	{
-		type: "event",
-		start: 0.9,
-		duration: 0.1
-	}
-]
+const props = defineProps({
+	reservations: Array,
+	scopeStart: Date,
+	scopeEnd: Date
+})
 
-const mockReservation = {
-	start: new Date().setSeconds(0),
-	duration: 12 * 60,
-	timeline: mockTimeline
-}
+console.log(props.scopeStart, props.scopeEnd)
+
+const scopeDuration = computed(() => {
+	return props.scopeEnd.getTime() - props.scopeStart.getTime()
+})
+
+const timeline = computed(() => {
+	const timeline = []
+
+	const scopeStartMs = props.scopeStart.getTime()
+	let prevTime = 0;
+
+	for (let reservation of props.reservations) {
+		const startTime = Date.parse(reservation.startTime) - scopeStartMs
+		const endTime = Date.parse(reservation.endTime) - scopeStartMs
+		const startPercent = startTime / scopeDuration.value
+		const endPercent = endTime / scopeDuration.value
+		const prevTimePercent = (prevTime) / scopeDuration.value
+		console.log(startPercent, endPercent, endPercent-startPercent)
+
+		if (prevTime < startTime) {
+			timeline.push({
+				type: 'gap',
+				startPercent: prevTimePercent,
+				endPercent: startPercent,
+				durationPercent: startPercent - prevTimePercent,
+				startDate: new Date(prevTime + scopeStartMs),
+				endDate: new Date(startTime + scopeStartMs)
+			})
+		}
+
+		timeline.push({
+			type: 'event',
+			startPercent,
+			endPercent,
+			durationPercent: endPercent - startPercent,
+			startDate: new Date(startTime + scopeStartMs),
+			endDate: new Date(endTime + scopeStartMs)
+		})
+
+		prevTime = endTime
+	}
+
+	if (prevTime < props.scopeEnd.getTime()) {
+		const startPercent = prevTime / scopeDuration.value
+		const endPercent = 1
+		timeline.push({
+			type: 'gap',
+			startPercent: startPercent,
+			endPercent: endPercent,
+			durationPercent: endPercent - startPercent,
+			startDate: new Date(prevTime + scopeStartMs),
+			endDate: new Date(props.scopeEnd.getTime())
+		})
+	}
+
+	return timeline
+})
+
+console.log(timeline.value)
+
 
 function getStart(reservation) {
-	return Math.max(reservation.start, 0)
+	return Math.max(reservation.startPercent, 0)
 }
 
 function getEnd(reservation) {
-	return Math.min(reservation.duration, 1 - reservation.start)
+	return Math.min(reservation.durationPercent, 1 - reservation.startPercent)
 }
 
 function formatTime(time) {
@@ -55,22 +85,14 @@ function formatTime(time) {
 }
 
 function getTooltip(reservation) {
-	let tip = reservation.type === "gap" ? "Free from" : "Booked from";
-
-	const startMinutes = reservation.start * mockReservation.duration
-	const startTime = vDate.addMinutes(mockReservation.start, startMinutes)
-	const durationMinutes = Math.round(reservation.duration * mockReservation.duration)
-	const endTime = vDate.addMinutes(startTime, durationMinutes)
-
-	tip += ` ${formatTime(startTime)} until ${formatTime(endTime)} (${durationMinutes} minutes)`
-
+	const tip = `${formatTime(reservation.startDate)} - ${formatTime(reservation.endDate)}`
 	return tip;
 }
 </script>
 
 <template>
 	<div class="timeline-container">
-		<v-tooltip v-for="reservation in mockReservation.timeline">
+		<v-tooltip v-for="reservation in timeline">
 			<template
 				v-slot:activator="{ props }"
 			>

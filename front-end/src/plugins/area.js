@@ -1,6 +1,6 @@
 import { BACKEND_URL } from "./config";
 
-const ALL_AREAS_URL = BACKEND_URL + "/area"
+const ALL_AREAS_URL = BACKEND_URL + "/area/home"
 
 const DEFAULT_BODY = {
 	method: "GET"
