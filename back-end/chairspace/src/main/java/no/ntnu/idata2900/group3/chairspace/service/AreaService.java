@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.repository.AreaRepository;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -113,7 +112,10 @@ public class AreaService extends EntityService<Area, UUID> {
 		List<UUID> freeAreaIds
 	) {
 		Pageable paging = PageRequest.of(page, EntityService.DEFAULT_PAGE_SIZE);
-		List<UUID> subAreaIds = getSubAreas(superAreaId);
+		List<UUID> subAreaIds = null;
+		if (superAreaId != null) {
+			subAreaIds = getSubAreas(superAreaId);
+		}
 		return areaRepository.searchWithOptionalParams(
 			paging,
 			capacity,
