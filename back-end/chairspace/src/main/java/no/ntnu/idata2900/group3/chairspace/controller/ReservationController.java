@@ -4,13 +4,17 @@ import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.assembler.ReservationAssembler;
 import no.ntnu.idata2900.group3.chairspace.dto.SimpleReservation;
 import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
+import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
+import no.ntnu.idata2900.group3.chairspace.exceptions.NotReservableException;
 import no.ntnu.idata2900.group3.chairspace.service.ReservationService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -109,6 +113,38 @@ public class ReservationController extends PermissionManager {
 		reservationService.create(reservation);
 
 		return new ResponseEntity<>(HttpStatus.CREATED);
+	}
+
+	/**
+	 * Updates an existing reservation.
+	 *
+	 * @param simpleReservation the simple reservation to use for updating
+	 * @return 204 NO CONTENT
+	 */
+	@PutMapping("")
+	public ResponseEntity<String> put(@RequestBody SimpleReservation simpleReservation) {
+		this.hasPermissionToPut();
+		Reservation reservation;
+		try {
+			reservation = reservationAssembler.toDomain(simpleReservation);
+		} catch (InvalidArgumentCheckedException | NotReservableException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+		reservationService.update(reservation);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	/**
+	 * Attempts to delete the reservation with the given ID.
+	 *
+	 * @param id the id of the reservation to delete
+	 * @return 204 NO CONTENT
+	 */
+	@DeleteMapping("/{id}")
+	public ResponseEntity<String> delete(@PathVariable UUID id) {
+		this.hasPermissionToDelete();
+		reservationService.delete(id);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 }
