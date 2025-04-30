@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.NotReservableException;
-import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 
 /**
  * Represents a reservation of an area.
@@ -58,7 +57,6 @@ public class Reservation implements EntityInterface<UUID> {
 	 * @param start start date and time of reservation
 	 * @param end end date and time of reservation
 	 * @param comment comment for the reservation
-	 * @throws ReservedException if the area is not free for the specified timespan
 	 * @throws InvalidArgumentCheckedException if the end time is before the start time
 	 * @throws InvalidArgumentCheckedException if the start time is before the current time
 	 * @throws NotReservableException if the area is not reservable
@@ -69,7 +67,7 @@ public class Reservation implements EntityInterface<UUID> {
 		LocalDateTime start,
 		LocalDateTime end,
 		String comment
-	) throws InvalidArgumentCheckedException, ReservedException, NotReservableException {
+	) throws InvalidArgumentCheckedException, NotReservableException {
 		setUser(user);
 		setTimes(start, end);
 		setComment(comment);
@@ -87,7 +85,6 @@ public class Reservation implements EntityInterface<UUID> {
 	 * @param user that is reserving the area
 	 * @param start start date and time of reservation
 	 * @param end end date and time of reservation
-	 * @throws ReservedException if the area is not free for the specified timespan
 	 * @throws InvalidArgumentCheckedException if the end time is before the start time
 	 * @throws InvalidArgumentCheckedException if the start time is before the current time
 	 * @throws NotReservableException if tge area is not reservable
@@ -97,7 +94,7 @@ public class Reservation implements EntityInterface<UUID> {
 		User user,
 		LocalDateTime start,
 		LocalDateTime end
-	) throws InvalidArgumentCheckedException, ReservedException, NotReservableException {
+	) throws InvalidArgumentCheckedException, NotReservableException {
 		setUser(user);
 		setTimes(start, end);
 		setComment("");
@@ -113,7 +110,6 @@ public class Reservation implements EntityInterface<UUID> {
 	 * Also checks if the area is free for the specified timespan.
 	 *
 	 * @param area to reserve
-	 * @throws ReservedException if area is not free for the specified timespan
 	 * @throws NotReservableException if the area is not reservable
 	 * @throws IllegalArgumentException if the area is null
 	 */

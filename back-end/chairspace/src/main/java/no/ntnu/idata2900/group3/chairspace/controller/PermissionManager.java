@@ -1,4 +1,4 @@
-package no.ntnu.idata2900.group3.chairspace.controllers;
+package no.ntnu.idata2900.group3.chairspace.controller;
 
 import org.springframework.web.server.ResponseStatusException;
 
@@ -13,7 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
  * @author Sigve Bjørkedal
  * @author Odin Lyngsgård
  */
-public abstract class AbstractPermissionManager {
+public abstract class PermissionManager {
 
 	/**
 	 * Checks if the current session user has permission to get a single entity.
@@ -27,7 +27,6 @@ public abstract class AbstractPermissionManager {
 	 * @throws ResponseStatusException 403 forbidden if the current user lacks permissions
 	 */
 	protected boolean hasPermissionToGet() {
-		// TODO: Implement security
 		return true;
 	}
 
@@ -43,7 +42,6 @@ public abstract class AbstractPermissionManager {
 	 * @throws ResponseStatusException 403 forbidden if the current user lacks permissions
 	 */
 	protected boolean hasPermissionToGetAll() {
-		// TODO: Implement security
 		return true;
 	}
 
@@ -59,7 +57,6 @@ public abstract class AbstractPermissionManager {
 	 * @throws ResponseStatusException 403 forbidden if the current user lacks permissions
 	 */
 	protected boolean hasPermissionToPost() {
-		// TODO: Implement security
 		return true;
 	}
 
@@ -75,7 +72,6 @@ public abstract class AbstractPermissionManager {
 	 * @throws ResponseStatusException 403 forbidden if the current user lacks permissions
 	 */
 	protected boolean hasPermissionToPut() {
-		// TODO: Implement security
 		return true;
 	}
 
@@ -91,7 +87,6 @@ public abstract class AbstractPermissionManager {
 	 * @throws ResponseStatusException 403 forbidden if the current user lacks permissions
 	 */
 	protected boolean hasPermissionToDelete() {
-		// TODO: Implement security
 		return true;
 	}
 }

@@ -10,7 +10,6 @@ import jakarta.persistence.Table;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 
 /**

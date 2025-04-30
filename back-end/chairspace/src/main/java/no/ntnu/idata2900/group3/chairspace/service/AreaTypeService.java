@@ -5,17 +5,19 @@ import no.ntnu.idata2900.group3.chairspace.repository.AreaTypeRepository;
 import org.springframework.stereotype.Service;
 
 /**
- * Service for AreaType entity.
+ * Service class for interacting with and managing {@link AreaType}s.
+ *
+ * @author Odin Lyngsgård
+ * @author Sigve Bjørkedal
  */
 @Service
-public class AreaTypeService extends AbstractEntityService<AreaType, String> {
-
+public class AreaTypeService extends EntityService<AreaType, String> {
 	/**
-	 * Creates new instance of areaTypeService.
+	 * Creates a new area type service.
 	 *
-	 * @param areaRepository area repository
+	 * @param repository autowired AreaTypeRepository
 	 */
-	public AreaTypeService(AreaTypeRepository areaRepository) {
-		super(areaRepository);
+	public AreaTypeService(AreaTypeRepository repository) {
+		super(repository);
 	}
 }

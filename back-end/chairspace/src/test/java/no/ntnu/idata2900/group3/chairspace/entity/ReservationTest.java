@@ -207,7 +207,7 @@ class ReservationTest {
 				end,
 				comment
 			);
-		} catch (InvalidArgumentCheckedException | ReservedException | NotReservableException e) {
+		} catch (InvalidArgumentCheckedException | NotReservableException e) {
 			fail("Failed to create reservation", e);
 			return;
 		}
@@ -239,7 +239,7 @@ class ReservationTest {
 		assertEquals(start2, end);
 		try {
 			reservation = new Reservation(area, admin, start, end);
-		} catch (InvalidArgumentCheckedException | ReservedException | NotReservableException e) {
+		} catch (InvalidArgumentCheckedException | NotReservableException e) {
 			fail(e.getMessage(), e);
 			return;
 		}
