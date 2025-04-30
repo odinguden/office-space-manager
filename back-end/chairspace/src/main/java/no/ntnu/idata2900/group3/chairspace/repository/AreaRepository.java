@@ -28,8 +28,7 @@ public interface AreaRepository extends CrudRepository<Area, UUID> {
 	 * @param superAreaId id of the super area to find sub areas for
 	 * @return a list of sub areas of the given super area
 	 */
-	@Query("SELECT area.id FROM Area area WHERE area.superArea.id = ?1")
-	List<UUID> getSubAreaIds(UUID superAreaId);
+	List<UUID> findIdBySuperAreaId(UUID superAreaId);
 
 	/**
 	 * Searches for areas based on various optional parameters.
