@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.UUID;
 import java.util.function.Function;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -12,12 +13,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-@Component
+/**
+ * Utility class for generating and validating JWT tokens.
+ */
 public class JwtUtility {
-	@Value("${JWT_SECRET}")
+	@Value("")
 	private String jwtSecret;
 
-	@Value("${JWT_EXPIRATION}")
+	@Value("")
 	private long jwtExpiration;
 
 	/**
@@ -47,8 +50,31 @@ public class JwtUtility {
 		return new SecretKeySpec(keyBytes, 0, keyBytes.length, "HmacSHA256");
 	}
 
+	/* ----- Validation ----- */
+
+	public boolean validateToken(String token, UserDetails userDetails) {
+		final String username = extractUsername(token);
+		return (
+			userDetails != null
+			&& username.equals(userDetails.getUsername())
+			&& !isTokenExpired(token)
+			);
+	}
+
+	/**
+	 * Checks if the give token is valid for the current time.
+	 *
+	 * @param token the token to check
+	 * @return true if the token is expired
+	 */
 	private boolean isTokenExpired(String token) {
 		return extractExpiration(token).before(new Date());
+	}
+
+	/* ----- Extract claims ----- */
+
+	private String extractUsername(String token) {
+		return extractClaim(token, Claims::getSubject);
 	}
 
 	private Date extractExpiration(String token) {
@@ -66,10 +92,10 @@ public class JwtUtility {
 			.build()
 			.parseSignedClaims(token)
 			.getPayload();
-		}
+	}
 
-	public boolean validateToken(String token, UserDetails userDetails) {
-		final String username = extractUsername(token);
-		return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+	public UUID extractUserId(String jwt) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'extractUserId'");
 	}
 }

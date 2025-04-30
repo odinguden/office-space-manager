@@ -32,13 +32,7 @@ public class SecurityConfiguration {
 			)
 			.exceptionHandling(e -> e
 				.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)) // Return 401 for unauthorized requests
-			)
-			.oauth2Login(oauth2 -> oauth2
-			.loginPage("/login") //set login endpoint
-			)
-			.logout()
-			.logoutSuccessUrl("/logout") //set logout endpoint
-			.permitAll();
+			);
 			return http.build();
 	}
 }
