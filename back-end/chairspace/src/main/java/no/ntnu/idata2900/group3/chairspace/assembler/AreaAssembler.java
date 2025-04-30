@@ -134,9 +134,15 @@ public class AreaAssembler {
 	 * Converts a domain area to a simple area and includes the area's reservations.
 	 *
 	 * @param area the area to simplify
+	 * @param start the time start of the search
+	 * @param end the time end of the search
 	 * @return the area represented by a simple area object
 	 */
-	public SimpleArea toSimpleAreaWithReservations(Area area, LocalDateTime start, LocalDateTime end) {
+	public SimpleArea toSimpleAreaWithReservations(
+		Area area,
+		LocalDateTime start,
+		LocalDateTime end
+	) {
 		List<SimpleReservation> reservations = getReservationsForArea(area.getId(), start, end)
 			.stream()
 			.map(SimpleReservation.Builder::fromReservation)
