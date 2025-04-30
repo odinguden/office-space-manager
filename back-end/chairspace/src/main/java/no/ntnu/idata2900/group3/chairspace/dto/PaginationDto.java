@@ -16,6 +16,7 @@ public class PaginationDto<EntityTypeT> {
 	 * Constructs a pagination.
 	 * The pagination content will contain the items from the index itemsPerPage * current page
 	 * to the index ( itemsPerPage * current page ) + itemsPerPage.
+	 * If itemsPerPage is null, it will be set a default value of 12.
 	 *
 	 * @param items Items to paginate
 	 * @param itemsPerPage the amount of items per page
@@ -25,10 +26,14 @@ public class PaginationDto<EntityTypeT> {
 	 * @throws IllegalArgumentException if items are null
 	 * @throws IllegalArgumentException if current page is less than 0
 	 */
-	public PaginationDto(List<EntityTypeT> items, int itemsPerPage, int currentPage)
+	public PaginationDto(List<EntityTypeT> items, Integer itemsPerPage, int currentPage)
 		throws PageNotFoundException {
 		if (items == null) {
 			throw new IllegalArgumentException("Items are null where value was expected");
+		}
+		if (itemsPerPage == null) {
+			// Set a default value for items per page
+			itemsPerPage = 12;
 		}
 		setPageContent(items, itemsPerPage, currentPage);
 	}
