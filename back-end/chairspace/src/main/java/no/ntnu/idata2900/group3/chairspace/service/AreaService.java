@@ -1,7 +1,11 @@
 package no.ntnu.idata2900.group3.chairspace.service;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.dto.PaginationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.area.AreaCreationDto;
@@ -332,7 +336,7 @@ public class AreaService {
 		List<String> areaFeatureIds,
 		List<UUID> freeAreaIds
 	) {
-		List<UUID> subAreaIds = getSubAreasRecursive(superAreaId);
+		List<UUID> subAreaIds = getSubAreas(superAreaId);
 		return areaRepository.searchWithOptionalParams(
 			capacity,
 			subAreaIds,
@@ -345,20 +349,29 @@ public class AreaService {
 
 	/**
 	 * Gets all sub areas of a given area.
-	 * Will return null if the super area is not found in the database or if the given id is null.
+	 * Will return an empty list if the given id is null, or if the area does not exist.
 	 *
 	 * @param superAreaId the id of the area to get sub areas from
 	 * @return a list of sub areas of the given area
 	 */
-	public List<UUID> getSubAreasRecursive(UUID superAreaId) {
+	public List<UUID> getSubAreas(UUID superAreaId) {
 		if (superAreaId == null) {
-			return null;
+			return List.of();
 		}
-		List<UUID> subAreaIds = areaRepository.getSubAreaIds(superAreaId);
-		List<UUID> subAreaIdsCopy = new ArrayList<>(subAreaIds);
-		for (UUID subAreaId : subAreaIdsCopy) {
-			subAreaIds.addAll(getSubAreasRecursive(subAreaId));
+		List<UUID> subAreaIds = new ArrayList<>();
+		Deque<UUID> areaStack = new ArrayDeque<>();
+		Set<UUID> visited = new HashSet<>();
+		areaStack.add(superAreaId);
+
+		while (!areaStack.isEmpty()) {
+			UUID node = areaStack.pop();
+			if (visited.add(node)) {
+				List<UUID> children = areaRepository.findIdBySuperAreaId(node);
+				areaStack.addAll(children);
+				subAreaIds.addAll(children);
+			}
 		}
+
 		return subAreaIds;
 	}
 }
