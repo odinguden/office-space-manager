@@ -1,38 +1,67 @@
 package no.ntnu.idata2900.group3.chairspace.security;
 
+import no.ntnu.idata2900.group3.chairspace.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 /**
  * Security configuration class for the application.
  */
 @Configuration
+@EnableWebSecurity
 public class SecurityConfiguration {
 
+	UserService userService;
+
 	/**
-	 * Security and sutch.
+	 * Creates new instance of security configuration.
 	 *
-	 * @param http
-	 * @return
-	 * @throws Exception
+	 * @param userService user service
 	 */
+	public SecurityConfiguration(UserService userService) {
+		this.userService = userService;
+	}
+
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/login").permitAll() // Allow all to access login endpoint
-				.requestMatchers("/api-docs/**").permitAll() // TODO Remove later
-				.requestMatchers("swagger-ui/**").permitAll() // TODO Remove later
-				.requestMatchers("/v3/api-docs/**").permitAll() // TODO Remove later
+				// Allow all to access login endpoint
+				.requestMatchers("/login").permitAll()
+				// TODO Remove later
+				.requestMatchers("/api-docs/**").permitAll()
+				// TODO Remove later
+				.requestMatchers("swagger-ui/**").permitAll()
+				// TODO Remove later
+				.requestMatchers("/v3/api-docs/**").permitAll()
 				.anyRequest().authenticated()
 			)
-			.exceptionHandling(e -> e
-				.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)) // Return 401 for unauthorized requests
-			);
-			return http.build();
+			.oauth2Login(oauth2 -> oauth2
+				// .loginPage() Forces the user to user microsoft login.
+				// If the application is extended to support other login methods
+				// this should be changed.
+				.loginPage("/oauth2/authorization/azure")
+				.userInfoEndpoint(userInfo -> userInfo
+					.oidcUserService(oidcUserService()
+				)
+			));
+		return http.build();
+	}
+
+	private OAuth2UserService<OidcUserRequest, OidcUser>  oidcUserService() {
+		OidcUserService delegate = new OidcUserService();
+
+		return request -> {
+			OidcUser oidcUser = delegate.loadUser(request);
+			userService.synchUser(oidcUser);
+			return oidcUser;
+		};
 	}
 }
