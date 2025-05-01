@@ -1,43 +1,34 @@
 <script setup>
-const mockExtras = [
-	{
-		icon: "mdi-monitor",
-		title: "Monitor",
-		desc: "a desktop computer screen"
-	},
-	{
-		icon: "mdi-laptop",
-		title: "Office laptop",
-		desc: "an office provided laptop"
-	},
-	{
-		icon: "mdi-keyboard",
-		title: "Computer equipment",
-		desc: "a set of office provided computer equipment"
-	},
-	{
-		icon: "mdi-curtains",
-		title: "Window",
-		desc: "a nearby window"
-	},
-	{
-		icon: "mdi-headset",
-		title: "Headset",
-		desc: "an office provided headset"
+function getIcon(name) {
+	console.log(name)
+	switch (name) {
+		case "Screen":
+			return "mdi-monitor"
+		case "Camera":
+			return "mdi-camera"
+		case "Microphone":
+			return "mdi-microphone"
+		default:
+			return "mdi-help-box"
 	}
-]
+
+}
+
+const props = defineProps({
+	features: Array
+})
 </script>
 
 <template>
 	<div class="space-extras">
-		<v-tooltip v-for="extra in mockExtras">
+		<v-tooltip v-for="extra in props.features">
 			<template v-slot:activator="{ props }">
 				<v-icon v-bind="props">
-					{{ extra.icon }}
+					{{ getIcon(extra.id) }}
 				</v-icon>
 			</template>
 			<span>
-				{{ extra.title }}
+				{{ extra.id }}
 				<br>
 				This space comes equipped with {{ extra.desc }}
 			</span>

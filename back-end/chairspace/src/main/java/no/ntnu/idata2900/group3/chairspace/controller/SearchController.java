@@ -1,14 +1,14 @@
-package no.ntnu.idata2900.group3.chairspace.controllers;
+package no.ntnu.idata2900.group3.chairspace.controller;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import no.ntnu.idata2900.group3.chairspace.dto.PaginationDto;
-import no.ntnu.idata2900.group3.chairspace.dto.area.AreaDto;
-import no.ntnu.idata2900.group3.chairspace.exceptions.PageNotFoundException;
+import no.ntnu.idata2900.group3.chairspace.assembler.AreaAssembler;
+import no.ntnu.idata2900.group3.chairspace.dto.SimpleArea;
+import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.service.SearchService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 
 /**
@@ -26,8 +25,19 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/search")
 public class SearchController {
-	@Autowired
-	private SearchService searchService;
+	private final SearchService searchService;
+	private final AreaAssembler areaAssembler;
+
+	/**
+	 * Creates a new search controller.
+	 *
+	 * @param searchService autowired search service
+	 * @param areaAssembler autowired area assembler
+	 */
+	public SearchController(SearchService searchService, AreaAssembler areaAssembler) {
+		this.searchService = searchService;
+		this.areaAssembler = areaAssembler;
+	}
 
 	/**
 	 * Handles GET requests to search for areas based on various parameters.
@@ -47,7 +57,7 @@ public class SearchController {
 	 */
 	//TODO swagger documentation
 	@GetMapping("")
-	public ResponseEntity<PaginationDto<AreaDto>> doSearch(
+	public ResponseEntity<Page<SimpleArea>> doSearch(
 		@RequestParam() int page,
 		@RequestParam(name = "items-per-page", required = false) Integer itemsPerPage,
 		@RequestParam(required = false) Integer capacity,
@@ -58,22 +68,18 @@ public class SearchController {
 		@RequestParam(name = "end-time") LocalDateTime endDateTime,
 		@RequestParam() Duration duration
 	) {
-		PaginationDto<AreaDto> areas = null;
-		try {
-			areas = searchService.doSearch(
-					page,
-					itemsPerPage,
-					capacity,
-					superAreaId,
-					areaTypeId,
-					areaFeatureIds,
-					startDateTime,
-					endDateTime,
-					duration
-			);
-		} catch (PageNotFoundException e) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-		}
-		return new ResponseEntity<>(areas, HttpStatus.OK);
+		Page<Area> areas = searchService.doSearch(
+				page,
+				capacity,
+				superAreaId,
+				areaTypeId,
+				areaFeatureIds,
+				startDateTime,
+				endDateTime,
+				duration
+		);
+
+		Page<SimpleArea> simpleAreas = areas.map(areaAssembler::toSimpleArea);
+		return new ResponseEntity<>(simpleAreas, HttpStatus.OK);
 	}
 }

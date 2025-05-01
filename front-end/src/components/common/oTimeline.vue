@@ -1,53 +1,69 @@
 <script setup>
+import { computed } from 'vue'
 import { useDate } from 'vuetify'
 
 const vDate = useDate()
 
-const mockTimeline = [
-	{
-		type: "gap",
-		start: 0,
-		duration: 0.2
-	},
-	{
-		type: "event",
-		start: 0.2,
-		duration: 0.1
-	},
-	{
-		type: "gap",
-		start: 0.3,
-		duration: 0.05
-	},
-	{
-		type: "event",
-		start: 0.35,
-		duration: 0.35
-	},
-	{
-		type: "gap",
-		start: 0.7,
-		duration: 0.2
-	},
-	{
-		type: "event",
-		start: 0.9,
-		duration: 0.1
+const props = defineProps({
+	reservations: Array,
+	scopeStart: Date,
+	scopeEnd: Date
+})
+
+const timeline = computed(() => {
+	const timeline = []
+
+	const startScope = props.scopeStart.getTime()
+	const endScope = props.scopeEnd.getTime()
+	const totalMs = endScope - startScope
+
+	let lastEnd = new Date(startScope)
+
+	for (let reservation of props.reservations) {
+		const start = new Date(reservation.startTime)
+		const end = new Date(reservation.endTime)
+
+		if (start > lastEnd) {
+			timeline.push({
+				type: 'gap',
+				start: lastEnd,
+				end: start,
+				startPercent: (lastEnd - startScope) / totalMs,
+				durationPercent: (start - lastEnd) / totalMs
+			})
+		}
+
+		timeline.push({
+			type: 'event',
+			start,
+			end,
+			startPercent: (start - startScope) / totalMs,
+			durationPercent: (end - start) / totalMs
+		})
+
+		lastEnd = end
 	}
-]
 
-const mockReservation = {
-	start: new Date().setSeconds(0),
-	duration: 12 * 60,
-	timeline: mockTimeline
-}
+	if (lastEnd < endScope) {
+		timeline.push({
+			type: 'gap',
+			start: lastEnd,
+			end: new Date(endScope),
+			startPercent: (lastEnd - startScope) / totalMs,
+			durationPercent: (endScope - lastEnd) / totalMs
+		})
+	}
 
-function getStart(reservation) {
-	return Math.max(reservation.start, 0)
-}
+	return timeline
+})
 
-function getEnd(reservation) {
-	return Math.min(reservation.duration, 1 - reservation.start)
+function getDuration(reservation) {
+	const start = reservation.startPercent
+	const end = start + reservation.durationPercent
+
+	const duration = Math.min(end, 1) - Math.max(start, 0)
+
+	return Math.max(duration, 0);
 }
 
 function formatTime(time) {
@@ -55,22 +71,14 @@ function formatTime(time) {
 }
 
 function getTooltip(reservation) {
-	let tip = reservation.type === "gap" ? "Free from" : "Booked from";
-
-	const startMinutes = reservation.start * mockReservation.duration
-	const startTime = vDate.addMinutes(mockReservation.start, startMinutes)
-	const durationMinutes = Math.round(reservation.duration * mockReservation.duration)
-	const endTime = vDate.addMinutes(startTime, durationMinutes)
-
-	tip += ` ${formatTime(startTime)} until ${formatTime(endTime)} (${durationMinutes} minutes)`
-
+	const tip = `${formatTime(reservation.start)} - ${formatTime(reservation.end)}`
 	return tip;
 }
 </script>
 
 <template>
 	<div class="timeline-container">
-		<v-tooltip v-for="reservation in mockReservation.timeline">
+		<v-tooltip v-for="reservation in timeline">
 			<template
 				v-slot:activator="{ props }"
 			>
@@ -82,8 +90,7 @@ function getTooltip(reservation) {
 						'gap': reservation.type === 'gap'
 					}"
 					:style="{
-						'--reservation-start': getStart(reservation),
-						'--reservation-length': getEnd(reservation)
+						'--reservation-length': getDuration(reservation)
 					}"
 				/>
 			</template>

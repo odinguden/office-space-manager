@@ -2,14 +2,10 @@ package no.ntnu.idata2900.group3.chairspace.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import no.ntnu.idata2900.group3.chairspace.dto.PaginationDto;
-import no.ntnu.idata2900.group3.chairspace.dto.area.AreaDto;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
-import no.ntnu.idata2900.group3.chairspace.exceptions.PageNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 /**
@@ -17,11 +13,16 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class SearchService {
-	@Autowired
-	private AreaService areaService;
-	@Autowired
-	private ReservationService reservationService;
+	private final AreaService areaService;
 
+	/**
+	 * Creates a new search service.
+	 *
+	 * @param areaService autowired area service
+	 */
+	public SearchService(AreaService areaService) {
+		this.areaService = areaService;
+	}
 
 	/**
 	 * Searches for areas that fit the given criteria.
@@ -30,8 +31,7 @@ public class SearchService {
 	 * and can be null.
 	 * If they are null, they will be ignored in the search.
 	 *
-	 * @param page the page to get
-	 * @param itemsPerPage the number of items per page
+	 * @param page the page of the pagination to get
 	 * @param capacity the minimum capacity of the area
 	 * @param superAreaId the super area to search in
 	 * @param areaTypeId the type of area to search for
@@ -40,11 +40,9 @@ public class SearchService {
 	 * @param endDateTime the end date and time of the reservation
 	 * @param duration the duration of the reservation
 	 * @return a list of areas that fit the given criteria
-	 * @throws PageNotFoundException if the page is not found
 	 */
-	public PaginationDto<AreaDto> doSearch(
+	public Page<Area> doSearch(
 		int page,
-		Integer itemsPerPage,
 		Integer capacity,
 		UUID superAreaId,
 		String areaTypeId,
@@ -52,30 +50,23 @@ public class SearchService {
 		LocalDateTime startDateTime,
 		LocalDateTime endDateTime,
 		Duration duration
-	) throws PageNotFoundException {
+	) {
 		// Might be useful to make a method that returns Area objects instead of AreaDto objects
 		// This would let save us processing time for searching the database
-		List<AreaDto> rawAreaList = reservationService.getAreasThatContainFreeTimeSlot(
+		List<Area> rawAreaList = areaService.getAreasWithFreeGapLike(
 			startDateTime,
 			endDateTime,
 			duration
-			);
-		List<UUID> freeAreas = new ArrayList<>();
-		for (AreaDto areaDto : rawAreaList) {
-			freeAreas.add(areaDto.getId());
-		}
+		);
+		List<UUID> freeAreas = rawAreaList.stream().map(Area::getId).toList();
 
-		Iterable<Area> areas = areaService.searchWithOptionalParams(
+		return areaService.searchWithOptionalParams(
+			page,
 			capacity,
 			superAreaId,
 			areaTypeId,
 			areaFeatureIds,
 			freeAreas
 		);
-		List<AreaDto> areaDtos = new ArrayList<>();
-		for (Area area : areas) {
-			areaDtos.add(new AreaDto(area));
-		}
-		return new PaginationDto<>(areaDtos, itemsPerPage, page);
 	}
 }

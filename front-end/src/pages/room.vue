@@ -1,33 +1,50 @@
 <script setup>
-const breadcrumbItems = [
-	{
-		text: "Town hall",
-		icon: "mdi-domain"
-	},
-	{
-		text: "Floor 1",
-		icon: "mdi-stairs"
-	},
-	{
-		text: "A123",
-		icon: "mdi-desk"
-	}
-]
+import Area from '@/plugins/Area';
+import { useRoute } from 'vue-router';
+
+const route = useRoute()
+
+const area = ref(null)
+const breadcrumbs = ref([])
+
+function getArea() {
+	const id = route.params.id
+
+	Area.getArea(id)
+		.then(response => area.value = response)
+		.then(() => {
+			const newCrumbs = []
+			for (let superArea of area.value.superAreas) {
+				newCrumbs.push({
+					text: superArea.name,
+					link: `/room/${superArea.id}`
+				})
+			}
+
+			newCrumbs.push({
+				text: area.value.name,
+				link: null
+			})
+
+			breadcrumbs.value = newCrumbs
+		})
+}
 
 const showModal = ref(false)
+getArea()
 </script>
 
 <template>
-	<section class="room-page">
+	<section class="room-page" v-if="area !== null">
 		<o-breadcrumbs
-			:items="breadcrumbItems"
+			:items="breadcrumbs"
 			class="breadcrumbs"
 		/>
 		<header class="room-header">
 			<v-icon>mdi-desk</v-icon>
-			<h1>A123</h1>
-			<p>Something about this room...</p>
-			<o-space-extras />
+			<h1>{{ area.name }}</h1>
+			<p>{{ area.description }}</p>
+			<o-space-extras :features="area.areaFeatures" />
 		</header>
 		<v-btn
 			color="primary"
@@ -51,14 +68,20 @@ const showModal = ref(false)
 		</v-dialog>
 		<o-calendar />
 	</section>
+	<v-skeleton-loader
+		v-else
+		type="heading,paragraph,card"
+	/>
 </template>
 
 <style scoped lang="scss">
+
 section.room-page {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
 	margin: 8px auto;
+	width: 448px;
 }
 
 header.room-header {
@@ -75,6 +98,9 @@ header.room-header {
 
 	> :not(:first-child) {
 		grid-column: 2;
+		width: 100%;
+		text-wrap: wrap;
+		word-break: break-word;
 	}
 }
 

@@ -1,69 +1,48 @@
 package no.ntnu.idata2900.group3.chairspace.service;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import no.ntnu.idata2900.group3.chairspace.dto.area.AreaDto;
-import no.ntnu.idata2900.group3.chairspace.dto.reservation.ReservationCreationDto;
-import no.ntnu.idata2900.group3.chairspace.dto.reservation.ReservationDto;
-import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
-import no.ntnu.idata2900.group3.chairspace.entity.User;
-import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
-import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
-import no.ntnu.idata2900.group3.chairspace.exceptions.NotReservableException;
-import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 import no.ntnu.idata2900.group3.chairspace.repository.ReservationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Service class for managing and interacting with reservations.
+ * Service class for interacting with and managing {@link Reservation}s.
+ *
+ * @author Odin Lyngsgård
+ * @author Sigve Bjørkedal
  */
 @Service
-public class ReservationService {
-	/**
-	 * The amount of milliseconds in a single full day.
-	 */
-	public static final int MS_IN_DAY = 24 * 60 * 60 * 1000;
-
-	@Autowired
-	UserService userService;
-	@Autowired
-	AreaService areaService;
-	@Autowired
+public class ReservationService extends EntityService<Reservation, UUID> {
 	ReservationRepository reservationRepository;
 
 	/**
-	 * No args constructor for JPA.
+	 * Creates a new user service.
+	 *
+	 * @param repository autowired UserRepository
 	 */
-	public ReservationService() {
-		// No args constructor for JPA.
+	public ReservationService(ReservationRepository repository) {
+		super(repository);
+		this.reservationRepository = repository;
 	}
 
-	/**
-	 * Gets a reservation DTO by id.
-	 *
-	 * @param id the id of the reservation to get a DTO of
-	 * @return the reservation with the id as a DTO
-	 * @throws ElementNotFoundException if there is no item with the given ID
-	 */
-	public ReservationDto getReservationById(UUID id) throws ElementNotFoundException {
-		Optional<Reservation> reservation = reservationRepository.findById(id);
-		if (!reservation.isPresent()) {
-			throw ElementNotFoundException.RESERVATION_NOT_FOUND;
+	@Override
+	// Override to ensure reservations cannot overlap
+	protected boolean save(Reservation reservation) {
+		boolean canAdd = reservationRepository.isTimeSlotFree(
+			reservation.getArea().getId(),
+			reservation.getStart(),
+			reservation.getEnd()
+		);
+
+		if (canAdd) {
+			canAdd = super.save(reservation);
 		}
 
-		return new ReservationDto(reservation.get());
+		return canAdd;
 	}
 
 	/**
@@ -72,270 +51,74 @@ public class ReservationService {
 	 * @param userId the id of the user to get the reservations of
 	 * @return a list of reservation DTOs belonging to the given user id.
 	 */
-	public List<ReservationDto> getReservationsByUserId(UUID userId) {
-		List<Reservation> reservations = reservationRepository
-			.findAllByUserIdOrderByStartDateTimeAsc(userId);
-
-		return reservations.stream().map(ReservationDto::new).toList();
+	public List<Reservation> getReservationsForUser(UUID userId) {
+		return this.reservationRepository.findAllByUserIdOrderByStartDateTimeAsc(userId);
 	}
 
 	/**
-	 * Creates a reservation for the given area and user.
+	 * Gets all reservations belonging to a given area.
 	 *
-	 * @param areaId the id of the area to reserve
-	 * @param userId the id of the user reserving the area
-	 * @param start the start date and time of the reservation
-	 * @param end the end date and time of the reservation
-	 * @param comment a comment for the reservation
-	 * @return the created reservation
-	 * @throws InvalidArgumentCheckedException if the area or user is not found
-	 * @throws IllegalArgumentException if the start date and time is after the end date and time
-	 * @throws ReservedException if the area is already reserved for the given time period
-	 * @throws NotReservableException if the area is not reservable
+	 * @param areaId the id to get reservations from
+	 * @return all reservations belonging to a given area
 	 */
-	public void createReservation(
-		UUID areaId,
-		UUID userId,
-		LocalDateTime start,
-		LocalDateTime end,
-		String comment
-	) throws InvalidArgumentCheckedException, ReservedException, NotReservableException {
-		if (!reservationRepository.isTimeSlotFree(areaId, start, end)) {
-			throw ReservedException.reservationOverlapException();
-		}
-
-		Area area = areaService.getArea(areaId);
-		User user = userService.getEntity(userId);
-
-		reservationRepository.save(new Reservation(area, user, start, end, comment));
+	public List<Reservation> getReservationsForArea(UUID areaId) {
+		return this.reservationRepository.findAllByAreaIdOrderByStartDateTimeAsc(areaId);
 	}
 
 	/**
-	 * Automatically creates a reservation based on a DTO.
+	 * Gets all reservations belonging to a given area within the specified time period. This
+	 * includes all reservations that occur within the time frame.
 	 *
-	 * @param dto the data transfer object to create the reservation from
-	 * @return a reservation as generated by the dto
-	 * @throws InvalidArgumentCheckedException if any of the values in the DTO are invalid
-	 * @throws ReservedException if the reservation would overlap with an existing one
-	 * @throws NotReservableException if the reservation is made for an area that does not allow
-	 *     reservations to be made.
+	 * @param areaId the id to get the reservations from
+	 * @param start the start of the time search
+	 * @param end the end of the time search
+	 * @return a list of reservations for the area that occur within the given timeframe
 	 */
-	public void createReservationByCreationDto(ReservationCreationDto dto)
-		throws InvalidArgumentCheckedException, ReservedException, NotReservableException {
-		this.createReservation(
-			dto.getArea(),
-			dto.getUser(),
-			dto.getStartTime(),
-			dto.getEndTime(),
-			dto.getComment()
-		);
-	}
-
-	/**
-	 * Attempts to delete a reservation by its id.
-	 *
-	 * @param id the id of the reservation
-	 * @return true if the reservation was deleted
-	 */
-	public boolean deleteReservation(UUID id) {
-		boolean isDeletable = reservationRepository.existsById(id);
-		reservationRepository.deleteById(id);
-		return isDeletable;
-	}
-
-	/**
-	 * Gets all the reservations that exist for an area within the specified time period.
-	 *
-	 * @param areaId the id of the area to get the time from
-	 * @param from the start time to get reservations from
-	 * @param until the end time to get reservations until
-	 * @return a list containing all reservations that exist within the specified time period
-	 *     for the given room
-	 */
-	public List<ReservationDto> getReservationsForAreaInTimePeriod(
-		UUID areaId,
-		LocalDateTime from,
-		LocalDateTime until
+	public List<Reservation> getReservationsForAreaBetween(
+		UUID areaId, LocalDateTime start, LocalDateTime end
 	) {
-		List<Reservation> rawList = reservationRepository
-			.findReservationsForAreaInTimePeriod(areaId, from, until);
-
-		return rawList.stream()
-			.map(ReservationDto::new)
-			.toList();
+		return this.reservationRepository.findReservationsForAreaInTimePeriod(areaId, start, end);
 	}
 
 	/**
-	 * Returns a list of areaDTOs that contain a free timeslot between start and end that lasts for
-	 * at least duration.
+	 * Checks if the input area has any gap that is greater than the input duration.
 	 *
-	 * @param start the start of the time window to check
-	 * @param end the end of the time window to check
-	 * @param duration the minimum duration a gap must have
-	 * @return a list of areaDTOs that contain a free timeslot between start and end that lasts for
-	 *      at least the length of duration.
+	 * @param areaId the id of the area to check
+	 * @param searchStart the time to start search from
+	 * @param searchEnd the time to end the search
+	 * @param minDuration the minimum length of a gap to find
+	 * @return true if the area has a gap that is at least the size of {@code minDuration}
 	 */
-	public List<AreaDto> getAreasThatContainFreeTimeSlot(
-		LocalDateTime start,
-		LocalDateTime end,
-		Duration duration
-	) {
-		Map<UUID, AreaDto> reservableAreas = new HashMap<>();
-		// We need to get all reservable areas to know whether areas that have never been reserved
-		// are free.
-		Iterable<Area> allAreasIterable = areaService.getReservableAreas();
-		// Assume everything is free until it isn't
-		// This logic ensures that areas without any reservations are still counted as "free"
-		allAreasIterable.iterator().forEachRemaining(
-			area -> reservableAreas.put(area.getId(), new AreaDto(area))
-		);
-
-		List<Reservation> allReservations = reservationRepository
-			.findAllReservationsInTimePeriod(start, end);
-
-		Map<UUID, List<Reservation>> areaReservationsMap = allReservations.stream()
-			.collect(Collectors.groupingBy(reservation -> reservation.getArea().getId()));
-
-		for (Map.Entry<UUID, List<Reservation>> entry : areaReservationsMap.entrySet()) {
-			UUID id = entry.getKey();
-			List<Reservation> reservations = entry.getValue();
-
-			// Check if the room is at all reservable with the criteria. If not, remove it.
-			if (!isAnyGapGreaterThanDuration(reservations, start, end, duration)) {
-				reservableAreas.remove(id);
-			}
-		}
-
-		return new ArrayList<>(reservableAreas.values());
-	}
-
-	/**
-	 * Gets the percentage of a day that an area is occupied by reservations.
-	 *
-	 * @param areaId the id of the area
-	 * @param day the day to check the reservation frequency of
-	 * @return the percentage of the day an area is occupied, as a decimal
-	 * @see #getReservationFrequencyForMonth(UUID, YearMonth)
-	 */
-	public float getReservationFrequencyForDay(UUID areaId, LocalDate day) {
-		LocalDateTime startOfDay = day.atStartOfDay();
-		LocalDateTime endOfDay = day.plusDays(1).atStartOfDay();
-
-		List<Reservation> reservationsForDay = reservationRepository
-			.findReservationsForAreaInTimePeriod(areaId, startOfDay, endOfDay);
-
-		float totalMilliseconds = 0;
-
-		for (Reservation reservation : reservationsForDay) {
-			LocalDateTime clampedStartTime = clampTime(reservation.getStart(), startOfDay, null);
-			LocalDateTime clampedEndTime = clampTime(reservation.getEnd(), null, endOfDay);
-
-			totalMilliseconds += getMillisBetween(clampedStartTime, clampedEndTime);
-		}
-
-		return totalMilliseconds / MS_IN_DAY;
-	}
-
-	/**
-	 * Gets the percentage of a month that an area is occupied by reservations.
-	 *
-	 * @param areaId the id of the area
-	 * @param year the year to which the month belongs
-	 * @param month the month to check the reservation frequency of
-	 * @return the percentage of the day an area is occupied, as a decimal
-	 * @see #getReservationFrequencyForDay(UUID, LocalDate)
-	 */
-	public float getReservationFrequencyForMonth(UUID areaId, int year, int month) {
-		// Note: Month is 1-indexed (range of 1 to 12)
-		YearMonth yearMonth = YearMonth.of(year, month);
-		int lengthOfMonth = yearMonth.lengthOfMonth();
-
-		// We use a higher intermediary precision to increase accuracy
-		// as floats lose accuracy as numbers grow large.
-		double totalFrequency = 0;
-
-		for (int day = 1; day <= yearMonth.lengthOfMonth(); day++) {
-			LocalDate thisDate = LocalDate.of(year, month, day);
-
-			totalFrequency += getReservationFrequencyForDay(areaId, thisDate);
-		}
-
-		// Since max frequency where every day is fully occupied is the same as
-		// the length of the month, this gets the percentage for the full month
-		return (float) (totalFrequency / lengthOfMonth);
-	}
-
-	/**
-	 * Clamps the time to a minimum and maximum time.
-	 *
-	 * @param time the time to be clamped
-	 * @param min the lowest permissible value for the time. If missing, does not enforce a boundary
-	 * @param max the highest permissible value for the time. If missing, does not enforce a
-	 *     boundary
-	 * @return the time clamped between min and max.
-	 */
-	private LocalDateTime clampTime(LocalDateTime time, LocalDateTime min, LocalDateTime max) {
-		LocalDateTime clampedTime = time;
-
-		if (min != null && time.isBefore(min)) {
-			clampedTime = min;
-		} else if (max != null && time.isAfter(max)) {
-			clampedTime = max;
-		}
-
-		return clampedTime;
-	}
-
-	private float getMillisBetween(LocalDateTime start, LocalDateTime end) {
-		Duration duration = Duration.between(start, end);
-
-		return duration.toMillis();
-	}
-
-	private boolean isAnyGapGreaterThanDuration(
-		List<Reservation> reservations,
+	public boolean doesAreaHaveFreeGapLike(
+		UUID areaId,
 		LocalDateTime searchStart,
 		LocalDateTime searchEnd,
-		Duration minGap
+		Duration minDuration
 	) {
-		// All of these checks should in theory always mean that there is a sufficient gap
-		if (reservations == null
-			|| minGap == null
-			|| reservations.isEmpty()
-			|| minGap.toMillis() <= 0) {
-			return true;
-		}
+		Iterator<Reservation> reservations = reservationRepository
+			.findReservationsForAreaInTimePeriod(areaId, searchStart, searchEnd).iterator();
 
 		boolean hasGap = false;
-		LocalDateTime prevTime = searchStart;
-		Iterator<Reservation> reservationIterator = reservations.iterator();
+		LocalDateTime prevEnd = searchStart;
 
-		while (!hasGap && reservationIterator.hasNext()) {
-			Reservation reservation = reservationIterator.next();
+		while (reservations.hasNext() && !hasGap) {
+			Reservation reservation = reservations.next();
 
-			if (isGapGreaterThanDuration(prevTime, reservation.getStart(), minGap)) {
+			if (isGapGreaterThanDuration(prevEnd, reservation.getStart(), minDuration)) {
 				hasGap = true;
 			}
 
-			// Prevents finding durations that fall outside of the search range, while
-			// still taking the gap from the last reservation to the end of the search into account
-			prevTime = reservation.getEnd().isBefore(searchEnd) ? reservation.getEnd() : searchEnd;
+			prevEnd = reservation.getEnd().isBefore(searchEnd) ? reservation.getEnd() : searchEnd;
 		}
 
-		// Checks the edge case in which the last reservation for the room ends before the search
-		// end. Simply checks the gap between the last reservation and the search end.
-		if (!hasGap && isGapGreaterThanDuration(prevTime, searchEnd, minGap)) {
-			hasGap = true;
-		}
-
-		return hasGap;
+		return false;
 	}
 
 	private boolean isGapGreaterThanDuration(
-		LocalDateTime start,
-		LocalDateTime end,
+		LocalDateTime gapStart,
+		LocalDateTime gapEnd,
 		Duration duration
 	) {
-		return Duration.between(start, end).compareTo(duration) >= 0;
+		return Duration.between(gapStart, gapEnd).compareTo(duration) >= 0;
 	}
 }

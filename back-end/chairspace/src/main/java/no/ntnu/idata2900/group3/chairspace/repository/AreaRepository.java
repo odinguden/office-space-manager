@@ -3,8 +3,10 @@ package no.ntnu.idata2900.group3.chairspace.repository;
 import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -13,14 +15,14 @@ import org.springframework.stereotype.Repository;
  * Repository for the Area entity.
  */
 @Repository
-public interface AreaRepository extends CrudRepository<Area, UUID> {
+public interface AreaRepository extends JpaRepository<Area, UUID> {
 	/**
 	 * Finds all areas by whether they are reservable.
 	 *
 	 * @param reservable whether to get reservable or non-reservable areas
 	 * @return a list of areas by whether they are reservable
 	 */
-	Iterable<Area> findAllByReservable(boolean reservable);
+	List<Area> findAllByReservable(boolean reservable);
 
 	/**
 	 * Finds all direct sub areas of a given super area.
@@ -33,6 +35,7 @@ public interface AreaRepository extends CrudRepository<Area, UUID> {
 	/**
 	 * Searches for areas based on various optional parameters.
 	 *
+	 * @param pageable the pageable used for pagination
 	 * @param capacity the minimum capacity of the area
 	 * @param subAreaIds the list of sub area IDs to filter by
 	 * @param areaTypeId area type ID to filter by
@@ -54,7 +57,8 @@ public interface AreaRepository extends CrudRepository<Area, UUID> {
 		GROUP BY area
 		HAVING (:featureCount IS NULL OR COUNT(areaFeature) >= :featureCount)
 		""")
-	Iterable<Area> searchWithOptionalParams(
+	Page<Area> searchWithOptionalParams(
+		Pageable pageable,
 		@Param("capacity") Integer capacity,
 		@Param("subAreas") List<UUID> subAreaIds,
 		@Param("areaType") String areaTypeId,

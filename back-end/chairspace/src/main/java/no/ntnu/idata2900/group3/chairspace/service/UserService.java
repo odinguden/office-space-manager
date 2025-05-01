@@ -1,30 +1,28 @@
 package no.ntnu.idata2900.group3.chairspace.service;
 
-import java.util.List;
 import java.util.UUID;
-import no.ntnu.idata2900.group3.chairspace.entity.Area;
-import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import no.ntnu.idata2900.group3.chairspace.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 /**
- * Service for user entity.
- * Connects application logic to database
+ * Service class for interacting with and managing {@link User}s.
+ *
+ * @author Odin Lyngsgård
+ * @author Sigve Bjørkedal
  */
 @Service
-public class UserService extends AbstractEntityService<User, UUID> {
-	@Autowired
-	UserRepository userRepository;
+public class UserService extends EntityService<User, UUID> {
 
 	/**
-	 * Creates new instance of user service.
+	 * Creates a new user service.
 	 *
-	 * @param repository user
+	 * @param repository autowired UserRepository
 	 */
 	public UserService(UserRepository repository) {
 		super(repository);

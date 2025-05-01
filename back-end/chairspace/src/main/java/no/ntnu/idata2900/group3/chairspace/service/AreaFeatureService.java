@@ -5,17 +5,20 @@ import no.ntnu.idata2900.group3.chairspace.repository.AreaFeatureRepository;
 import org.springframework.stereotype.Service;
 
 /**
- * Service containing basic methods for area feature service.
+ * Service class for interacting with and managing {@link AreaFeature}s.
+ *
+ * @author Odin Lyngsgård
+ * @author Sigve Bjørkedal
  */
 @Service
-public class AreaFeatureService extends AbstractEntityService<AreaFeature, String> {
+public class AreaFeatureService extends EntityService<AreaFeature, String> {
 
 	/**
-	 * Creates new instance of AreaFeatureService.
+	 * Creates a new area feature service.
 	 *
-	 * @param controller AreaFeatureController
+	 * @param repository autowired AreaFeatureRepository
 	 */
-	public AreaFeatureService(AreaFeatureRepository controller) {
-		super(controller);
+	public AreaFeatureService(AreaFeatureRepository repository) {
+		super(repository);
 	}
 }
