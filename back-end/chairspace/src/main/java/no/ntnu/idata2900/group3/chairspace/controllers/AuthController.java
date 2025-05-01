@@ -16,11 +16,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 public class AuthController {
-	
+
 	public final LoginUrlAuthenticationEntryPoint loginEntryPoint = new LoginUrlAuthenticationEntryPoint("/oauth2/authorization/azure");
 
 	@GetMapping("/login")
-	public String login(@AuthenticationPrincipal OidcUser user) {
-		return "<H1>Hello " + user.getName() + "</H1>";
+	public String login() {
+		//TODO proper redirect
+		return "redirect:/oauth2/authorization/azure";
 	}
 }
