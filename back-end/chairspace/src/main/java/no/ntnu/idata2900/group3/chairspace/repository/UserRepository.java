@@ -45,8 +45,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 	)
 	public List<Reservation> getUserReservations(UUID id);
 
-	//TODO: remove this method 
-	public User findByEmail(String email);
-
 	public User findByExternalId(String externalId);
 }
