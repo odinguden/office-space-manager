@@ -1,13 +1,16 @@
 package no.ntnu.idata2900.group3.chairspace.service;
 
+import java.util.List;
 import java.util.UUID;
+import no.ntnu.idata2900.group3.chairspace.entity.Area;
+import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
-import no.ntnu.idata2900.group3.chairspace.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class UserService extends EntityService<User, UUID> {
+	private UserRepository userRepository;
 
 	/**
 	 * Creates a new user service.
@@ -26,6 +30,7 @@ public class UserService extends EntityService<User, UUID> {
 	 */
 	public UserService(UserRepository repository) {
 		super(repository);
+		this.userRepository = repository;
 	}
 
 	/**
@@ -56,6 +61,14 @@ public class UserService extends EntityService<User, UUID> {
 		return userRepository.getUserReservations(id);
 	}
 
+	/**
+	 * Synchronizes the OIDC user with the database.
+	 * If the user does not exist in the database, it will be created.
+	 * If the user already exists, the information will be updated.
+	 *
+	 * @param user the OIDC user to synchronize
+	 * @return the user object from the database
+	 */
 	public User synchUser(OidcUser user) {
 		String externalId = user.getSubject();
 		User existingUser = userRepository.findByExternalId(externalId);
@@ -65,22 +78,27 @@ public class UserService extends EntityService<User, UUID> {
 		User newUser = null;
 		try {
 			//TODO: error handling
-			newUser = new User("user.getGivenName()", "user.getFamilyName()", user.getEmail(), externalId);
+			newUser = new User(user.getFullName(), user.getEmail(), externalId);
 		} catch (InvalidArgumentCheckedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		if (userRepository.count() == 0) {
+			newUser.setAdmin(true);
 		}
 		userRepository.save(newUser);
 		return newUser;
 
 	}
 
-	public User getUserByEmail(String email) {
-		return userRepository.findByEmail(email);
+	public User getSessionUser() {
+		User user = null;
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication != null && authentication.getPrincipal() instanceof OidcUser) {
+			OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
+			user = userRepository.findByExternalId(oidcUser.getSubject());
+		}
+		return user;
 	}
 
-	public User getSessionUser() {
-		//TODO: implement this method to return the user that is currently logged in
-		return null;
-	}
 }
