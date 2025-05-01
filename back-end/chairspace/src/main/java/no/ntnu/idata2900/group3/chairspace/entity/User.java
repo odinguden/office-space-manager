@@ -38,6 +38,10 @@ public class User implements EntityInterface<UUID> {
 	private String lastName;
 	@Column(nullable = false)
 	private String email;
+	@Column(name = "is_admin", nullable = false)
+	private boolean isAdmin = false;
+	@Column(name = "external_id", nullable = true)
+	private String externalId = null;
 
 	/**
 	 * No args constructor for JPA.
@@ -52,11 +56,13 @@ public class User implements EntityInterface<UUID> {
 	 * @param email the email of the user
 	 * @throws InvalidArgumentCheckedException if any of the parameters are empty
 	 */
-	public User(String firstName, String lastName, String email)
+	public User(String firstName, String lastName, String email, String exsternalID)
 		throws InvalidArgumentCheckedException {
 		setFirstName(firstName);
 		setLastName(lastName);
 		setEmail(email);
+		//TODO: proper setter for externalId
+		this.externalId = exsternalID;
 
 	}
 

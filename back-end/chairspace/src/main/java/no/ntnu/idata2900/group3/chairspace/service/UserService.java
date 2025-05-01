@@ -6,8 +6,10 @@ import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
+import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
 /**
@@ -54,5 +56,33 @@ public class UserService extends AbstractEntityService<User, UUID> {
 			throw ElementNotFoundException.USER_NOT_FOUND;
 		}
 		return userRepository.getUserReservations(id);
+	}
+
+	public User synchUser(OidcUser user) {
+		String externalId = user.getSubject();
+		User existingUser = userRepository.findByExternalId(externalId);
+		if (existingUser != null) {
+			return existingUser;
+		}
+		User newUser = null;
+		try {
+			//TODO: error handling
+			newUser = new User("user.getGivenName()", "user.getFamilyName()", user.getEmail(), externalId);
+		} catch (InvalidArgumentCheckedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		userRepository.save(newUser);
+		return newUser;
+
+	}
+
+	public User getUserByEmail(String email) {
+		return userRepository.findByEmail(email);
+	}
+
+	public User getSessionUser() {
+		//TODO: implement this method to return the user that is currently logged in
+		return null;
 	}
 }
