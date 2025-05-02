@@ -1,5 +1,5 @@
 <script setup>
-import area from '@/plugins/Area';
+import area from '@/plugins/area';
 import { watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 const currentPage = ref(1)

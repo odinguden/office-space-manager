@@ -61,9 +61,9 @@ public class SearchController {
 		@RequestParam() int page,
 		@RequestParam(name = "items-per-page", required = false) Integer itemsPerPage,
 		@RequestParam(required = false) Integer capacity,
-		@RequestParam(name = "super-area-id", required = false) UUID superAreaId,
-		@RequestParam(name = "area-type-id", required = false) String areaTypeId,
-		@RequestParam(name = "feature-id", required = false) List<String> areaFeatureIds,
+		@RequestParam(name = "super-area", required = false) UUID superAreaId,
+		@RequestParam(name = "area-type", required = false) String areaTypeId,
+		@RequestParam(name = "features", required = false) List<String> areaFeatureIds,
 		@RequestParam(name = "start-time") LocalDateTime startDateTime,
 		@RequestParam(name = "end-time") LocalDateTime endDateTime,
 		@RequestParam() Duration duration

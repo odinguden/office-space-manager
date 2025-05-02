@@ -1,7 +1,6 @@
 import { BACKEND_URL } from "./config";
 
 const BASE_URL = BACKEND_URL + "/area"
-
 const ALL_AREAS_URL = BASE_URL + "/home"
 
 const DEFAULT_BODY = {

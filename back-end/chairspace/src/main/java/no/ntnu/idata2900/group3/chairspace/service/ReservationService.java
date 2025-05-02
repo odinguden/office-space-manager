@@ -105,13 +105,14 @@ public class ReservationService extends EntityService<Reservation, UUID> {
 			Reservation reservation = reservations.next();
 
 			if (isGapGreaterThanDuration(prevEnd, reservation.getStart(), minDuration)) {
+				System.out.println("Has gap at " + reservation.getId());
 				hasGap = true;
 			}
 
 			prevEnd = reservation.getEnd().isBefore(searchEnd) ? reservation.getEnd() : searchEnd;
 		}
 
-		return false;
+		return hasGap;
 	}
 
 	private boolean isGapGreaterThanDuration(
