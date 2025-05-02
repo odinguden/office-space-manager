@@ -42,6 +42,16 @@ public class SecurityConfiguration {
 		this.userService = userService;
 	}
 
+	/**
+	 * Configures the security filter chain for the application.
+	 * If devMode is enabled, all requests are allowed without authentication.
+	 * In production, authentication is required for all requests except for the
+	 * login and Microsoft login endpoints.
+	 *
+	 * @param http the HttpSecurity object to configure
+	 * @return the configured SecurityFilterChain
+	 * @throws Exception if an error occurs during configuration
+	 */
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		// If devMode is enabled, allow all requests without authentication.
@@ -62,11 +72,8 @@ public class SecurityConfiguration {
 				.requestMatchers("/login").permitAll()
 				// Allow all to access microsoft login endpoint
 				.requestMatchers("/oauth2/authorization/azure").permitAll()
-				// TODO Remove later
 				.requestMatchers("/api-docs/**").permitAll()
-				// TODO Remove later
 				.requestMatchers("swagger-ui/**").permitAll()
-				// TODO Remove later
 				.requestMatchers("/v3/api-docs/**").permitAll()
 				.anyRequest().authenticated()
 			)
