@@ -48,9 +48,9 @@ class AreaTests {
 	@BeforeAll
 	static void setup() {
 		try {
-			nonAdminUser = new User("Stig", "Arne", "Arne@email.no");
-			adminUser = new User("Jon", "Kode", "Jon@Kode.no");
-			adminUser2 = new User("Stig", "Kode", "Stig@Kode.no");
+			nonAdminUser = new User("Stig " + "Arne", "Arne@email.no", "TestUser");
+			adminUser = new User("Jon " + "Kode", "Jon@Kode.no", "TestUser");
+			adminUser2 = new User("Stig " + "Kode", "Stig@Kode.no", "TestUser");
 			areaFeature = new AreaFeature("F1", "Feature 1");
 			areaFeature1 = new AreaFeature("F2", "Confusing i know");
 			areaType = new AreaType("T1", "Type 1");

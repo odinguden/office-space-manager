@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.time.LocalDateTime;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.NotReservableException;
-import no.ntnu.idata2900.group3.chairspace.exceptions.ReservedException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -32,8 +31,8 @@ class ReservationTest {
 	@BeforeAll
 	static void initialize() {
 		try {
-			admin = new User("Admin", "User", "Admin@Email.no");
-			nonAdmin = new User("User", "User", "User@Test.tt");
+			admin = new User("Admin " + "User", "Admin@Email.no", "TestUser");
+			nonAdmin = new User("User " + "User", "User@Test.tt", "TestUser");
 			area = new Area.Builder(
 				"Area",
 				10,
