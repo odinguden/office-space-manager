@@ -1,5 +1,6 @@
 package no.ntnu.idata2900.group3.chairspace.security;
 
+import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +15,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Security configuration class for the application.
@@ -24,6 +26,9 @@ public class SecurityConfiguration {
 
 	@Value("${frontend.url}")
 	private String frontendUrl;
+
+	@Value("${DEV_MODE}")
+	private boolean devMode;
 
 	UserService userService;
 
@@ -39,6 +44,16 @@ public class SecurityConfiguration {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		// If devMode is enabled, allow all requests without authentication.
+		// Should be disabled in production.
+		if (devMode) {
+			http.csrf(AbstractHttpConfigurer::disable)
+				.cors(AbstractHttpConfigurer::disable)
+				.authorizeHttpRequests(auth -> auth
+					.requestMatchers("/**").permitAll()
+				);
+			return http.build();
+		}
 		http
 			.csrf(AbstractHttpConfigurer::disable)
 			.cors(AbstractHttpConfigurer::disable)
@@ -81,7 +96,16 @@ public class SecurityConfiguration {
 
 		return request -> {
 			OidcUser oidcUser = delegate.loadUser(request);
-			userService.synchUser(oidcUser);
+			try {
+				userService.synchUser(oidcUser);
+			} catch (InvalidArgumentCheckedException e) {
+				throw new ResponseStatusException(
+					HttpStatus.INTERNAL_SERVER_ERROR,
+					"Failed to synchronize user. OidcUser lacks data to create user entity: "
+					+ e.getMessage(),
+					e
+				);
+			}
 			return oidcUser;
 		};
 	}
