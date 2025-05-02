@@ -1,7 +1,9 @@
 package no.ntnu.idata2900.group3.chairspace.service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import no.ntnu.idata2900.group3.chairspace.dto.SimpleArea;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
@@ -68,21 +70,15 @@ public class UserService extends EntityService<User, UUID> {
 	 *
 	 * @param user the OIDC user to synchronize
 	 * @return the user object from the database
+	 * @throws InvalidArgumentCheckedException not able to create user entity from OIDC user
 	 */
-	public User synchUser(OidcUser user) {
+	public User synchUser(OidcUser user) throws InvalidArgumentCheckedException {
 		String externalId = user.getSubject();
 		User existingUser = userRepository.findByExternalId(externalId);
 		if (existingUser != null) {
 			return existingUser;
 		}
-		User newUser = null;
-		try {
-			//TODO: error handling
-			newUser = new User(user.getFullName(), user.getEmail(), externalId);
-		} catch (InvalidArgumentCheckedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		User newUser = new User(user.getFullName(), user.getEmail(), externalId);
 		if (userRepository.count() == 0) {
 			newUser.setAdmin(true);
 		}
@@ -91,6 +87,11 @@ public class UserService extends EntityService<User, UUID> {
 
 	}
 
+	/**
+	 * Gets the currently logged in user.
+	 *
+	 * @return the currently logged in user, or null if no user is logged in
+	 */
 	public User getSessionUser() {
 		User user = null;
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -101,4 +102,59 @@ public class UserService extends EntityService<User, UUID> {
 		return user;
 	}
 
+	/**
+	 * Adds an area to the user's favorites.
+	 * If the user is not logged in, an exception is thrown.
+	 *
+	 * @param area the area to add to favorites
+	 * @throws IllegalStateException if the user is not logged in
+	 */
+	public void addFavorite(Area area) {
+		User user = getSessionUser();
+		if (user == null) {
+			throw new IllegalStateException("User is not logged in");
+		}
+		if (area == null) {
+			throw new IllegalArgumentException("Area was null when value was expected");
+		}
+		user.addFavoriteArea(area);
+		userRepository.save(user);
+	}
+
+	/**
+	 * Removes an area from the user's favorites.
+	 * If the user is not logged in, an exception is thrown.
+	 *
+	 * @param area the area to remove from favorites
+	 * @throws IllegalStateException if the user is not logged in
+	 */
+	public void removeFavorite(Area area) {
+		User user = getSessionUser();
+		if (user == null) {
+			throw new IllegalStateException("User is not logged in");
+		}
+		user.removeFavoriteArea(area);
+		userRepository.save(user);
+	}
+
+	/**
+	 * Gets all the favorites of the user.
+	 *
+	 * @return a list of areas the user has marked as favorites
+	 * @throws IllegalStateException if the user is not logged in
+	 */
+	public Set<SimpleArea> getFavorites() {
+		User user = getSessionUser();
+		if (user == null) {
+			throw new IllegalStateException("User is not logged in");
+		}
+		Set<Area> areas = user.getFavoriteAreas();
+		Set<SimpleArea> simpleAreas = Set.of();
+		for (Area area : areas) {
+			simpleAreas.add(
+				SimpleArea.Builder.fromArea(area).build()
+			);
+		}
+		return simpleAreas;
+	}
 }

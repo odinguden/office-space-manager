@@ -106,6 +106,24 @@ public class User implements EntityInterface<UUID> {
 		return this.email;
 	}
 
+	/**
+	 * Returns the admin status of the user.
+	 *
+	 * @return true if the user is an admin
+	 */
+	public boolean isAdmin() {
+		return this.isAdmin;
+	}
+
+	/**
+	 * Return the users favorite areas as a set.
+	 *
+	 * @return the set of favorite areas
+	 */
+	public Set<Area> getFavoriteAreas() {
+		return favoriteAreas;
+	}
+
 	/* ---- Setters ---- */
 
 	/**
