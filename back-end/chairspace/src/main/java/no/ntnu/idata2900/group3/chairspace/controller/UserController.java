@@ -2,23 +2,20 @@ package no.ntnu.idata2900.group3.chairspace.controller;
 
 import java.util.Set;
 import java.util.UUID;
-
+import no.ntnu.idata2900.group3.chairspace.dto.SimpleArea;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
 import no.ntnu.idata2900.group3.chairspace.service.AreaService;
 import no.ntnu.idata2900.group3.chairspace.service.UserService;
-import no.ntnu.idata2900.group3.chairspace.dto.SimpleArea;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 
 
@@ -40,6 +37,7 @@ public class UserController extends AbstractController<User, UUID> {
 	 * Creates a new user controller.
 	 *
 	 * @param userService autowired user service.
+	 * @param areaService autowired area service.
 	 */
 	public UserController(UserService userService, AreaService areaService) {
 		super(userService);
@@ -76,6 +74,15 @@ public class UserController extends AbstractController<User, UUID> {
 
 	}
 
+	/**
+	 * Adds an area to the user's favorites.
+	 * This can only be performed by a logged-in user.
+	 *
+	 * @param areaId the id of the area to add to favorites
+	 * @return the response entity with status 200 OK if successful
+	 * @throws ResponseStatusException 401 if the user is not logged in
+	 * @throws ResponseStatusException 404 if the area is not found
+	 */
 	@PostMapping("/favorite/{areaId}")
 	public ResponseEntity<String> addFavorite(@PathVariable UUID areaId) {
 		Area area = areaService.get(areaId);
@@ -90,6 +97,14 @@ public class UserController extends AbstractController<User, UUID> {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	/**
+	 * Removes an area from the user's favorites.
+	 *
+	 * @param areaId the id of the area to remove from favorites
+	 * @return the response entity with status 200 OK if successful
+	 * @throws ResponseStatusException 401 if the user is not logged in
+	 * @throws ResponseStatusException 404 if the area is not found
+	 */
 	@DeleteMapping("/favorite/{areaId}")
 	public ResponseEntity<String> removeFavorite(@PathVariable UUID areaId) {
 		Area area = areaService.get(areaId);
@@ -104,8 +119,21 @@ public class UserController extends AbstractController<User, UUID> {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	/**
+	 * Gets the user's favorites.
+	 * This can only be performed by a logged-in user.
+	 *
+	 * @return the response entity with the user's favorites
+	 * @throws ResponseStatusException 401 if the user is not logged in
+	 */
 	@GetMapping("/favorite")
 	public ResponseEntity<Set<SimpleArea>> getFavorites() {
-		return new ResponseEntity<>(userService.getFavorites(), HttpStatus.OK);
+		Set<SimpleArea> favorites;
+		try {
+			favorites = userService.getFavorites();
+		} catch (IllegalStateException e) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not logged in");
+		}
+		return new ResponseEntity<>(favorites, HttpStatus.OK);
 	}
 }
