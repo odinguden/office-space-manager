@@ -1,7 +1,7 @@
 <template>
 	<v-main id="main">
 		<o-app-frame />
-		<router-view id="main-view" />
+		<router-view id="main-view" :key="$route.fullPath" />
 		<o-footer />
 	</v-main>
 </template>
