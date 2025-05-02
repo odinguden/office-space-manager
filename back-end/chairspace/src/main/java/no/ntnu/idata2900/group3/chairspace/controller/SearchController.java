@@ -79,7 +79,9 @@ public class SearchController {
 				duration
 		);
 
-		Page<SimpleArea> simpleAreas = areas.map(areaAssembler::toSimpleArea);
+		Page<SimpleArea> simpleAreas = areas.map(area ->
+			areaAssembler.toSimpleAreaWithReservations(area, startDateTime, endDateTime)
+		);
 		return new ResponseEntity<>(simpleAreas, HttpStatus.OK);
 	}
 }

@@ -2,10 +2,10 @@
 import fetcher from '@/plugins/fetcher';
 import { watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-const currentPage = ref(1)
 const router = useRouter()
 const route = useRoute()
 
+const currentPage = ref(1)
 const areas = ref([])
 const pages = ref(0)
 const loading = ref(false)
@@ -15,7 +15,7 @@ if (route.query["page"] !== undefined) {
 }
 
 function updatePagination() {
-	window.history.replaceState({}, "", `/index?page=${currentPage.value}`)
+	router.push(`/index?page=${currentPage.value}`)
 	loading.value = true;
 	fetcher.getAreaPagination(currentPage.value - 1).then(response => {
 		areas.value = response.content

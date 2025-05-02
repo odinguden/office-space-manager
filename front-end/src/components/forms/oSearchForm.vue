@@ -41,11 +41,6 @@ function fetchAreaTypes() {
 }
 fetchAreaTypes()
 
-const { handleSubmit, values, errors } = useForm({
-	validationSchema: search.getValidationSchema(),
-	initialValues: search.getInitialValues()
-})
-
 const computedDate = computed({
 	get() {
 		return new Date(search.date)

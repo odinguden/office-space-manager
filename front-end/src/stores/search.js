@@ -15,7 +15,7 @@ function formatDuration(input) {
 
 export const useSearchStore = defineStore('search', {
 	state: () => ({
-		areaType: "Desk",
+		areaType: "desk",
 		capacity: 1,
 		date: null,
 		timeStart: "00:00",
@@ -175,18 +175,14 @@ export const useSearchStore = defineStore('search', {
 					return "An error has occurred"
 				if (value == null)
 					return "Start time is required"
-				if (this.timeEnd == null)
-					return true
-				return true
+				return this.timeEnd != null && this.timeEnd != ""
 			},
 			timeEnd: (value) => {
 				if (!this.vDate)
 					return "An error has occurred"
 				if (value == null)
 					return "Start time is required"
-				if (this.timeStart == null)
-					return true
-				return true
+				return this.timeStart != null && this.timeStart != ""
 			},
 			duration: () => true,
 			location: () => true,
