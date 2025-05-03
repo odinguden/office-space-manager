@@ -35,6 +35,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class ReservationController extends PermissionManager {
 	private final ReservationService reservationService;
 	private final ReservationAssembler reservationAssembler;
+	public static final int DEFAULT_PAGE_SIZE = 12;
 
 	/**
 	 * Creates a new reservation controller.
@@ -147,4 +148,39 @@ public class ReservationController extends PermissionManager {
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
+	/**
+	 * Gets all reservations belonging to a given user.
+	 *
+	 * @param userId the id of the user to get the reservations of
+	 * @param page the page of the pagination to retrieve
+	 * @param size the size of the page to retrieve
+	 * @return reservations belonging to the user in a paginated format
+	 * @throws ResponseStatusException 400 BAD_REQUEST if the userId is null or the page is negative
+	 */
+	@GetMapping("/user/")
+	public ResponseEntity<Page<SimpleReservation>> getReservationsByUser(
+		@RequestParam UUID userId,
+		@RequestParam(required = false) Integer page,
+		@RequestParam(required = false) Integer size
+	) {
+		this.hasPermissionToGet();
+		if (page == null || page < 0) {
+			page = 0;
+		}
+		if (userId == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+		if (size == null || size < 0) {
+			size = DEFAULT_PAGE_SIZE;
+		}
+		Page<Reservation> reservations = reservationService.getReservationsByUserPaged(
+			userId,
+			page,
+			size
+		);
+		Page<SimpleReservation> simpleReservations = reservations.map(
+			reservationAssembler::toSimple
+		);
+		return new ResponseEntity<>(simpleReservations, HttpStatus.OK);
+	}
 }

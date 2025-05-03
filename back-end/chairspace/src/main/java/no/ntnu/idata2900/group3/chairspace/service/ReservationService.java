@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
 import no.ntnu.idata2900.group3.chairspace.repository.ReservationRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -120,5 +123,19 @@ public class ReservationService extends EntityService<Reservation, UUID> {
 		Duration duration
 	) {
 		return Duration.between(gapStart, gapEnd).compareTo(duration) >= 0;
+	}
+
+	/**
+	 * Gets all reservations belonging to a given user.
+	 *
+	 * @param userId the user to get the reservations of
+	 * @param page the page to get
+	 * @param size the amount of entries per page
+	 * @return a list of reservation DTOs belonging to the given user id.
+	 */
+	public Page<Reservation> getReservationsByUserPaged(UUID userId, int page, int size) {
+		Pageable paging = PageRequest.of(page, size);
+
+		return this.reservationRepository.findAllByUserPaged(userId, paging);
 	}
 }

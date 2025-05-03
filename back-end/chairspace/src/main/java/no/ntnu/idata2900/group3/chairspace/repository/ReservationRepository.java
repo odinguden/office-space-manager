@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -109,4 +111,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
 	 * @return a list of reservations belonging to the area
 	 */
 	public List<Reservation> findAllByAreaIdOrderByStartDateTimeAsc(UUID areaId);
+
+	/**
+	 * Returns a page of reservations belonging to the provided user id.
+	 *
+	 * @param userId the user who's reservations are being fetched
+	 * @param pageable the pageable object to use for pagination
+	 * @return a page of reservations belonging to the user
+	 */
+	@Query("SELECT reservation FROM Reservation reservation WHERE reservation.user = ?1")
+	public Page<Reservation> findAllByUserPaged(UUID userId, Pageable pageable);
 }
