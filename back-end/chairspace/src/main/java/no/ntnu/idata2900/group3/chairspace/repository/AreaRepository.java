@@ -66,4 +66,14 @@ public interface AreaRepository extends JpaRepository<Area, UUID> {
 		@Param("freeAreas") List<UUID> freeAreaIds,
 		@Param("featureCount") Integer featureCount
 	);
+
+	/**
+	 * Finds all areas that have this user as an admin.
+	 *
+	 * @param userId the id of user to find areas for
+	 * @param pageable the pageable used for pagination
+	 * @return a list of areas that have this user as an admin
+	 */
+	@Query("SELECT area FROM Area area WHERE :user MEMBER OF area.administrators")
+	Page<Area> findByAdmin(UUID userId, Pageable pageable);
 }
