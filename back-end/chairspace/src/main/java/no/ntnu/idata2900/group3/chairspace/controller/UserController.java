@@ -2,9 +2,12 @@ package no.ntnu.idata2900.group3.chairspace.controller;
 
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import no.ntnu.idata2900.group3.chairspace.assembler.AreaAssembler;
 import no.ntnu.idata2900.group3.chairspace.dto.SimpleArea;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
+import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.service.AreaService;
 import no.ntnu.idata2900.group3.chairspace.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -30,18 +34,24 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/user")
 public class UserController extends AbstractController<User, UUID> {
 	private UserService userService;
-	//TODO: remove this if possible
 	private AreaService areaService;
+	private AreaAssembler areaAssembler;
 
 	/**
 	 * Creates a new user controller.
 	 *
 	 * @param userService autowired user service.
 	 * @param areaService autowired area service.
+	 * @param areaAssembler autowired area assembler.
 	 */
-	public UserController(UserService userService, AreaService areaService) {
+	public UserController(
+		UserService userService,
+		AreaService areaService,
+		AreaAssembler areaAssembler
+	) {
 		super(userService);
 		this.userService = userService;
+		this.areaService = areaService;
 	}
 
 	/**
@@ -53,14 +63,11 @@ public class UserController extends AbstractController<User, UUID> {
 	 * @return the response entity with status OK if successful
 	 * @throws ResponseStatusException if the user is not found or the current user is not an admin
 	 */
-	@PostMapping("{userId}/admin/{adminState}")
+	@PostMapping("{userId}/admin/")
 	public ResponseEntity<String> setAdmin(
-		@PathVariable UUID userId, @PathVariable boolean adminState
+		@PathVariable UUID userId, @RequestParam boolean adminState
 	) {
-		User user = userService.get(userId);
-		if (user == null) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User was not found");
-		}
+		hasPermissionToPut();
 		User currentUser = userService.getSessionUser();
 		if (currentUser == null) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not logged in");
@@ -70,7 +77,12 @@ public class UserController extends AbstractController<User, UUID> {
 				HttpStatus.FORBIDDEN, "User is not authorized to perform this action"
 			);
 		}
-		return new ResponseEntity<>(HttpStatus.OK);
+		try {
+			userService.setAdmin(userId, adminState);
+		} catch (ElementNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+		}
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
 	}
 
@@ -85,6 +97,7 @@ public class UserController extends AbstractController<User, UUID> {
 	 */
 	@PostMapping("/favorite/{areaId}")
 	public ResponseEntity<String> addFavorite(@PathVariable UUID areaId) {
+		super.hasPermissionToPost();
 		Area area = areaService.get(areaId);
 		if (area == null) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Area was not found");
@@ -107,6 +120,7 @@ public class UserController extends AbstractController<User, UUID> {
 	 */
 	@DeleteMapping("/favorite/{areaId}")
 	public ResponseEntity<String> removeFavorite(@PathVariable UUID areaId) {
+		super.hasPermissionToDelete();
 		Area area = areaService.get(areaId);
 		if (area == null) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Area was not found");
@@ -128,12 +142,16 @@ public class UserController extends AbstractController<User, UUID> {
 	 */
 	@GetMapping("/favorite")
 	public ResponseEntity<Set<SimpleArea>> getFavorites() {
-		Set<SimpleArea> favorites;
+		super.hasPermissionToGet();
+		Set<Area> areas;
 		try {
-			favorites = userService.getFavorites();
+			areas = userService.getFavorites();
 		} catch (IllegalStateException e) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not logged in");
 		}
+		Set<SimpleArea> favorites = areas.stream()
+			.map(areaAssembler::toSimpleArea)
+			.collect(Collectors.toSet());
 		return new ResponseEntity<>(favorites, HttpStatus.OK);
 	}
 }

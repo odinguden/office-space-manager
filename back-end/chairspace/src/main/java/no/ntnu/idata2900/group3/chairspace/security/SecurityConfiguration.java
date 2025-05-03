@@ -64,14 +64,14 @@ public class SecurityConfiguration {
 				);
 			return http.build();
 		}
-		http
-			.csrf(AbstractHttpConfigurer::disable)
+		http.csrf(AbstractHttpConfigurer::disable)
 			.cors(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(auth -> auth
 				// Allow all to access login endpoint
 				.requestMatchers("/login").permitAll()
 				// Allow all to access microsoft login endpoint
 				.requestMatchers("/oauth2/authorization/azure").permitAll()
+				// Allow access to documentation endpoints
 				.requestMatchers("/api-docs/**").permitAll()
 				.requestMatchers("swagger-ui/**").permitAll()
 				.requestMatchers("/v3/api-docs/**").permitAll()
@@ -104,7 +104,7 @@ public class SecurityConfiguration {
 		return request -> {
 			OidcUser oidcUser = delegate.loadUser(request);
 			try {
-				userService.synchUser(oidcUser);
+				userService.syncUser(oidcUser);
 			} catch (InvalidArgumentCheckedException e) {
 				throw new ResponseStatusException(
 					HttpStatus.INTERNAL_SERVER_ERROR,

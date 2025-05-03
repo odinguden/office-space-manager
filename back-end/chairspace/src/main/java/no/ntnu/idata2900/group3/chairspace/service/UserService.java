@@ -1,11 +1,8 @@
 package no.ntnu.idata2900.group3.chairspace.service;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import no.ntnu.idata2900.group3.chairspace.dto.SimpleArea;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
-import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
@@ -36,31 +33,22 @@ public class UserService extends EntityService<User, UUID> {
 	}
 
 	/**
-	 * Returns all areas the user administrates in list.
+	 * Sets the user as admin or not admin.
 	 *
-	 * @param id the id of the user
-	 * @return list containing the areas the user administrates
-	 * @throws ElementNotFoundException if a user with matching id cannot be found
+	 * @param userId the user to set as admin or not admin
+	 * @param isAdmin true if the user should be set as admin
+	 * @throws ElementNotFoundException if the user does not exist in the database
 	 */
-	public List<Area> getUserAreas(UUID id) throws ElementNotFoundException {
-		if (!userRepository.existsById(id)) {
+	public void setAdmin(UUID userId, boolean isAdmin) throws ElementNotFoundException {
+		if (userId == null) {
+			throw new IllegalArgumentException("User was null when value was expected");
+		}
+		User user = get(userId);
+		if (user == null) {
 			throw ElementNotFoundException.USER_NOT_FOUND;
 		}
-		return userRepository.getUserAreas(id);
-	}
-
-	/**
-	 * Gets all reservations created by the user.
-	 *
-	 * @param id the id of the user
-	 * @return the reservations the user have made in a list
-	 * @throws ElementNotFoundException if a user with matching id cannot be found
-	 */
-	public List<Reservation> getUserReservations(UUID id) throws ElementNotFoundException {
-		if (!userRepository.existsById(id)) {
-			throw ElementNotFoundException.USER_NOT_FOUND;
-		}
-		return userRepository.getUserReservations(id);
+		user.setAdmin(isAdmin);
+		userRepository.save(user);
 	}
 
 	/**
@@ -72,7 +60,7 @@ public class UserService extends EntityService<User, UUID> {
 	 * @return the user object from the database
 	 * @throws InvalidArgumentCheckedException not able to create user entity from OIDC user
 	 */
-	public User synchUser(OidcUser user) throws InvalidArgumentCheckedException {
+	public User syncUser(OidcUser user) throws InvalidArgumentCheckedException {
 		String externalId = user.getSubject();
 		User existingUser = userRepository.findByExternalId(externalId);
 		if (existingUser != null) {
@@ -143,18 +131,11 @@ public class UserService extends EntityService<User, UUID> {
 	 * @return a list of areas the user has marked as favorites
 	 * @throws IllegalStateException if the user is not logged in
 	 */
-	public Set<SimpleArea> getFavorites() {
+	public Set<Area> getFavorites() {
 		User user = getSessionUser();
 		if (user == null) {
 			throw new IllegalStateException("User is not logged in");
 		}
-		Set<Area> areas = user.getFavoriteAreas();
-		Set<SimpleArea> simpleAreas = Set.of();
-		for (Area area : areas) {
-			simpleAreas.add(
-				SimpleArea.Builder.fromArea(area).build()
-			);
-		}
-		return simpleAreas;
+		return user.getFavoriteAreas();
 	}
 }
