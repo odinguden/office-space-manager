@@ -1,5 +1,8 @@
 package no.ntnu.idata2900.group3.chairspace.controller;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.assembler.ReservationAssembler;
 import no.ntnu.idata2900.group3.chairspace.dto.SimpleReservation;
@@ -93,6 +96,86 @@ public class ReservationController extends PermissionManager {
 	}
 
 	/**
+	 * Gets reservations belonging to an area between two timestamps.
+	 *
+	 * @param id the id of the area to retrieve reservations for
+	 * @param start the starting timestamp
+	 * @param end the ending timestamp
+	 * @return a list of reservations for the area within a timespan
+	 */
+	@GetMapping("/area/{id}")
+	public ResponseEntity<List<SimpleReservation>> getForAreaInTime(
+		@PathVariable UUID id,
+		@RequestParam LocalDateTime start,
+		@RequestParam LocalDateTime end
+	) {
+		this.hasPermissionToGet();
+		List<Reservation> reservations =
+			this.reservationService.getReservationsForAreaBetween(id, start, end);
+
+		return new ResponseEntity<>(
+			reservations.stream().map(reservationAssembler::toSimple).toList(),
+			HttpStatus.OK
+		);
+	}
+
+	/**
+	 * Gets the reservation frequency for either a day or a month. If day is null and month/year
+	 * are defined, gets the aggregated frequency of the month. If month/year is null and day is
+	 * defined, gets the frequency of the day. Otherwise returns 404.
+	 *
+	 * @param id the id of the area to retrieve the frequency for
+	 * @param date the day to get the frequency of
+	 * @param year the year to get the frequency of
+	 * @param month the month to get the frequency of
+	 * @return the reservation frequency of the room, as an integer percentage.
+	 */
+	@GetMapping("/area/{id}/frequency")
+	public ResponseEntity<Integer> getReservationFrequency(
+		@PathVariable UUID id,
+		@RequestParam(required = false) LocalDate date,
+		@RequestParam(required = false) Integer year,
+		@RequestParam(required = false) Integer month
+	) {
+		float frequency;
+		if (date == null && month != null && year != null) {
+			frequency = reservationService.getReservationFrequencyForMonth(id, year, month);
+		} else if (date != null && month == null && year == null) {
+			frequency = reservationService.getReservationFrequencyForDay(id, date);
+		} else {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>((int) (frequency * 100), HttpStatus.OK);
+	}
+
+	/**
+	 * Gets the reservation frequency for a month as a list of frequencies for each day.
+	 *
+	 * @param id the id of the area to get the frequencies of
+	 * @param year the year to get the frequency of
+	 * @param month the month to get the frequency of
+	 * @return a list of frequencies for the provided month for the area
+	 */
+	@GetMapping("/area/{id}/frequency/list")
+	public ResponseEntity<List<Integer>> getReservationFrequencyForFullMonth(
+		@PathVariable UUID id,
+		@RequestParam int year,
+		@RequestParam int month
+	) {
+		List<Float> frequencies =
+			reservationService.getReservationFrequencyForDaysInMonth(id, year, month);
+
+		List<Integer> frequencyInts = frequencies.stream()
+			.map(frequency -> (int) (frequency * 100))
+			.toList();
+
+		return new ResponseEntity<>(
+			frequencyInts,
+			HttpStatus.OK
+		);
+	}
+
+	/**
 	 * Creates a new reservation based on a simple reservation.
 	 *
 	 * @param simpleReservation the simple reservation to create from
@@ -146,5 +229,4 @@ public class ReservationController extends PermissionManager {
 		reservationService.delete(id);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
-
 }

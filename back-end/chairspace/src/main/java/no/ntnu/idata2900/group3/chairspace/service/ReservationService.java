@@ -1,7 +1,10 @@
 package no.ntnu.idata2900.group3.chairspace.service;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -17,7 +20,9 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ReservationService extends EntityService<Reservation, UUID> {
-	ReservationRepository reservationRepository;
+	/** * The amount of milliseconds in a single full day. */
+	public static final int MS_IN_DAY = 24 * 60 * 60 * 1000;
+	private final ReservationRepository reservationRepository;
 
 	/**
 	 * Creates a new user service.
@@ -120,5 +125,111 @@ public class ReservationService extends EntityService<Reservation, UUID> {
 		Duration duration
 	) {
 		return Duration.between(gapStart, gapEnd).compareTo(duration) >= 0;
+	}
+
+	/**
+	 * Gets the percentage of a day that an area is occupied by reservations.
+	 *
+	 * @param areaId the id of the area
+	 * @param day the day to check the reservation frequency of
+	 * @return the percentage of the day an area is occupied, as a decimal
+	 * @see #getReservationFrequencyForMonth(UUID, YearMonth)
+	 */
+	public float getReservationFrequencyForDay(UUID areaId, LocalDate day) {
+		LocalDateTime startOfDay = day.atStartOfDay();
+		LocalDateTime endOfDay = day.plusDays(1).atStartOfDay();
+
+		List<Reservation> reservationsForDay = reservationRepository
+			.findReservationsForAreaInTimePeriod(areaId, startOfDay, endOfDay);
+
+		float totalMilliseconds = 0;
+
+		for (Reservation reservation : reservationsForDay) {
+			LocalDateTime clampedStartTime = clampTime(reservation.getStart(), startOfDay, null);
+			LocalDateTime clampedEndTime = clampTime(reservation.getEnd(), null, endOfDay);
+
+			totalMilliseconds += getMillisBetween(clampedStartTime, clampedEndTime);
+		}
+
+		return totalMilliseconds / MS_IN_DAY;
+	}
+
+	/**
+	 * Gets the frequency of reservations for every day in a month.
+	 *
+	 * @param areaId the id of the area
+	 * @param year the year to which the month belongs
+	 * @param month the month to check the reservation frequency of
+	 * @return list of days with the percentage of the day an area is occupied, as a decimal
+	 * @see #getReservationFrequencyForDay(UUID, LocalDate)
+	 */
+	public List<Float> getReservationFrequencyForDaysInMonth(UUID areaId, int year, int month) {
+		YearMonth yearMonth = YearMonth.of(year, month);
+
+		List<Float> frequencies = new ArrayList<>();
+
+		for (int day = 1; day <= yearMonth.lengthOfMonth(); day++) {
+			LocalDate thisDate = LocalDate.of(year, month, day);
+
+			frequencies.add(getReservationFrequencyForDay(areaId, thisDate));
+		}
+
+		return frequencies;
+	}
+
+	/**
+	 * Gets the percentage of a month that an area is occupied by reservations.
+	 *
+	 * @param areaId the id of the area
+	 * @param year the year to which the month belongs
+	 * @param month the month to check the reservation frequency of
+	 * @return the percentage of the day an area is occupied, as a decimal
+	 * @see #getReservationFrequencyForDay(UUID, LocalDate)
+	 */
+	public float getReservationFrequencyForMonth(UUID areaId, int year, int month) {
+		// Note: Month is 1-indexed (range of 1 to 12)
+		YearMonth yearMonth = YearMonth.of(year, month);
+		int lengthOfMonth = yearMonth.lengthOfMonth();
+
+		// We use a higher intermediary precision to increase accuracy
+		// as floats lose accuracy as numbers grow large.
+		double totalFrequency = 0;
+
+		for (int day = 1; day <= lengthOfMonth; day++) {
+			LocalDate thisDate = LocalDate.of(year, month, day);
+
+			totalFrequency += getReservationFrequencyForDay(areaId, thisDate);
+		}
+
+		// Since max frequency where every day is fully occupied is the same as
+		// the length of the month, this gets the percentage for the full month
+		return (float) (totalFrequency / lengthOfMonth);
+	}
+
+	/**
+	 * Clamps the time to a minimum and maximum time.
+	 *
+	 * @param time the time to be clamped
+	 * @param min the lowest permissible value for the time. If missing, does not enforce a boundary
+	 * @param max the highest permissible value for the time. If missing, does not enforce a
+	 *     boundary
+	 * @return the time clamped between min and max.
+	 */
+	private LocalDateTime clampTime(LocalDateTime time, LocalDateTime min, LocalDateTime max) {
+		LocalDateTime clampedTime = time;
+
+		if (min != null && time.isBefore(min)) {
+			clampedTime = min;
+		} else if (max != null && time.isAfter(max)) {
+			clampedTime = max;
+		}
+
+		return clampedTime;
+	}
+
+	private float getMillisBetween(LocalDateTime start, LocalDateTime end) {
+		Duration duration = Duration.between(start, end);
+
+		return duration.toMillis();
 	}
 }
