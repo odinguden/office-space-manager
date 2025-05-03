@@ -1,9 +1,6 @@
 package no.ntnu.idata2900.group3.chairspace.repository;
 
-import java.util.List;
 import java.util.UUID;
-import no.ntnu.idata2900.group3.chairspace.entity.Area;
-import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,11 +12,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
 
+
 	/**
-	 * Returns the areas that a single user administers.
+	 * Finds the user based on the given external ID.
 	 *
-	 * @param id the id of the user
-	 * @return a list containing the areas the user administers
+	 * @param externalId the external ID of the user
+	 * @return the user with the given external ID, or null if not found
 	 */
 	@Query(value = """
 		SELECT area
@@ -28,22 +26,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 		WHERE areaAdmin.id = ?1
 		"""
 	)
-	public List<Area> getUserAreas(UUID id);
-
-	/**
-	 * Returns the reservations made by user.
-	 *
-	 * @param id the id of the user
-	 * @return a list containing the reservation made by this user
-	 */
-	@Query(value = """
-		SELECT reservation
-		FROM Reservation reservation
-		INNER JOIN reservation.user user
-		WHERE user.id = ?1
-		"""
-	)
-	public List<Reservation> getUserReservations(UUID id);
-
 	public User findByExternalId(String externalId);
 }
