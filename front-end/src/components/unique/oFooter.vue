@@ -29,7 +29,7 @@ const { mobile } = useDisplay()
 <style scoped lang="scss">
 footer {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: 1fr;
 	gap: 24px;
 	padding: 24px;
 	width: 100%;
@@ -53,21 +53,20 @@ footer {
 	}
 
 	.ownership {
-		grid-column: 2;
-		align-self: end;
 		display: flex;
 		flex-direction: column;
+		align-items: center;
 		gap: 8px;
 
 		> p {
-			text-align: end;
+			text-align: center;
 			color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
 		}
 
 		.ownership-images {
-			align-self: end;
 			display: grid;
 			grid-template-columns: 1fr 1fr;
+			justify-items: center;
 			gap: 12px;
 			align-items: center;
 
