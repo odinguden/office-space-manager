@@ -10,6 +10,7 @@ import 'vuetify/styles'
 
 // Composables
 import { createVuetify } from 'vuetify'
+import { VTimePicker } from 'vuetify/labs/components'
 
 const appTheme = {
 	dark: false,
@@ -33,5 +34,8 @@ export default createVuetify({
 	},
 	display: {
 		mobileBreakpoint: "md"
+	},
+	components: {
+		VTimePicker
 	}
 })

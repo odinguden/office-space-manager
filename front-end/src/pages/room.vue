@@ -1,5 +1,5 @@
 <script setup>
-import Area from '@/plugins/Area';
+import fetcher from '@/plugins/fetcher';
 import { useRoute } from 'vue-router';
 
 const route = useRoute()
@@ -10,7 +10,7 @@ const breadcrumbs = ref([])
 function getArea() {
 	const id = route.params.id
 
-	Area.getArea(id)
+	fetcher.getArea(id)
 		.then(response => area.value = response)
 		.then(() => {
 			const newCrumbs = []

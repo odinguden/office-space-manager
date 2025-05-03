@@ -1,9 +1,8 @@
 <script setup>
 import fetcher from '@/plugins/fetcher';
-import { watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-const router = useRouter()
 const route = useRoute()
+const router = useRouter()
 
 const currentPage = ref(1)
 const areas = ref([])
@@ -15,19 +14,19 @@ if (route.query["page"] !== undefined) {
 }
 
 function updatePagination() {
-	router.push(`/index?page=${currentPage.value}`)
+	route.query["page"] = currentPage.value
 	loading.value = true;
-	fetcher.getAreaPagination(currentPage.value - 1).then(response => {
-		areas.value = response.content
-		pages.value = response.totalPages
+	fetcher.getSearchResultsWithParamList(route.query, currentPage.value - 1)
+		.then(response => {
+			areas.value = response.content
+			pages.value = response.totalPages
 
-		loading.value = false
-	})
+			loading.value = false
+		})
 }
 updatePagination()
 
 watch(currentPage, updatePagination)
-
 </script>
 
 <template>

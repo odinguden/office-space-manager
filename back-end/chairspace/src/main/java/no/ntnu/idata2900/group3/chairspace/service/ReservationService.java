@@ -111,7 +111,7 @@ public class ReservationService extends EntityService<Reservation, UUID> {
 			prevEnd = reservation.getEnd().isBefore(searchEnd) ? reservation.getEnd() : searchEnd;
 		}
 
-		return false;
+		return hasGap;
 	}
 
 	private boolean isGapGreaterThanDuration(
