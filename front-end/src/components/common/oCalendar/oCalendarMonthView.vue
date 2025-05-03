@@ -1,15 +1,23 @@
 <script setup>
+import fetcher from '@/plugins/fetcher';
 import { useODate } from '@/plugins/oDate';
 import { watch } from 'vue';
 const props = defineProps({
 	year: Number,
 	month: Number,
+	area: Object,
 	clickableDays: Boolean
 })
 
 const oDate = useODate()
 
 const selectedWeek = ref(undefined)
+const frequencies = ref([])
+
+function getFrequencies() {
+	fetcher.getReservationFrequencyForMonth(props.area.id, props.year, props.month + 1)
+		.then(response => frequencies.value = response)
+}
 
 const weeks = computed(() => {
 	return oDate.getWeeksOfMonth(props.year, props.month)
@@ -24,6 +32,7 @@ function onWeekClicked(week) {
 }
 
 watch(props, () => selectedWeek.value = undefined)
+getFrequencies()
 </script>
 
 <template>
@@ -33,6 +42,7 @@ watch(props, () => selectedWeek.value = undefined)
 			:key="week"
 			:week="week"
 			:month="month"
+			:frequencies="frequencies"
 			@week-clicked="onWeekClicked(week)"
 		/>
 	</v-sheet>
@@ -40,6 +50,7 @@ watch(props, () => selectedWeek.value = undefined)
 		<o-clickable-week
 			:week="selectedWeek"
 			:month="undefined"
+			:frequencies="frequencies"
 			clickable-days
 			@day-clicked=""
 		>

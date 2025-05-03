@@ -62,11 +62,15 @@ getArea()
 					Booking
 				</v-card-title>
 				<v-card-text>
-					<o-booking @cancel="showModal = false"/>
+					<o-booking
+						:area="area"
+						:date="new Date()"
+						@cancel="showModal = false"
+					/>
 				</v-card-text>
 			</v-card>
 		</v-dialog>
-		<o-calendar />
+		<o-calendar :area="area" />
 	</section>
 	<v-skeleton-loader
 		v-else

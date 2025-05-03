@@ -2,7 +2,8 @@
 const props = defineProps({
 	clickableDays: Boolean,
 	month: Number,
-	week: Object
+	week: Object,
+	frequencies: Array
 })
 
 const emit = defineEmits(["week-clicked", "day-clicked"])
@@ -46,21 +47,28 @@ function dayClicked(day) {
 			</v-sheet>
 		</slot>
 		<v-sheet
-			v-for="day in week.days"
+			v-for="(day, idx) in week.days"
 			:class="{
 				'out-of-month': (month !== undefined && day.getMonth() != props.month),
 				'hoverable': props.clickableDays
 			}"
+			:style="{
+				'--frequency': (month === undefined || day.getMonth() == props.month)
+					? frequencies[day.getDate() - 1] / 100 : 0
+			}"
 			v-ripple="props.clickableDays"
 			@click="dayClicked"
 		>
-			{{ day.getDate() }}
+			<div>
+				{{ day.getDate() }}
+			</div>
 		</v-sheet>
 	</div>
 </template>
 
 <style scoped lang="scss">
 .week {
+	--frequency: 0;
 	display: grid;
 	grid-auto-flow: column;
 	grid-auto-columns: 1fr;
@@ -72,11 +80,21 @@ function dayClicked(day) {
 	}
 
 	> * {
+		--frequency: 0;
+		background-color: rgba(var(--v-theme-error), var(--frequency));
 		padding: 4px;
 		aspect-ratio: 1;
-		background: transparent;
 		text-align: center;
 		vertical-align: middle;
+
+		> div {
+			background-color: rgba(var(--v-theme-surface), 0.8);
+			border-radius: 100vmax;
+			height: 1.5rem;
+			aspect-ratio: 1;
+			vertical-align: middle;
+			text-align: center;
+		}
 	}
 
 	> .out-of-month {
