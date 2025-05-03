@@ -2,6 +2,17 @@
 const props = defineProps({
 	area: Object
 })
+
+const breadcrumbs = computed(() => {
+	const newCrumbs = []
+	for (let superArea of props.area.superAreas) {
+		newCrumbs.push({
+			text: superArea.name,
+			link: `/room/${superArea.id}`
+		})
+	}
+	return newCrumbs
+})
 </script>
 
 <template>
@@ -10,6 +21,11 @@ const props = defineProps({
 		elevation="0"
 		tile
 	>
+		<o-breadcrumbs
+			v-if="area.superAreas.length > 0"
+			class="card-crumbs"
+			:items="breadcrumbs"
+		/>
 		<v-icon>mdi-desk</v-icon>
 		<div class="card-header">
 			<h1><router-link :to="`/room/${area.id}`">{{ area.name }}</router-link></h1>
@@ -44,6 +60,13 @@ const props = defineProps({
 	grid-template-rows: auto 1fr;
 	gap: 8px 16px;
 	align-items: center;
+
+	.card-crumbs {
+		grid-column: 1 / span 2;
+		font-size: 0.75rem;
+		opacity: 0.7;
+		margin: -8px,
+	}
 
 	.card-header {
 		display: grid;
