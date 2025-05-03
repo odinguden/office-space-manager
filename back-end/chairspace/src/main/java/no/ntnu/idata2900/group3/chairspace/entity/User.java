@@ -46,13 +46,10 @@ public class User implements EntityInterface<UUID> {
 	@ManyToMany
 	@JoinTable(
 		name = "user_favorites",
-		joinColumns = {
-			@JoinColumn(name = "area_id")
-		},
-		inverseJoinColumns = {
-			@JoinColumn(name = "user_id")
-		}
-	)	Set<Area> favoriteAreas;
+		joinColumns = @JoinColumn(name = "area_id"),
+		inverseJoinColumns = @JoinColumn(name = "user_id")
+	)
+	Set<Area> favoriteAreas;
 
 	/**
 	 * No args constructor for JPA.
