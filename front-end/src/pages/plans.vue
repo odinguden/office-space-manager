@@ -39,7 +39,7 @@ automatically getting a room, avoid rules that aren't strictly necessary.
 				Make a new plan
 			</v-btn>
 		</header>
-		<o-contained-grid min-width="400px">
+		<o-contained-grid>
 			<o-space-card v-for="_ in Array(4)">
 				<template #timeline>
 					<o-calendar />

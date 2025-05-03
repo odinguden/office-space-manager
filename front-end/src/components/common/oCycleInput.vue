@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 
 const emit = defineEmits([
 	"on-increase",
@@ -41,6 +41,10 @@ const computedValue = computed({
 		internalValue.value = newValue
 		model.value = newValue
 	}
+})
+
+watch(model, (newValue) => {
+	internalValue.value = newValue
 })
 
 // Checks whether the current value exceeds any boundaries
