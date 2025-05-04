@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -58,14 +59,14 @@ public class SecurityConfiguration {
 		// Should be disabled in production.
 		if (devMode) {
 			http.csrf(AbstractHttpConfigurer::disable)
-				.cors(AbstractHttpConfigurer::disable)
+				.cors(Customizer.withDefaults())
 				.authorizeHttpRequests(auth -> auth
 					.requestMatchers("/**").permitAll()
 				);
 			return http.build();
 		}
 		http.csrf(AbstractHttpConfigurer::disable)
-			.cors(AbstractHttpConfigurer::disable)
+			.cors(Customizer.withDefaults())
 			.authorizeHttpRequests(auth -> auth
 				// Allow all to access login endpoint
 				.requestMatchers("/login").permitAll()
