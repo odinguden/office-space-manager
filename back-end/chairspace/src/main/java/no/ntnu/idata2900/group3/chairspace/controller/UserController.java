@@ -33,10 +33,9 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/user")
 public class UserController extends AbstractController<User, UUID> {
-	private UserService userService;
-	private AreaService areaService;
-	private AreaAssembler areaAssembler;
-
+	private final UserService userService;
+	private final AreaService areaService;
+	private final AreaAssembler areaAssembler;
 	/**
 	 * Creates a new user controller.
 	 *
@@ -52,6 +51,7 @@ public class UserController extends AbstractController<User, UUID> {
 		super(userService);
 		this.userService = userService;
 		this.areaService = areaService;
+		this.areaAssembler = areaAssembler;
 	}
 
 	/**

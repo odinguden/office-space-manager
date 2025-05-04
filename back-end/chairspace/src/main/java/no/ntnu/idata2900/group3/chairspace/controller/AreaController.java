@@ -172,9 +172,9 @@ public class AreaController extends PermissionManager {
 	 * @param size number of entries per page
 	 * @return a page of areas that have this user as an admin
 	 */
-	@GetMapping("/user/{")
+	@GetMapping("/user/{userId}")
 	public ResponseEntity<Page<SimpleArea>> findAreasByAdmin(
-		@RequestParam UUID userId,
+		@PathVariable UUID userId,
 		@RequestParam(required = false) Integer page,
 		@RequestParam(required = false) Integer size
 	) {

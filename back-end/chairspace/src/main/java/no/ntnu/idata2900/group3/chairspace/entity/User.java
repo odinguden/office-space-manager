@@ -10,7 +10,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -51,7 +50,7 @@ public class User implements EntityInterface<UUID> {
 		joinColumns = @JoinColumn(name = "area_id"),
 		inverseJoinColumns = @JoinColumn(name = "user_id")
 	)
-	Set<Area> favoriteAreas;
+	Set<Area> favoriteAreas = new HashSet<>();
 
 	/**
 	 * No args constructor for JPA.
@@ -70,7 +69,6 @@ public class User implements EntityInterface<UUID> {
 		throws InvalidArgumentCheckedException {
 		setName(name);
 		setEmail(email);
-		favoriteAreas = new HashSet<>();
 		//TODO: proper setter for externalId
 		this.externalId = externalId;
 
