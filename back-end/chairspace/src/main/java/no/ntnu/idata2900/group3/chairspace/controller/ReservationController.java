@@ -156,16 +156,13 @@ public class ReservationController extends PermissionManager {
 	 * @return reservations belonging to the user in a paginated format
 	 * @throws ResponseStatusException 400 BAD_REQUEST if the userId is null or the page is negative
 	 */
-	@GetMapping("/user/")
+	@GetMapping("/user/{userId}")
 	public ResponseEntity<Page<SimpleReservation>> getReservationsByUser(
-		@RequestParam UUID userId,
+		@PathVariable UUID userId,
 		@RequestParam(required = false) Integer page,
 		@RequestParam(required = false) Integer size
 	) {
 		this.hasPermissionToGet();
-		if (userId == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-		}
 		Page<Reservation> reservations = reservationService.getReservationsByUserPaged(
 			userId,
 			page,
