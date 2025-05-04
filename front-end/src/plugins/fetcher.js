@@ -12,7 +12,8 @@ const RESERVATION_AREA_URL = RESERVATION_URL + "/area"
 const SEARCH_URL = BACKEND_URL + "/search"
 
 const DEFAULT_BODY = {
-	method: "GET"
+	method: "GET",
+	credentials: "include"
 }
 
 function paramListToUrlAppendage(paramList) {
@@ -30,28 +31,28 @@ function formatDate(input) {
 
 export default {
 	async getAreaPagination(page) {
-		return fetch(ALL_AREAS_URL + `?page=${page}`)
+		return fetch(ALL_AREAS_URL + `?page=${page}`, DEFAULT_BODY)
 			.then(response => response.json())
 	},
 
 	async getArea(id) {
-		return fetch(AREA_URL + `/${id}`)
+		return fetch(AREA_URL + `/${id}`, DEFAULT_BODY)
 			.then(response => response.json())
 	},
 
 	async getAreaTypes() {
-		return fetch(AREA_TYPE_URL)
+		return fetch(AREA_TYPE_URL, DEFAULT_BODY)
 			.then(response => response.json())
 	},
 
 	async getAreaFeatures() {
-		return fetch(AREA_FEATURE_URL)
+		return fetch(AREA_FEATURE_URL, DEFAULT_BODY)
 			.then(response => response.json())
 	},
 
 	async getSearchResultsWithParamList(params, page) {
 		params["page"] = page || 0
-		return fetch(SEARCH_URL + paramListToUrlAppendage(params))
+		return fetch(SEARCH_URL + paramListToUrlAppendage(params), DEFAULT_BODY)
 			.then(response => response.json())
 	},
 

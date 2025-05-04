@@ -229,4 +229,31 @@ public class ReservationController extends PermissionManager {
 		reservationService.delete(id);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
+
+	/**
+	 * Gets all reservations belonging to a given user.
+	 *
+	 * @param userId the id of the user to get the reservations of
+	 * @param page the page of the pagination to retrieve
+	 * @param size the size of the page to retrieve
+	 * @return reservations belonging to the user in a paginated format
+	 * @throws ResponseStatusException 400 BAD_REQUEST if the userId is null or the page is negative
+	 */
+	@GetMapping("/user/{userId}")
+	public ResponseEntity<Page<SimpleReservation>> getReservationsByUser(
+		@PathVariable UUID userId,
+		@RequestParam(required = false) Integer page,
+		@RequestParam(required = false) Integer size
+	) {
+		this.hasPermissionToGet();
+		Page<Reservation> reservations = reservationService.getReservationsByUserPaged(
+			userId,
+			page,
+			size
+		);
+		Page<SimpleReservation> simpleReservations = reservations.map(
+			reservationAssembler::toSimple
+		);
+		return new ResponseEntity<>(simpleReservations, HttpStatus.OK);
+	}
 }
