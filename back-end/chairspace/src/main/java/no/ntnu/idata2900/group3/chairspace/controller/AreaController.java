@@ -163,4 +163,26 @@ public class AreaController extends PermissionManager {
 		areaService.delete(id);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
+
+	/**
+	 * Gets all areas that have this user as an admin.
+	 *
+	 * @param userId the id of user to find areas for
+	 * @param page page index
+	 * @param size number of entries per page
+	 * @return a page of areas that have this user as an admin
+	 */
+	@GetMapping("/user/{userId}")
+	public ResponseEntity<Page<SimpleArea>> findAreasByAdmin(
+		@PathVariable UUID userId,
+		@RequestParam(required = false) Integer page,
+		@RequestParam(required = false) Integer size
+	) {
+		this.hasPermissionToGetAll();
+		Page<Area> areas = areaService.getAreasByUser(userId, page, size);
+		return new ResponseEntity<>(
+			areas.map(areaAssembler::toSimpleArea),
+			HttpStatus.OK
+		);
+	}
 }

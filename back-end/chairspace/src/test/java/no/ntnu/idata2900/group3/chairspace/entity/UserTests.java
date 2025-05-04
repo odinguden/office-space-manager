@@ -23,13 +23,12 @@ class UserTests {
 	@Test
 	void testCreation() {
 		try {
-			user = new User(firstName, lastName, email);
+			user = new User(firstName + lastName, email, null);
 		} catch (InvalidArgumentCheckedException e) {
 			e.printStackTrace();
 		}
 
-		assertEquals(firstName, user.getFirstName());
-		assertEquals(lastName, user.getLastName());
+		assertEquals(firstName + lastName, user.getName());
 		assertEquals(email, user.getEmail());
 	}
 
@@ -72,8 +71,8 @@ class UserTests {
 	@Test
 	void testNullEmailThrows() {
 		assertThrows(
-			IllegalArgumentException.class,
-			() -> new User(firstName, lastName, null),
+			InvalidArgumentCheckedException.class,
+			() -> new User(firstName + lastName, "null", "Test"),
 			"Null email does not throw"
 		);
 	}

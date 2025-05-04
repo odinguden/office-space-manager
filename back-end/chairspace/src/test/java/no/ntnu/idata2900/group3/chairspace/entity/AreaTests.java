@@ -2,8 +2,6 @@ package no.ntnu.idata2900.group3.chairspace.entity;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -35,7 +33,6 @@ class AreaTests {
 
 	private static User nonAdminUser;
 	private static User adminUser;
-	private static User adminUser2;
 	private static AreaFeature areaFeature;
 	private static AreaFeature areaFeature1;
 	private static AreaType areaType;
@@ -48,9 +45,8 @@ class AreaTests {
 	@BeforeAll
 	static void setup() {
 		try {
-			nonAdminUser = new User("Stig", "Arne", "Arne@email.no");
-			adminUser = new User("Jon", "Kode", "Jon@Kode.no");
-			adminUser2 = new User("Stig", "Kode", "Stig@Kode.no");
+			nonAdminUser = new User("Stig " + "Arne", "Arne@email.no", "TestUser");
+			adminUser = new User("Jon " + "Kode", "Jon@Kode.no", "TestUser");
 			areaFeature = new AreaFeature("F1", "Feature 1");
 			areaFeature1 = new AreaFeature("F2", "Confusing i know");
 			areaType = new AreaType("T1", "Type 1");

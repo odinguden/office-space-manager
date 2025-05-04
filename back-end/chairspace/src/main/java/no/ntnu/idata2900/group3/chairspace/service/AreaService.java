@@ -154,4 +154,23 @@ public class AreaService extends EntityService<Area, UUID> {
 
 		return subAreaIds;
 	}
+
+	/**
+	 * Gets all areas that have this user as an admin.
+	 *
+	 * @param userId the user to find areas for
+	 * @param page the page to get
+	 * @param size the amount of entries per page
+	 * @return a page of areas that have this user as an admin
+	 */
+	public Page<Area> getAreasByUser(UUID userId, Integer page, Integer size) {
+		if (page == null || page < 0) {
+			page = 0;
+		}
+		if (size == null || size < 0) {
+			size = DEFAULT_PAGE_SIZE;
+		}
+		Pageable paging = PageRequest.of(page, size);
+		return areaRepository.findByAdmin(userId, paging);
+	}
 }

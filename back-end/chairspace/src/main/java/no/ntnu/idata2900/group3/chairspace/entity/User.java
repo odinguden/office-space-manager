@@ -6,7 +6,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,12 +36,21 @@ public class User implements EntityInterface<UUID> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID id;
-	@Column(name = "first_name", nullable = false)
-	private String firstName;
-	@Column(name = "last_name", nullable = false)
-	private String lastName;
+	@Column(name = "name", nullable = false)
+	private String name;
 	@Column(nullable = false)
 	private String email;
+	@Column(name = "is_admin", nullable = false)
+	private boolean isAdmin = false;
+	@Column(name = "external_id", nullable = true)
+	private String externalId = null;
+	@ManyToMany
+	@JoinTable(
+		name = "user_favorites",
+		joinColumns = @JoinColumn(name = "area_id"),
+		inverseJoinColumns = @JoinColumn(name = "user_id")
+	)
+	Set<Area> favoriteAreas = new HashSet<>();
 
 	/**
 	 * No args constructor for JPA.
@@ -46,16 +60,17 @@ public class User implements EntityInterface<UUID> {
 	/**
 	 * Constructs a instance of user with first and last name and a email.
 	 *
-	 * @param firstName the first name of the user
-	 * @param lastName the last name of the user
+	 * @param name the name of the user
 	 * @param email the email of the user
+	 * @param externalId the external id of the user
 	 * @throws InvalidArgumentCheckedException if any of the parameters are empty
 	 */
-	public User(String firstName, String lastName, String email)
+	public User(String name, String email, String externalId)
 		throws InvalidArgumentCheckedException {
-		setFirstName(firstName);
-		setLastName(lastName);
+		setName(name);
 		setEmail(email);
+		//TODO: proper setter for externalId
+		this.externalId = externalId;
 
 	}
 
@@ -71,21 +86,12 @@ public class User implements EntityInterface<UUID> {
 	}
 
 	/**
-	 * Returns the first name of the account as a string.
+	 * Returns the name of the user as a string.
 	 *
-	 * @return The first name of the user
+	 * @return The name of the user
 	 */
-	public String getFirstName() {
-		return this.firstName;
-	}
-
-	/**
-	 * Returns last name of the account as a string.
-	 *
-	 * @return The last name of the user
-	 */
-	public String getLastName() {
-		return this.lastName;
+	public String getName() {
+		return this.name;
 	}
 
 	/**
@@ -97,7 +103,34 @@ public class User implements EntityInterface<UUID> {
 		return this.email;
 	}
 
+	/**
+	 * Returns the admin status of the user.
+	 *
+	 * @return true if the user is an admin
+	 */
+	public boolean isAdmin() {
+		return this.isAdmin;
+	}
+
+	/**
+	 * Return the users favorite areas as a set.
+	 *
+	 * @return the set of favorite areas
+	 */
+	public Set<Area> getFavoriteAreas() {
+		return favoriteAreas;
+	}
+
 	/* ---- Setters ---- */
+
+	/**
+	 * Sets the admin status of the user.
+	 *
+	 * @param isAdmin true if the user is an admin, false otherwise
+	 */
+	public void setAdmin(boolean isAdmin) {
+		this.isAdmin = isAdmin;
+	}
 
 	/**
 	 * Sets email for user.
@@ -124,34 +157,42 @@ public class User implements EntityInterface<UUID> {
 	}
 
 	/**
-	 * Sets the first name of the user.
+	 * Sets the name of the user.
 	 *
-	 * @param firstName the first name of the user
-	 * @throws InvalidArgumentCheckedException if first name is null
+	 * @param name the name of the user
+	 * @throws InvalidArgumentCheckedException if name is null or blank
 	 */
-	public void setFirstName(String firstName)  throws InvalidArgumentCheckedException {
-		if (firstName == null) {
-			throw new IllegalArgumentException("firstName is null when value was expected");
+	public void setName(String name)  throws InvalidArgumentCheckedException {
+		if (name == null) {
+			throw new IllegalArgumentException("name is null when value was expected");
 		}
-		if (firstName.isBlank()) {
+		if (name.isBlank()) {
 			throw new InvalidArgumentCheckedException("firstName is blank");
 		}
-		this.firstName = firstName;
+		this.name = name;
 	}
 
 	/**
-	 * Sets the last name string of the user.
+	 * Adds an area to the list of favorite areas.
 	 *
-	 * @param lastName the last name of the user
-	 * @throws InvalidArgumentCheckedException if the last name string is blank
+	 * @param area the area to add
 	 */
-	public void setLastName(String lastName) throws InvalidArgumentCheckedException {
-		if (lastName == null) {
-			throw new IllegalArgumentException("lastName is null when value was expected");
+	public void addFavoriteArea(Area area) {
+		if (area == null) {
+			throw new IllegalArgumentException("area is null when value was expected");
 		}
-		if (lastName.isBlank()) {
-			throw new InvalidArgumentCheckedException("lastName is blank");
+		favoriteAreas.add(area);
+	}
+
+	/**
+	 * Removes an area from the list of favorite areas.
+	 *
+	 * @param area the area to remove
+	 */
+	public void removeFavoriteArea(Area area) {
+		if (area == null) {
+			throw new IllegalArgumentException("area is null when value was expected");
 		}
-		this.lastName = lastName;
+		favoriteAreas.remove(area);
 	}
 }
