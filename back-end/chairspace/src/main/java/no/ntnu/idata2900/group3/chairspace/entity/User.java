@@ -10,6 +10,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -68,7 +70,7 @@ public class User implements EntityInterface<UUID> {
 		throws InvalidArgumentCheckedException {
 		setName(name);
 		setEmail(email);
-		favoriteAreas = Set.of();
+		favoriteAreas = new HashSet<>();
 		//TODO: proper setter for externalId
 		this.externalId = externalId;
 
@@ -181,11 +183,7 @@ public class User implements EntityInterface<UUID> {
 		if (area == null) {
 			throw new IllegalArgumentException("area is null when value was expected");
 		}
-		if (favoriteAreas == null) {
-			favoriteAreas = Set.of(area);
-		} else {
-			favoriteAreas.add(area);
-		}
+		favoriteAreas.add(area);
 	}
 
 	/**
