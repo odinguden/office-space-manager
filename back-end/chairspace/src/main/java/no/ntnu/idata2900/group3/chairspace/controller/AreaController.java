@@ -5,6 +5,7 @@ import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.assembler.AreaAssembler;
 import no.ntnu.idata2900.group3.chairspace.dto.SimpleArea;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
+import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.service.AreaService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -119,7 +120,11 @@ public class AreaController extends PermissionManager {
 
 		try {
 			area = areaAssembler.assembleArea(simpleArea);
+		} catch (ElementNotFoundException e) {
+			e.printStackTrace();
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		}
 
@@ -142,7 +147,11 @@ public class AreaController extends PermissionManager {
 		Area area;
 		try {
 			area = areaAssembler.mergeWithExisting(simpleArea.id(), simpleArea);
+		} catch (ElementNotFoundException e) {
+			e.printStackTrace();
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		}
 
