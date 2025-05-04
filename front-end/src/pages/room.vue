@@ -34,7 +34,6 @@ function getArea() {
 
 function openModal(day) {
 	if (day == undefined) day = new Date()
-	console.log(day)
 	selectedDate.value = day
 	showModal.value = true
 }

@@ -23,7 +23,6 @@ function weekNumberClicked() {
 function dayClicked(day) {
 	if (props.clickableDays) {
 		emit("day-clicked", day)
-		console.log(day)
 	}
 }
 </script>
