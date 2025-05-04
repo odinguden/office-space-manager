@@ -133,9 +133,14 @@ public class ReservationService extends EntityService<Reservation, UUID> {
 	 * @param size the amount of entries per page
 	 * @return a list of reservation DTOs belonging to the given user id.
 	 */
-	public Page<Reservation> getReservationsByUserPaged(UUID userId, int page, int size) {
+	public Page<Reservation> getReservationsByUserPaged(UUID userId, Integer page, Integer size) {
 		Pageable paging = PageRequest.of(page, size);
-
+		if (page < 0 || page == null) {
+			page = 0;
+		}
+		if (size < 0 || size == null) {
+			size = DEFAULT_PAGE_SIZE;
+		}
 		return this.reservationRepository.findAllByUserPaged(userId, paging);
 	}
 }

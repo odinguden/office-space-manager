@@ -35,7 +35,6 @@ import org.springframework.web.server.ResponseStatusException;
 public class ReservationController extends PermissionManager {
 	private final ReservationService reservationService;
 	private final ReservationAssembler reservationAssembler;
-	public static final int DEFAULT_PAGE_SIZE = 12;
 
 	/**
 	 * Creates a new reservation controller.
@@ -164,14 +163,8 @@ public class ReservationController extends PermissionManager {
 		@RequestParam(required = false) Integer size
 	) {
 		this.hasPermissionToGet();
-		if (page == null || page < 0) {
-			page = 0;
-		}
 		if (userId == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-		}
-		if (size == null || size < 0) {
-			size = DEFAULT_PAGE_SIZE;
 		}
 		Page<Reservation> reservations = reservationService.getReservationsByUserPaged(
 			userId,
