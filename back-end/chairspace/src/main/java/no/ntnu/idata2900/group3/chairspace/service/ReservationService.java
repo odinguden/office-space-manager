@@ -134,13 +134,13 @@ public class ReservationService extends EntityService<Reservation, UUID> {
 	 * @return a list of reservation DTOs belonging to the given user id.
 	 */
 	public Page<Reservation> getReservationsByUserPaged(UUID userId, Integer page, Integer size) {
-		Pageable paging = PageRequest.of(page, size);
 		if (page < 0 || page == null) {
 			page = 0;
 		}
 		if (size < 0 || size == null) {
 			size = DEFAULT_PAGE_SIZE;
 		}
+		Pageable paging = PageRequest.of(page, size);
 		return this.reservationRepository.findAllByUserPaged(userId, paging);
 	}
 }
