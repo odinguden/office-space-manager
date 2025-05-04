@@ -13,6 +13,7 @@ const oDate = useODate()
 
 const selectedWeek = ref(undefined)
 const frequencies = ref([])
+const timelines = ref([])
 
 function getFrequencies() {
 	fetcher.getReservationFrequencyForMonth(props.area.id, props.year, props.month + 1)
@@ -23,10 +24,27 @@ const weeks = computed(() => {
 	return oDate.getWeeksOfMonth(props.year, props.month)
 })
 
+function getTimelines(week) {
+	for (let [idx, day] of week.days.entries()) {
+		const startOfDay = new Date(day)
+		startOfDay.setHours(0, 0, 0, 0)
+		const endOfDay = new Date(day)
+		endOfDay.setHours(23, 59, 59, 999)
+		fetcher.getReservationsForAreaInTime(props.area.id, startOfDay, endOfDay)
+			.then(response => timelines.value[idx] = {
+				reservations: response,
+				scopeStart: startOfDay,
+				scopeEnd: endOfDay
+			})
+	}
+}
+
 function onWeekClicked(week) {
 	if (selectedWeek.value === undefined) {
 		selectedWeek.value = week
+		getTimelines(week)
 	} else {
+		timelines.value = []
 		selectedWeek.value = undefined
 	}
 }
@@ -49,10 +67,10 @@ getFrequencies()
 	<v-sheet v-else>
 		<o-clickable-week
 			:week="selectedWeek"
-			:month="undefined"
+			:month="month"
 			:frequencies="frequencies"
 			clickable-days
-			@day-clicked=""
+			@day-clicked="$emit('day-clicked', $event)"
 		>
 			<template #week-number>
 				<v-btn
@@ -72,9 +90,16 @@ getFrequencies()
 		<div class="timeline-section">
 			<div />
 			<div
-				v-for="day in selectedWeek.days"
+				v-for="day, idx in selectedWeek.days"
 			>
-				<o-timeline vertical />
+				<o-timeline
+					v-if="timelines[idx] != undefined"
+					:reservations="timelines[idx].reservations"
+					:scope-start="timelines[idx].scopeStart"
+					:scope-end="timelines[idx].scopeEnd"
+					vertical
+				/>
+				<div v-else />
 			</div>
 		</div>
 	</v-sheet>

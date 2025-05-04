@@ -40,6 +40,7 @@ const selectedMonth = ref(now.getMonth())
 			:month="selectedMonth"
 			:key="`${selectedYear}-${selectedMonth}`"
 			clickable-days
+			@day-clicked="$emit('day-clicked', $event)"
 		/>
 	</v-sheet>
 </template>

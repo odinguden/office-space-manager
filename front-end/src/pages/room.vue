@@ -5,7 +5,9 @@ import { useRoute } from 'vue-router';
 const route = useRoute()
 
 const area = ref(null)
+const selectedDate = ref(null)
 const breadcrumbs = ref([])
+const showModal = ref(false)
 
 function getArea() {
 	const id = route.params.id
@@ -30,7 +32,16 @@ function getArea() {
 		})
 }
 
-const showModal = ref(false)
+function openModal(day=new Date()) {
+	console.log(day)
+	selectedDate.value = day
+	showModal.value = true
+}
+
+function closeModal() {
+	showModal.value = false
+}
+
 getArea()
 </script>
 
@@ -51,7 +62,7 @@ getArea()
 			text="Book this room"
 			tile
 			variant="outlined"
-			@click="showModal = true"
+			@click="openModal"
 		/>
 		<v-dialog
 			v-model="showModal"
@@ -64,13 +75,13 @@ getArea()
 				<v-card-text>
 					<o-booking
 						:area="area"
-						:date="new Date()"
+						:start-date="selectedDate"
 						@cancel="showModal = false"
 					/>
 				</v-card-text>
 			</v-card>
 		</v-dialog>
-		<o-calendar :area="area" />
+		<o-calendar :area="area" @day-clicked="openModal($event)" />
 	</section>
 	<v-skeleton-loader
 		v-else

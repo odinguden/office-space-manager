@@ -37,7 +37,6 @@ const computedValue = computed({
 		return internalValue.value
 	},
 	set(newValue) {
-		console.log(newValue)
 		internalValue.value = newValue
 		model.value = newValue
 	}

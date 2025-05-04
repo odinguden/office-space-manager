@@ -10,22 +10,20 @@ const emit = defineEmits(["week-clicked", "day-clicked"])
 
 function weekClicked() {
 	if (!props.clickableDays) {
-		console.log("Week")
 		emit("week-clicked", props.week.number)
 	}
 }
 
 function weekNumberClicked() {
 	if (props.clickableDays) {
-		console.log("Week number")
 		emit("week-clicked", props.week.number)
 	}
 }
 
 function dayClicked(day) {
 	if (props.clickableDays) {
-		console.log("Day")
 		emit("day-clicked", day)
+		console.log(day)
 	}
 }
 </script>
@@ -57,7 +55,7 @@ function dayClicked(day) {
 					? frequencies[day.getDate() - 1] / 100 : 0
 			}"
 			v-ripple="props.clickableDays"
-			@click="dayClicked"
+			@click="dayClicked(day)"
 		>
 			<div>
 				{{ day.getDate() }}
@@ -103,6 +101,6 @@ function dayClicked(day) {
 }
 
 .hoverable:hover {
-	background-color: rgba(var(--v-theme-on-surface), var(--v-hover-opacity));
+	opacity: 0.8;
 }
 </style>

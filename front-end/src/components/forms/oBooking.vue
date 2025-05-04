@@ -17,7 +17,15 @@ const props = defineProps({
 
 const loadingReservations = ref(true)
 const reservations = ref([])
-const date = ref(props.startDate || now)
+const date = ref(now)
+if (props.startDate) {
+	const year = props.startDate.getFullYear();
+	const month = String(props.startDate.getMonth() + 1).padStart(2, "0")
+	const day = String(props.startDate.getDate()).padStart(2, "0")
+	const text = `${year}-${month}-${day}`
+
+	date.value = text
+}
 const dateAsDate = computed(() => new Date(date.value))
 const startTime = ref("")
 const endTime = ref("")
