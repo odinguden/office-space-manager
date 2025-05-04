@@ -32,7 +32,8 @@ function getArea() {
 		})
 }
 
-function openModal(day=new Date()) {
+function openModal(day) {
+	if (day == undefined) day = new Date()
 	console.log(day)
 	selectedDate.value = day
 	showModal.value = true
@@ -62,7 +63,7 @@ getArea()
 			text="Book this room"
 			tile
 			variant="outlined"
-			@click="openModal"
+			@click="openModal()"
 		/>
 		<v-dialog
 			v-model="showModal"
@@ -76,7 +77,7 @@ getArea()
 					<o-booking
 						:area="area"
 						:start-date="selectedDate"
-						@cancel="showModal = false"
+						@cancel="closeModal"
 					/>
 				</v-card-text>
 			</v-card>

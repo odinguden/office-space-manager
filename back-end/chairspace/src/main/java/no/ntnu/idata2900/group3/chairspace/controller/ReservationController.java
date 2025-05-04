@@ -5,11 +5,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.assembler.ReservationAssembler;
+import no.ntnu.idata2900.group3.chairspace.dto.MakeReservationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.SimpleReservation;
+import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
+import no.ntnu.idata2900.group3.chairspace.entity.User;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.NotReservableException;
+import no.ntnu.idata2900.group3.chairspace.service.AreaService;
 import no.ntnu.idata2900.group3.chairspace.service.ReservationService;
+import no.ntnu.idata2900.group3.chairspace.service.UserService;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +30,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.azure.core.exception.HttpResponseException;
+
 
 
 /**
@@ -37,19 +45,27 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/reservation")
 public class ReservationController extends PermissionManager {
 	private final ReservationService reservationService;
+	private final UserService userService;
+	private final AreaService areaService;
 	private final ReservationAssembler reservationAssembler;
 
 	/**
 	 * Creates a new reservation controller.
 	 *
 	 * @param reservationService autowired reservation service
+	 * @param areaService autowired area service
+	 * @param userService autowired user service
 	 * @param reservationAssembler autowired reservation assembler
 	 */
 	public ReservationController(
 		ReservationService reservationService,
+		UserService userService,
+		AreaService areaService,
 		ReservationAssembler reservationAssembler
 	) {
 		this.reservationService = reservationService;
+		this.areaService = areaService;
+		this.userService = userService;
 		this.reservationAssembler = reservationAssembler;
 	}
 
@@ -196,6 +212,44 @@ public class ReservationController extends PermissionManager {
 		reservationService.create(reservation);
 
 		return new ResponseEntity<>(HttpStatus.CREATED);
+	}
+
+	/**
+	 * Creates a new reservation for the currently logged in user.
+	 *
+	 * @param reservationMakeRequest DTO object containing data to make a reservation
+	 * @return 204 NO CONTENT
+	 */
+	@PostMapping("/make")
+	public ResponseEntity<String> bookRoomForMe(
+		@RequestBody MakeReservationDto reservationMakeRequest
+	) {
+		User user = userService.getSessionUser();
+		if (user == null) {
+			System.out.println("No session user?");
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+		}
+		Area area = areaService.get(reservationMakeRequest.roomId());
+		if (area == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
+		Reservation reservation;
+		try {
+			reservation = new Reservation(
+				area,
+				user,
+				reservationMakeRequest.startTime(),
+				reservationMakeRequest.endTime(),
+				reservationMakeRequest.comment());
+		} catch (InvalidArgumentCheckedException | NotReservableException e) {
+			e.printStackTrace();
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+		if (!reservationService.create(reservation)) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT);
+		}
+
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	/**

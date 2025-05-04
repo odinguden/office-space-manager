@@ -7,6 +7,7 @@ const AREA_URL = BACKEND_URL + "/area"
 const ALL_AREAS_URL = AREA_URL + "/home"
 
 const RESERVATION_URL = BACKEND_URL + "/reservation"
+const RESERVATION_MAKE_URL = RESERVATION_URL + "/make"
 const RESERVATION_AREA_URL = RESERVATION_URL + "/area"
 
 const SEARCH_URL = BACKEND_URL + "/search"
@@ -59,12 +60,29 @@ export default {
 	async getReservationsForAreaInTime(areaId, startTime, endTime) {
 		startTime = formatDate(startTime)
 		endTime = formatDate(endTime)
-		return fetch(`${RESERVATION_AREA_URL}/${areaId}?start=${startTime}&end=${endTime}`)
+		return fetch(`${RESERVATION_AREA_URL}/${areaId}?start=${startTime}&end=${endTime}`, DEFAULT_BODY)
 			.then(response => response.json())
 	},
 
 	async getReservationFrequencyForMonth(areaId, year, month) {
-		return fetch(`${RESERVATION_AREA_URL}/${areaId}/frequency/list?year=${year}&month=${month}`)
+		return fetch(`${RESERVATION_AREA_URL}/${areaId}/frequency/list?year=${year}&month=${month}`, DEFAULT_BODY)
 			.then(response => response.json())
+	},
+
+	async tryMakeReservation(areaId, startTime, endTime, comment="") {
+		const requestBody = {
+			...DEFAULT_BODY,
+			method: "POST",
+			headers: {
+				"Content-type": "application/json"
+			},
+			body: JSON.stringify({
+				roomId: areaId,
+				startTime: formatDate(startTime),
+				endTime: formatDate(endTime),
+				comment
+			})
+		}
+		return fetch(RESERVATION_MAKE_URL, requestBody)
 	}
 }
