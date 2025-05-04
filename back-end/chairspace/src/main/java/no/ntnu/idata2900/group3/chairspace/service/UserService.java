@@ -62,16 +62,20 @@ public class UserService extends EntityService<User, UUID> {
 	 */
 	public User syncUser(OidcUser user) throws InvalidArgumentCheckedException {
 		String externalId = user.getSubject();
-		User existingUser = userRepository.findByExternalId(externalId);
-		if (existingUser != null) {
-			return existingUser;
+		User databaseUser = userRepository.findByExternalId(externalId);
+		if (databaseUser == null) {
+			//If the user does not exist in the database, create a new one
+			databaseUser = new User(user.getFullName(), user.getEmail(), externalId);
+			if (userRepository.count() == 0) {
+				databaseUser.setAdmin(true);
+			}
+		} else {
+			//If the user already exists, update the information
+			databaseUser.setEmail(user.getEmail());
+			databaseUser.setName(user.getFullName());
 		}
-		User newUser = new User(user.getFullName(), user.getEmail(), externalId);
-		if (userRepository.count() == 0) {
-			newUser.setAdmin(true);
-		}
-		userRepository.save(newUser);
-		return newUser;
+		userRepository.save(databaseUser);
+		return databaseUser;
 
 	}
 
@@ -83,8 +87,7 @@ public class UserService extends EntityService<User, UUID> {
 	public User getSessionUser() {
 		User user = null;
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication != null && authentication.getPrincipal() instanceof OidcUser) {
-			OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
+		if (authentication != null && authentication.getPrincipal() instanceof OidcUser oidcUser) {
 			user = userRepository.findByExternalId(oidcUser.getSubject());
 		}
 		return user;

@@ -195,8 +195,6 @@ public class User implements EntityInterface<UUID> {
 		if (area == null) {
 			throw new IllegalArgumentException("area is null when value was expected");
 		}
-		if (favoriteAreas != null) {
-			favoriteAreas.remove(area);
-		}
+		favoriteAreas.remove(area);
 	}
 }

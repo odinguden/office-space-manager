@@ -119,6 +119,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
 	 * @param pageable the pageable object to use for pagination
 	 * @return a page of reservations belonging to the user
 	 */
-	@Query("SELECT reservation FROM Reservation reservation WHERE reservation.user = ?1")
+	@Query("SELECT reservation FROM Reservation reservation WHERE reservation.user.id = ?1")
 	public Page<Reservation> findAllByUserPaged(UUID userId, Pageable pageable);
 }

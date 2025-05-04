@@ -74,6 +74,6 @@ public interface AreaRepository extends JpaRepository<Area, UUID> {
 	 * @param pageable the pageable used for pagination
 	 * @return a list of areas that have this user as an admin
 	 */
-	@Query("SELECT area FROM Area area WHERE :user MEMBER OF area.administrators")
+	@Query("SELECT area FROM Area area JOIN area.administrators admin WHERE admin.id = :userId")
 	Page<Area> findByAdmin(UUID userId, Pageable pageable);
 }
