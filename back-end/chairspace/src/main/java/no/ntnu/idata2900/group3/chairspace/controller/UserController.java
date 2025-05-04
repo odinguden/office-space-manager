@@ -107,7 +107,7 @@ public class UserController extends AbstractController<User, UUID> {
 		} catch (IllegalStateException e) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not logged in");
 		}
-		return new ResponseEntity<>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	/**
@@ -130,7 +130,7 @@ public class UserController extends AbstractController<User, UUID> {
 		} catch (IllegalStateException e) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not logged in");
 		}
-		return new ResponseEntity<>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	/**
@@ -153,5 +153,30 @@ public class UserController extends AbstractController<User, UUID> {
 			.map(areaAssembler::toSimpleArea)
 			.collect(Collectors.toSet());
 		return new ResponseEntity<>(favorites, HttpStatus.OK);
+	}
+
+	/**
+	 * Checks if the given area is a favorite of the user.
+	 * This can only be performed by a logged-in user.
+	 *
+	 * @param areaId the id of the area to check
+	 * @return the response entity with true if the area is a favorite, false otherwise
+	 * @throws ResponseStatusException 401 if the user is not logged in
+	 * @throws ResponseStatusException 404 if the area is not found
+	 */
+	@GetMapping("/favorite/{areaId}")
+	public ResponseEntity<Boolean> isFavorite(@PathVariable UUID areaId) {
+		super.hasPermissionToGet();
+		boolean isFavorite;
+		Area area = areaService.get(areaId);
+		if (area == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Area was not found");
+		}
+		try {
+			isFavorite = userService.isFavorite(area);
+		} catch (IllegalStateException e) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not logged in");
+		}
+		return new ResponseEntity<>(isFavorite, HttpStatus.OK);
 	}
 }

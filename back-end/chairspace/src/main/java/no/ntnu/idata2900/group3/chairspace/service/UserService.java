@@ -138,4 +138,22 @@ public class UserService extends EntityService<User, UUID> {
 		}
 		return user.getFavoriteAreas();
 	}
+
+	/**
+	 * Returns if the given area is a favorite of the user.
+	 *
+	 * @param area the area to check
+	 * @return true if the area is a favorite of the user
+	 */
+	public boolean isFavorite(Area area) {
+		User user = getSessionUser();
+		if (user == null) {
+			throw new IllegalStateException("User is not logged in");
+		}
+		boolean isFavorite = false;
+		if (user.getFavoriteAreas().contains(area)) {
+			isFavorite = true;
+		}
+		return isFavorite;
+	}
 }
