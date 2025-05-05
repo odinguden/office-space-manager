@@ -13,6 +13,7 @@ import Room from '@/pages/room.vue'
 import Bookings from '@/pages/bookings.vue'
 import Plans from '@/pages/plans.vue'
 import Search from '@/pages/search.vue'
+import Spaces from '@/pages/spaces.vue'
 
 const routes = [
 	{
@@ -29,6 +30,11 @@ const routes = [
 		path: "/room/:id",
 		name: "room",
 		component: Room
+	},
+	{
+		path: "/spaces",
+		name: "spaces",
+		component: Spaces
 	},
 	{
 		path: "/bookings",
