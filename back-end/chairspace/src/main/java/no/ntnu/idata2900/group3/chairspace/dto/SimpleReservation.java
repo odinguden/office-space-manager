@@ -18,7 +18,8 @@ public record SimpleReservation(
 	LocalDateTime startTime,
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	LocalDateTime endTime,
-	String comment
+	String comment,
+	boolean isMine
 ) {
 	/**
 	 * A builder for {@link SimpleReservations}.
@@ -30,6 +31,7 @@ public record SimpleReservation(
 		private LocalDateTime startTime;
 		private LocalDateTime endTime;
 		private String comment;
+		private Boolean isMine = false;
 
 		/**
 		 * Constructs a new simple reservation from this builder.
@@ -43,7 +45,8 @@ public record SimpleReservation(
 				this.userId,
 				this.startTime,
 				this.endTime,
-				this.comment
+				this.comment,
+				this.isMine
 			);
 		}
 
@@ -126,6 +129,17 @@ public record SimpleReservation(
 		 */
 		public Builder comment(String comment) {
 			this.comment = comment;
+			return this;
+		}
+
+		/**
+		 * Sets the isMine of this builder.
+		 *
+		 * @param isMine the isMine to set
+		 * @return this builder
+		 */
+		public Builder isMine(boolean isMine) {
+			this.isMine = isMine;
 			return this;
 		}
 	}

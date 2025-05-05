@@ -38,7 +38,8 @@ const timeline = computed(() => {
 			start,
 			end,
 			startPercent: (start - startScope) / totalMs,
-			durationPercent: (end - start) / totalMs
+			durationPercent: (end - start) / totalMs,
+			isMine: reservation.isMine
 		})
 
 		lastEnd = end
@@ -87,7 +88,8 @@ function getTooltip(reservation) {
 					class="timeline-component"
 					:class="{
 						'event': reservation.type === 'event',
-						'gap': reservation.type === 'gap'
+						'gap': reservation.type === 'gap',
+						'mine': reservation.isMine
 					}"
 					:style="{
 						'--reservation-length': getDuration(reservation)
@@ -119,6 +121,10 @@ function getTooltip(reservation) {
 		&.event {
 			background-color: rgb(var(--v-theme-error));
 			border: 2px solid rgba(var(--v-border-color), 0.33);
+
+			&.mine {
+				background-color: rgb(var(--v-theme-blue));
+			}
 		}
 	}
 

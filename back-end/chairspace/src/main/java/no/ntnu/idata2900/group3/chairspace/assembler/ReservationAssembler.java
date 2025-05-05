@@ -37,8 +37,17 @@ public class ReservationAssembler {
 	 * @return the simple representation of the input reservation
 	 */
 	public SimpleReservation toSimple(Reservation reservation) {
-		return SimpleReservation.Builder.fromReservation(reservation)
-			.build();
+		User sessionUser = userService.getSessionUser();
+		SimpleReservation.Builder builder = SimpleReservation.Builder.fromReservation(reservation);
+
+		System.out.println("TESTING USER STUFF -------==================");
+		if (sessionUser != null) {
+			System.out.println(reservation.getUser().getId());
+			System.out.println(sessionUser.getId());
+			builder.isMine(reservation.getUser().getId().equals(sessionUser.getId()));
+		}
+
+		return builder.build();
 	}
 
 	/**

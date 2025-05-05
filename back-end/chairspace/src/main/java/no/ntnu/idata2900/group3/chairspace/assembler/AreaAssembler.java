@@ -29,6 +29,7 @@ public class AreaAssembler {
 	private final AreaService areaService;
 	private final UserService userService;
 	private final ReservationService reservationService;
+	private final ReservationAssembler reservationAssembler;
 
 	/**
 	 * Creates a new Area Assembler.
@@ -36,15 +37,18 @@ public class AreaAssembler {
 	 * @param areaService the area service connected to this assembler
 	 * @param userService the user service connected to this assembler
 	 * @param reservationService the reservation service connected to this assembler
+	 * @param reservationAssembler autowired reservation assembler
 	 */
 	public AreaAssembler(
 		AreaService areaService,
 		UserService userService,
-		ReservationService reservationService
+		ReservationService reservationService,
+		ReservationAssembler reservationAssembler
 	) {
 		this.areaService = areaService;
 		this.userService = userService;
 		this.reservationService = reservationService;
+		this.reservationAssembler = reservationAssembler;
 	}
 
 	/**
@@ -145,8 +149,7 @@ public class AreaAssembler {
 	) {
 		List<SimpleReservation> reservations = getReservationsForArea(area.getId(), start, end)
 			.stream()
-			.map(SimpleReservation.Builder::fromReservation)
-			.map(SimpleReservation.Builder::build)
+			.map(reservationAssembler::toSimple)
 			.toList();
 
 		SimpleReservationList simpleReservationList = new SimpleReservationList(

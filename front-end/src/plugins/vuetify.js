@@ -10,6 +10,7 @@ import 'vuetify/styles'
 
 // Composables
 import { createVuetify } from 'vuetify'
+import { blue } from 'vuetify/util/colors'
 import { VTimePicker } from 'vuetify/labs/components'
 
 const appTheme = {
@@ -21,6 +22,7 @@ const appTheme = {
 		'on-background': "#121212",
 		'surface': '#f9f9f9',
 		'on-surface': "#1d2f6f",
+		'blue': blue.base
 	}
 }
 
