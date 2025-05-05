@@ -22,6 +22,12 @@ public interface AreaRepository extends JpaRepository<Area, UUID> {
 	 * @param reservable whether to get reservable or non-reservable areas
 	 * @return a list of areas by whether they are reservable
 	 */
+	@Query("""
+		SELECT area
+		FROM Area area
+		WHERE area.reservable = :reservable
+		AND area.planControlled = false
+		""")
 	List<Area> findAllByReservable(boolean reservable);
 
 	/**

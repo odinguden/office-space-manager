@@ -40,12 +40,8 @@ public class Area implements EntityInterface<UUID> {
 	@ManyToMany
 	@JoinTable(
 		name = "area_administrators",
-		joinColumns = {
-			@JoinColumn(name = "area_id")
-		},
-		inverseJoinColumns = {
-			@JoinColumn(name = "user_id")
-		}
+		joinColumns = @JoinColumn(name = "area_id"),
+		inverseJoinColumns = @JoinColumn(name = "user_id")
 	)
 	@Column(name = "administrators")
 	private Set<User> administrators;
@@ -70,6 +66,7 @@ public class Area implements EntityInterface<UUID> {
 	)
 	private Set<AreaFeature> features;
 	private boolean reservable;
+	private boolean planControlled = false;
 
 	/**
 	 * No args constructor for JPA.
@@ -94,6 +91,7 @@ public class Area implements EntityInterface<UUID> {
 		this.features = builder.features;
 		this.reservable = builder.reservable;
 		this.id = builder.id;
+		this.planControlled = builder.isPlanControlled;
 	}
 
 	/* ---- Getters ---- */
@@ -247,6 +245,15 @@ public class Area implements EntityInterface<UUID> {
 	}
 
 	/**
+	 * Returns the plan controlled status of the area.
+	 *
+	 * @return true if plan controlled.
+	 */
+	public boolean isPlanControlled() {
+		return planControlled;
+	}
+
+	/**
 	 * Returns true if the area is reservable, false if not.
 	 *
 	 * @return reservable status
@@ -296,6 +303,7 @@ public class Area implements EntityInterface<UUID> {
 		private Set<AreaFeature> features;
 		private boolean reservable;
 		private UUID id;
+		private boolean isPlanControlled;
 		// Damn this is a lot of fields.
 		// Good im using the builder pattern then 😎
 
@@ -317,6 +325,7 @@ public class Area implements EntityInterface<UUID> {
 			// Default values
 			description = "";
 			calendarControlled = false;
+			isPlanControlled = false;
 			administrators = new HashSet<>();
 			features = new HashSet<>();
 		}
@@ -516,6 +525,18 @@ public class Area implements EntityInterface<UUID> {
 		 */
 		public Builder id(UUID id) {
 			this.id = id;
+			return this;
+		}
+
+		/**
+		 * Sets the plan controlled status of the area.
+		 * Will be false by default.
+		 *
+		 * @param planControlled the plan controlled status of the area.
+		 * @return builder object
+		 */
+		public Builder isPlanControlled(boolean planControlled) {
+			this.isPlanControlled = planControlled;
 			return this;
 		}
 
