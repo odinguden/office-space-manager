@@ -1,8 +1,23 @@
+<script setup>
+import { useAuthStore } from '@/stores/authStore';
+import { onMounted } from 'vue';
+
+const authStore = useAuthStore()
+
+onMounted(() => authStore.updateState())
+</script>
+
 <template>
-	<v-main id="main">
+	<v-main id="main" v-if="authStore.authState === authStore.AUTH_STATES.AUTHORIZED">
 		<o-app-frame />
 		<router-view id="main-view" :key="$route.fullPath" />
 		<o-footer />
+	</v-main>
+	<v-main v-else-if="authStore.authState === authStore.AUTH_STATES.UNAUTHORIZED">
+		<o-login />
+	</v-main>
+	<v-main v-else>
+		<v-skeleton-loader :type="card" />
 	</v-main>
 </template>
 
