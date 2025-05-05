@@ -15,7 +15,6 @@ import no.ntnu.idata2900.group3.chairspace.exceptions.NotReservableException;
 import no.ntnu.idata2900.group3.chairspace.service.AreaService;
 import no.ntnu.idata2900.group3.chairspace.service.ReservationService;
 import no.ntnu.idata2900.group3.chairspace.service.UserService;
-
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +28,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-
-import com.azure.core.exception.HttpResponseException;
-
-
 
 /**
  * Controller for the reservation feature entity.
@@ -305,9 +300,8 @@ public class ReservationController extends PermissionManager {
 			page,
 			size
 		);
-		Page<SimpleReservation> simpleReservations = reservations.map(
-			reservationAssembler::toSimple
-		);
+		Page<SimpleReservation> simpleReservations = reservations
+			.map(reservationAssembler::toSimple);
 		return new ResponseEntity<>(simpleReservations, HttpStatus.OK);
 	}
 }
