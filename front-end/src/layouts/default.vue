@@ -17,7 +17,6 @@ onMounted(() => authStore.updateState())
 		<o-login />
 	</v-main>
 	<v-main v-else>
-		<v-skeleton-loader :type="card" />
 	</v-main>
 </template>
 
