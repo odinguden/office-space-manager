@@ -27,17 +27,24 @@ import org.springframework.stereotype.Service;
 public class AreaService extends EntityService<Area, UUID> {
 	AreaRepository areaRepository;
 	ReservationService reservationService;
+	PlanService planService;
 
 	/**
 	 * Creates a new area service.
 	 *
 	 * @param repository autowired AreaRepository
 	 * @param reservationService autowired reservationService
+	 * @param planService autowired planService
 	 */
-	public AreaService(AreaRepository repository, ReservationService reservationService) {
+	public AreaService(
+		AreaRepository repository,
+		ReservationService reservationService,
+		PlanService planService
+	) {
 		super(repository);
 		this.areaRepository = repository;
 		this.reservationService = reservationService;
+		this.planService = planService;
 	}
 
 	@Override
