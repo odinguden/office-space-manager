@@ -4,7 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.time.LocalDateTime;
+import jakarta.persistence.ManyToOne;
+import java.util.Date;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 
@@ -17,9 +18,11 @@ public class Plan implements EntityInterface<UUID> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID id;
+	@ManyToOne
+	private Area area;
 	private String name;
-	private LocalDateTime startTime;
-	private LocalDateTime endTime;
+	private Date startTime;
+	private Date endTime;
 
 	/**
 	 * No args constructor for JPA.
@@ -32,16 +35,18 @@ public class Plan implements EntityInterface<UUID> {
 	 * Constructor for Plan.
 	 *
 	 * @param name The name of the plan.
+	 * @param area the area of the plan
 	 * @param startTime The start date of the plan.
 	 * @param endTime The end date of the plan.
 	 * @throws InvalidArgumentCheckedException if the start date is after the end date.
 	 */
-	public Plan(String name, LocalDateTime startTime, LocalDateTime endTime)
+	public Plan(String name, Area area, Date startTime, Date endTime)
 		throws InvalidArgumentCheckedException {
 		setName(name);
-		if (startTime.isAfter(endTime)) {
+		if (startTime.after(endTime)) {
 			throw new InvalidArgumentCheckedException();
 		}
+		setArea(area);
 		setStart(startTime);
 		setEnd(endTime);
 	}
@@ -55,11 +60,29 @@ public class Plan implements EntityInterface<UUID> {
 	 * @param name The name of the plan.
 	 * @throws IllegalArgumentException if the name is null or blank.
 	 */
-	public void setName(String name) {
+	private void setName(String name) {
 		if (name == null || name.isBlank()) {
 			throw new IllegalArgumentException("Name cannot be null or blank.");
 		}
 		this.name = name;
+	}
+
+	/**
+	 * Sets the area of the plan.
+	 *
+	 * @param area the area to set
+	 * @throws InvalidArgumentCheckedException if the area is not plan controlled
+	 */
+	private void setArea(Area area) throws InvalidArgumentCheckedException {
+		if (area == null) {
+			throw new IllegalArgumentException("Area is null when value was expected");
+		}
+		if (!area.isPlanControlled()) {
+			throw new InvalidArgumentCheckedException(
+				"Cannot create plan for non plan controlled area"
+			);
+		}
+		this.area = area;
 	}
 
 	/**
@@ -68,7 +91,7 @@ public class Plan implements EntityInterface<UUID> {
 	 * @param startTime The start date of the plan.
 	 * @throws IllegalArgumentException if the start date is null.
 	 */
-	public void setStart(LocalDateTime startTime) {
+	public void setStart(Date startTime) {
 		if (startTime == null) {
 			throw new IllegalArgumentException("Start date cannot be null.");
 		}
@@ -81,7 +104,7 @@ public class Plan implements EntityInterface<UUID> {
 	 * @param endTime The end date of the plan.
 	 * @throws IllegalArgumentException if the end date is null.
 	 */
-	public void setEnd(LocalDateTime endTime) {
+	public void setEnd(Date endTime) {
 		if (endTime == null) {
 			throw new IllegalArgumentException("End date cannot be null.");
 		}
@@ -109,7 +132,7 @@ public class Plan implements EntityInterface<UUID> {
 	 *
 	 * @return The start date of the plan.
 	 */
-	public LocalDateTime getStart() {
+	public Date getStart() {
 		return startTime;
 	}
 
@@ -118,8 +141,17 @@ public class Plan implements EntityInterface<UUID> {
 	 *
 	 * @return The end date of the plan.
 	 */
-	public LocalDateTime getEnd() {
+	public Date getEnd() {
 		return endTime;
+	}
+
+	/**
+	 * Returns the area of this plan.
+	 *
+	 * @return the area of this plan
+	 */
+	public Area getArea() {
+		return area;
 	}
 
 }
