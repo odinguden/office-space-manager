@@ -2,11 +2,17 @@ package no.ntnu.idata2900.group3.chairspace.controller;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import no.ntnu.idata2900.group3.chairspace.assembler.ReservationAssembler;
 import no.ntnu.idata2900.group3.chairspace.dto.MakeReservationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.SimpleReservation;
+import no.ntnu.idata2900.group3.chairspace.dto.SimpleReservationList;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
@@ -283,25 +289,80 @@ public class ReservationController extends PermissionManager {
 	 * Gets all reservations belonging to a given user.
 	 *
 	 * @param userId the id of the user to get the reservations of
-	 * @param page the page of the pagination to retrieve
-	 * @param size the size of the page to retrieve
-	 * @return reservations belonging to the user in a paginated format
+	 * @return reservations belonging to the user
 	 * @throws ResponseStatusException 400 BAD_REQUEST if the userId is null or the page is negative
 	 */
 	@GetMapping("/user/{userId}")
-	public ResponseEntity<Page<SimpleReservation>> getReservationsByUser(
-		@PathVariable UUID userId,
-		@RequestParam(required = false) Integer page,
-		@RequestParam(required = false) Integer size
+	public ResponseEntity<List<SimpleReservation>> getReservationsByUser(
+		@PathVariable UUID userId
 	) {
 		this.hasPermissionToGet();
-		Page<Reservation> reservations = reservationService.getReservationsByUserPaged(
-			userId,
-			page,
-			size
-		);
-		Page<SimpleReservation> simpleReservations = reservations
-			.map(reservationAssembler::toSimple);
+		List<Reservation> reservations = reservationService.getReservationsByUser(userId);
+		List<SimpleReservation> simpleReservations = reservations.stream()
+			.map(reservationAssembler::toSimple)
+			.toList();
 		return new ResponseEntity<>(simpleReservations, HttpStatus.OK);
+	}
+
+	/**
+	 * Gets a map of all areas in which the current user has a booking, mapped to all bookings for
+	 *     those areas, from the start of the first booking to the end of the last booking made
+	 *     by the user.
+	 *
+	 * @return a map of all areas the user has booked connected to simple reservation lists
+	 *     for the scope of the user's reservations.
+	 */
+	@GetMapping("/user/me")
+	public ResponseEntity<Map<UUID, SimpleReservationList>> getMyReservationData() {
+		this.hasPermissionToGet();
+		User sessionUser = userService.getSessionUser();
+		if (sessionUser == null) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+		}
+
+		List<Reservation> myReservations = reservationService
+			.getReservationsByUser(sessionUser.getId());
+
+		if (myReservations.isEmpty()) {
+			return new ResponseEntity<>(
+				new HashMap<>(),
+				HttpStatus.OK
+			);
+		}
+
+		LocalDateTime scopeStart = myReservations.stream()
+			.map(Reservation::getStart)
+			.min(Comparator.naturalOrder())
+			.orElseThrow();
+
+		LocalDateTime scopeEnd = myReservations.stream()
+			.map(Reservation::getEnd)
+			.max(Comparator.naturalOrder())
+			.orElseThrow();
+
+		Set<UUID> areaIds = myReservations.stream()
+			.map(Reservation::getArea)
+			.map(Area::getId)
+			.collect(Collectors.toSet());
+
+		Map<UUID, SimpleReservationList> allReservationsMap = new HashMap<>();
+
+		for (UUID areaId : areaIds) {
+			List<SimpleReservation> areaReservations = reservationService
+				.getReservationsForAreaBetween(areaId, scopeStart, scopeEnd)
+				.stream()
+				.map(reservationAssembler::toSimple)
+				.toList();
+
+			SimpleReservationList simpleReservationList = new SimpleReservationList(
+				scopeStart,
+				scopeEnd,
+				areaReservations
+			);
+
+			allReservationsMap.put(areaId, simpleReservationList);
+		}
+
+		return new ResponseEntity<>(allReservationsMap, HttpStatus.OK);
 	}
 }
