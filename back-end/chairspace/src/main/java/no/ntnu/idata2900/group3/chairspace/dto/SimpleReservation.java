@@ -13,6 +13,7 @@ import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
 public record SimpleReservation(
 	UUID id,
 	UUID areaId,
+	String areaName,
 	UUID userId,
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	LocalDateTime startTime,
@@ -27,6 +28,7 @@ public record SimpleReservation(
 	public static class Builder {
 		private UUID id;
 		private UUID areaId;
+		private String areaName;
 		private UUID userId;
 		private LocalDateTime startTime;
 		private LocalDateTime endTime;
@@ -42,6 +44,7 @@ public record SimpleReservation(
 			return new SimpleReservation(
 				this.id,
 				this.areaId,
+				this.areaName,
 				this.userId,
 				this.startTime,
 				this.endTime,
@@ -60,6 +63,7 @@ public record SimpleReservation(
 			return new Builder()
 				.id(reservation.getId())
 				.areaId(reservation.getArea().getId())
+				.areaName(reservation.getArea().getName())
 				.userId(reservation.getUser().getId())
 				.startTime(reservation.getStart())
 				.endTime(reservation.getEnd())
@@ -85,6 +89,17 @@ public record SimpleReservation(
 		 */
 		public Builder areaId(UUID areaId) {
 			this.areaId = areaId;
+			return this;
+		}
+
+		/**
+		 * Sets the areaName of this builder.
+		 *
+		 * @param areaName the areaName to set
+		 * @return this builder
+		 */
+		public Builder areaName(String areaName) {
+			this.areaName = areaName;
 			return this;
 		}
 

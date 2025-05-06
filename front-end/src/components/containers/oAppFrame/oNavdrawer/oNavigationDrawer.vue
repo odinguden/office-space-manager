@@ -15,7 +15,7 @@ const NAV_TARGETS = {
 		{
 			name: "My bookings",
 			icon: "mdi-receipt-text",
-			link: null
+			link: "/bookings"
 		},
 		{
 			name: "My plans",

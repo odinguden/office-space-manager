@@ -10,6 +10,7 @@ const MY_AREAS_URL = AREA_URL + "/user"
 const RESERVATION_URL = BACKEND_URL + "/reservation"
 const RESERVATION_MAKE_URL = RESERVATION_URL + "/make"
 const RESERVATION_AREA_URL = RESERVATION_URL + "/area"
+const MY_RESERVATIONS_URL = RESERVATION_URL + "/user"
 
 const SEARCH_URL = BACKEND_URL + "/search"
 
@@ -106,6 +107,15 @@ export default {
 			return new Promise()
 		}
 		return fetch(`${MY_AREAS_URL}/${me.userId}?page=${page}`, DEFAULT_BODY)
+			.then(response => response.json())
+	},
+
+	async getMyBookings(me) {
+		if (me === null) {
+			return new Promise()
+		}
+
+		return fetch(`${MY_RESERVATIONS_URL}/me`, DEFAULT_BODY)
 			.then(response => response.json())
 	}
 }

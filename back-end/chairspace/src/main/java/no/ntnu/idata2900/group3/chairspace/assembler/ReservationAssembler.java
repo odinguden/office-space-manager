@@ -40,10 +40,7 @@ public class ReservationAssembler {
 		User sessionUser = userService.getSessionUser();
 		SimpleReservation.Builder builder = SimpleReservation.Builder.fromReservation(reservation);
 
-		System.out.println("TESTING USER STUFF -------==================");
 		if (sessionUser != null) {
-			System.out.println(reservation.getUser().getId());
-			System.out.println(sessionUser.getId());
 			builder.isMine(reservation.getUser().getId().equals(sessionUser.getId()));
 		}
 
