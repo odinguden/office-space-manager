@@ -69,7 +69,8 @@ public record SimpleArea(
 				.areaFeatures(area.getFeatures())
 				.capacity(area.getCapacity())
 				.calendarLink(area.getCalendarLink())
-				.reservable(area.isReservable());
+				.reservable(area.isReservable())
+				.planControlled(area.isPlanControlled());
 		}
 
 		/**
