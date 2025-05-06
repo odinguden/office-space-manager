@@ -20,8 +20,10 @@ const timeline = computed(() => {
 	let lastEnd = new Date(startScope)
 
 	for (let reservation of props.reservations) {
-		const start = new Date(reservation.startTime)
-		const end = new Date(reservation.endTime)
+		let start = new Date(reservation.startTime)
+		start = vDate.addHours(start, 2)
+		let end = new Date(reservation.endTime)
+		end = vDate.addHours(end, 2)
 
 		if (start > lastEnd) {
 			timeline.push({
