@@ -29,7 +29,7 @@ public class PlanAssembler {
 	 * @param plan the plan to build the simple plan from
 	 * @return the simple plan
 	 */
-	public SimplePlan toSimplePlan(Plan plan) {
+	public SimplePlan toSimple(Plan plan) {
 		return Builder.fromPlan(plan).build();
 	}
 

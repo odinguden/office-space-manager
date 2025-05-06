@@ -1,17 +1,16 @@
 package no.ntnu.idata2900.group3.chairspace.controller;
 
+import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.assembler.PlanAssembler;
 import no.ntnu.idata2900.group3.chairspace.dto.SimplePlan;
 import no.ntnu.idata2900.group3.chairspace.entity.Plan;
 import no.ntnu.idata2900.group3.chairspace.service.PlanService;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -28,6 +27,7 @@ public class PlanController extends AbstractController<Plan, UUID> {
 	 * Constructor for plan controller.
 	 *
 	 * @param planService autowired plan service
+	 * @param planAssembler autowired plan assembler
 	 */
 	public PlanController(PlanService planService, PlanAssembler planAssembler) {
 		super(planService);
@@ -39,20 +39,18 @@ public class PlanController extends AbstractController<Plan, UUID> {
 	 * Gets all plans belonging to a single area.
 	 *
 	 * @param areaId id of the area
-	 * @param page the page that is requested
-	 * @param size the number of items on the page
 	 * @return plans belonging to a single area
 	 */
 	@GetMapping("/area/{areaId}")
-	public ResponseEntity<Page<SimplePlan>> getPlansByArea(
-		@PathVariable UUID areaId,
-		@RequestParam Integer page,
-		@RequestParam Integer size
+	public ResponseEntity<List<SimplePlan>> getPlansByArea(
+		@PathVariable UUID areaId
 	) {
 		hasPermissionToGet();
-		Page<Plan> plans = planService.getPlansByArea(areaId, page, size);
-		Page<SimplePlan> simplePlans = plans.map(planAssembler::toSimplePlan);
-
+		List<Plan> plans = planService.getPlansByArea(areaId);
+		List<SimplePlan> simplePlans = plans
+			.stream()
+			.map(planAssembler::toSimple)
+			.toList();
 		return new ResponseEntity<>(simplePlans, HttpStatus.OK);
 	}
 }
