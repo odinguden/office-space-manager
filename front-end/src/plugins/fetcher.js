@@ -35,48 +35,53 @@ function formatDate(input) {
 	return input.toISOString().slice(0, 19)
 }
 
+async function doFetch(URL, content={}) {
+	const body = { ...DEFAULT_BODY, ...content }
+	return fetch(URL, body)
+		.catch(error => console.error(`Failed to fetch from ${URL} with method ${body.method}:`, error))
+}
+
 export default {
 	async getAreaPagination(page) {
-		return fetch(ALL_AREAS_URL + `?page=${page}`, DEFAULT_BODY)
+		return doFetch(ALL_AREAS_URL + `?page=${page}`)
 			.then(response => response.json())
 	},
 
 	async getArea(id) {
-		return fetch(AREA_URL + `/${id}`, DEFAULT_BODY)
+		return doFetch(AREA_URL + `/${id}`)
 			.then(response => response.json())
 	},
 
 	async getAreaTypes() {
-		return fetch(AREA_TYPE_URL, DEFAULT_BODY)
+		return doFetch(AREA_TYPE_URL)
 			.then(response => response.json())
 	},
 
 	async getAreaFeatures() {
-		return fetch(AREA_FEATURE_URL, DEFAULT_BODY)
+		return doFetch(AREA_FEATURE_URL)
 			.then(response => response.json())
 	},
 
 	async getSearchResultsWithParamList(params, page) {
 		params["page"] = page || 0
-		return fetch(SEARCH_URL + paramListToUrlAppendage(params), DEFAULT_BODY)
+		return doFetch(SEARCH_URL + paramListToUrlAppendage(params))
 			.then(response => response.json())
 	},
 
 	async getReservationsForAreaInTime(areaId, startTime, endTime) {
 		startTime = formatDate(startTime)
 		endTime = formatDate(endTime)
-		return fetch(`${RESERVATION_AREA_URL}/${areaId}?start=${startTime}&end=${endTime}`, DEFAULT_BODY)
+		return doFetch(`${RESERVATION_AREA_URL}/${areaId}?start=${startTime}&end=${endTime}`)
 			.then(response => response.json())
 	},
 
 	async getReservationFrequencyForMonth(areaId, year, month) {
-		return fetch(`${RESERVATION_AREA_URL}/${areaId}/frequency/list?year=${year}&month=${month}`, DEFAULT_BODY)
+		return doFetch(`${RESERVATION_AREA_URL}/${areaId}/frequency/list?year=${year}&month=${month}`)
 			.then(response => response.json())
 	},
 
 	async tryMakeReservation(areaId, startTime, endTime, comment="") {
 		const requestBody = {
-			...DEFAULT_BODY,
 			method: "POST",
 			headers: {
 				"Content-type": "application/json"
@@ -88,11 +93,11 @@ export default {
 				comment
 			})
 		}
-		return fetch(RESERVATION_MAKE_URL, requestBody)
+		return doFetch(RESERVATION_MAKE_URL, requestBody)
 	},
 
 	async whoAmI() {
-		return fetch(WHOAMI_URL, DEFAULT_BODY)
+		return doFetch(WHOAMI_URL)
 			.then(response => {
 				console.log(response)
 				if (response.ok) {
@@ -106,7 +111,7 @@ export default {
 		if (me === null) {
 			return new Promise()
 		}
-		return fetch(`${MY_AREAS_URL}/${me.userId}?page=${page}`, DEFAULT_BODY)
+		return doFetch(`${MY_AREAS_URL}/${me.userId}?page=${page}`)
 			.then(response => response.json())
 	},
 
@@ -115,7 +120,7 @@ export default {
 			return new Promise()
 		}
 
-		return fetch(`${MY_RESERVATIONS_URL}/me`, DEFAULT_BODY)
+		return doFetch(`${MY_RESERVATIONS_URL}/me`)
 			.then(response => response.json())
 	}
 }
