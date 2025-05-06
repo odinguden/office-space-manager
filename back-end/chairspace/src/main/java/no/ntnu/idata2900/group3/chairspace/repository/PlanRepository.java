@@ -4,8 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.entity.Plan;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -23,12 +21,12 @@ public interface PlanRepository extends JpaRepository<Plan, UUID> {
 	 * @return all reservable plan areas
 	 */
 	@Query("""
-			SELECT DISTINCT plan.area.id
-			FROM Plan plan
-			WHERE plan.area.planControlled = true
-			AND plan.area.reservable = true
-			AND plan.startTime <= ?1
-			AND plan.endTime >= ?2
+		SELECT DISTINCT plan.area.id
+		FROM Plan plan
+		WHERE plan.area.planControlled = true
+		AND plan.area.reservable = true
+		AND plan.startDate <= ?1
+		AND plan.endDate >= ?2
 		""")
 	List<UUID> getReservablePlanAreas(LocalDate start, LocalDate end);
 
@@ -36,11 +34,14 @@ public interface PlanRepository extends JpaRepository<Plan, UUID> {
 	 * Gets all plans belonging to a certain area.
 	 *
 	 * @param areaId the id of the area
-	 * @param pageable the pageable used for pagination
 	 * @return all plans belonging to the area with the given id
 	 */
-	@Query("SELECT plan FROM Plan plan WHERE plan.area.id = ?1")
-	Page<Plan> getPlansByArea(UUID areaId, Pageable pageable);
+	@Query("""
+		SELECT plan
+		FROM Plan plan
+		WHERE plan.area.id = ?1
+		""")
+	List<Plan> getPlansByArea(UUID areaId);
 
 	/**
 	 * Returns true if there is a plan marking the area as free for the given time slot.
@@ -51,13 +52,11 @@ public interface PlanRepository extends JpaRepository<Plan, UUID> {
 	 * @return true if a plan exists to free the area for the period
 	 */
 	@Query("""
-		SELECT EXISTS(
-			SELECT 1
-			FROM Plan plan
-			WHERE plan.area.id = ?1
-			AND plan.startTime <= ?2
-			AND plan.endTime >= ?3
-		)
+		SELECT COUNT(plan) > 0
+		FROM Plan plan
+		WHERE plan.area.id = ?1
+		AND plan.startDate <= ?2
+		AND plan.endDate >= ?3
 		""")
 	public boolean isReservable(UUID areaId, LocalDate start, LocalDate end);
 }

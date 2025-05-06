@@ -10,8 +10,9 @@ import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 
 /**
- * Represents a plan for a area.
- * A plan is a unit of time where a otherwise unreservable area is reservable.
+ * Plans represents a block of time where an area that otherwise is not reservable
+ * becomes reservable.
+ * Plans are to be checked if an area is marked with PlanControlled.
  */
 @Entity
 public class Plan implements EntityInterface<UUID> {
@@ -21,8 +22,8 @@ public class Plan implements EntityInterface<UUID> {
 	@ManyToOne
 	private Area area;
 	private String name;
-	private LocalDate startTime;
-	private LocalDate endTime;
+	private LocalDate startDate;
+	private LocalDate endDate;
 
 	/**
 	 * No args constructor for JPA.
@@ -36,19 +37,19 @@ public class Plan implements EntityInterface<UUID> {
 	 *
 	 * @param name The name of the plan.
 	 * @param area the area of the plan
-	 * @param startTime The start date of the plan.
-	 * @param endTime The end date of the plan.
+	 * @param startDate The start date of the plan.
+	 * @param endDate The end date of the plan.
 	 * @throws InvalidArgumentCheckedException if the start date is after the end date.
 	 */
-	public Plan(String name, Area area, LocalDate startTime, LocalDate endTime)
+	public Plan(String name, Area area, LocalDate startDate, LocalDate endDate)
 		throws InvalidArgumentCheckedException {
 		setName(name);
-		if (startTime.isAfter(endTime)) {
+		if (startDate.isAfter(endDate)) {
 			throw new InvalidArgumentCheckedException();
 		}
 		setArea(area);
-		setStart(startTime);
-		setEnd(endTime);
+		setStart(startDate);
+		setEnd(endDate);
 	}
 
 
@@ -88,27 +89,27 @@ public class Plan implements EntityInterface<UUID> {
 	/**
 	 * Sets the start date of the plan.
 	 *
-	 * @param startTime The start date of the plan.
+	 * @param startDate The start date of the plan.
 	 * @throws IllegalArgumentException if the start date is null.
 	 */
-	public void setStart(LocalDate startTime) {
-		if (startTime == null) {
+	private void setStart(LocalDate startDate) {
+		if (startDate == null) {
 			throw new IllegalArgumentException("Start date cannot be null.");
 		}
-		this.startTime = startTime;
+		this.startDate = startDate;
 	}
 
 	/**
 	 * Sets the end date of the plan.
 	 *
-	 * @param endTime The end date of the plan.
+	 * @param endDate The end date of the plan.
 	 * @throws IllegalArgumentException if the end date is null.
 	 */
-	public void setEnd(LocalDate endTime) {
-		if (endTime == null) {
+	private void setEnd(LocalDate endDate) {
+		if (endDate == null) {
 			throw new IllegalArgumentException("End date cannot be null.");
 		}
-		this.endTime = endTime;
+		this.endDate = endDate;
 	}
 
 	/* ---- Getters ---- */
@@ -133,7 +134,7 @@ public class Plan implements EntityInterface<UUID> {
 	 * @return The start date of the plan.
 	 */
 	public LocalDate getStart() {
-		return startTime;
+		return startDate;
 	}
 
 	/**
@@ -142,7 +143,7 @@ public class Plan implements EntityInterface<UUID> {
 	 * @return The end date of the plan.
 	 */
 	public LocalDate getEnd() {
-		return endTime;
+		return endDate;
 	}
 
 	/**
@@ -153,5 +154,4 @@ public class Plan implements EntityInterface<UUID> {
 	public Area getArea() {
 		return area;
 	}
-
 }
