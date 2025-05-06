@@ -1,4 +1,5 @@
 import { BACKEND_URL } from "./config";
+import { timeUtil } from "./timeUtil";
 
 const AREA_TYPE_URL = BACKEND_URL + "/area-type"
 const AREA_FEATURE_URL = BACKEND_URL + "/area-feature"
@@ -29,10 +30,6 @@ function paramListToUrlAppendage(paramList) {
 	}
 
 	return "?" + urlList.join("&")
-}
-
-function formatDate(input) {
-	return input.toISOString().slice(0, 19)
 }
 
 async function doFetch(URL, content={}) {
@@ -69,8 +66,8 @@ export default {
 	},
 
 	async getReservationsForAreaInTime(areaId, startTime, endTime) {
-		startTime = formatDate(startTime)
-		endTime = formatDate(endTime)
+		startTime = timeUtil.formatDateForSend(startTime)
+		endTime = timeUtil.formatDateForSend(endTime)
 		return doFetch(`${RESERVATION_AREA_URL}/${areaId}?start=${startTime}&end=${endTime}`)
 			.then(response => response.json())
 	},
@@ -88,8 +85,8 @@ export default {
 			},
 			body: JSON.stringify({
 				roomId: areaId,
-				startTime: formatDate(startTime),
-				endTime: formatDate(endTime),
+				startTime: timeUtil.formatDateForSend(startTime),
+				endTime: timeUtil.formatDateForSend(endTime),
 				comment
 			})
 		}
