@@ -9,12 +9,14 @@ import no.ntnu.idata2900.group3.chairspace.repository.PlanRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 /**
  * Service class for interacting with and managing {@link Plan}s.
  *
  * @author Odin Lyngsgård
  */
+@Service
 public class PlanService extends EntityService<Plan, UUID> {
 	PlanRepository planRepository;
 

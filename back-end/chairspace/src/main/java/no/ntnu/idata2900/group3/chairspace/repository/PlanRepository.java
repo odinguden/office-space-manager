@@ -55,8 +55,8 @@ public interface PlanRepository extends JpaRepository<Plan, UUID> {
 			SELECT 1
 			FROM Plan plan
 			WHERE plan.area.id = ?1
-			AND plan.start <= ?2
-			AND plan.end >= ?3
+			AND plan.startTime <= ?2
+			AND plan.endTime >= ?3
 		)
 		""")
 	public boolean isReservable(UUID areaId, LocalDate start, LocalDate end);
