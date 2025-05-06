@@ -1,6 +1,5 @@
 <script setup>
 function getIcon(name) {
-	console.log(name)
 	switch (name) {
 		case "Screen":
 			return "mdi-monitor"

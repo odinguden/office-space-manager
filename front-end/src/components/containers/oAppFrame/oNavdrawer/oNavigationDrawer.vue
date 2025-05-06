@@ -10,17 +10,17 @@ const NAV_TARGETS = {
 		{
 			name: "My space",
 			icon: "mdi-desk",
-			link: "/room/1"
+			link: null
 		},
 		{
 			name: "My bookings",
 			icon: "mdi-receipt-text",
-			link: "/bookings"
+			link: null
 		},
 		{
 			name: "My plans",
 			icon: "mdi-clock",
-			link: "/plans"
+			link: null
 		}
 	],
 	admin: [

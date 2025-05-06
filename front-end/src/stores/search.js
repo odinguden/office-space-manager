@@ -76,7 +76,6 @@ export const useSearchStore = defineStore('search', {
 			let minutes = Math.abs(this.vDate.getDiff(this.dateStart, this.dateEnd, "minutes"))
 			const hours = Math.floor(minutes / 60)
 			minutes = minutes - hours * 60
-			console.log(this.startDate, this.endDate, hours, minutes)
 			return {hours, minutes}
 		}
 	},
@@ -93,10 +92,8 @@ export const useSearchStore = defineStore('search', {
 				} else {
 					if  (typeof result == "string") {
 						this.errorMessages[key] = [result]
-						console.log(key + ": " + result)
 					} else {
 						this.errorMessages[key] = ["An error has occurred"]
-						console.log(key + ": Error occurred")
 					}
 					isValid = false
 				}
@@ -146,7 +143,6 @@ export const useSearchStore = defineStore('search', {
 
 			queryParams["duration"] = formatDuration(realDuration)
 
-			console.log(queryParams)
 			const nonEmptyParams = {}
 			for (let [idx, param] of Object.entries(queryParams)) {
 				if (param !== null && param !== undefined) {

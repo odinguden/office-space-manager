@@ -6,7 +6,9 @@
 			density="comfortable"
 		>
 			Cancel Booking
-			<o-confirm-dialog activator="parent"/>
+			<o-confirm-dialog activator="parent">
+				Are you certain you want to delete this booking?
+			</o-confirm-dialog>
 		</v-btn>
 	</div>
 </template>
