@@ -1,7 +1,6 @@
 export const timeUtil = {
 	toTimeString(input) {
 		const pad = (str) => String(str).padStart(2, '0')
-		console.log( `${pad(input.getHours())}:${pad(input.getMinutes())}`)
 		return `${pad(input.getHours())}:${pad(input.getMinutes())}`
 	},
 
