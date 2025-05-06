@@ -55,7 +55,6 @@ getReservations()
 					<div class="timeline-wrapper">
 						<o-timeline
 							style="height: 64px"
-							
 							:scope-start="new Date(reservationData.scopeStart)"
 							:scope-end="new Date(reservationData.scopeEnd)"
 							:reservations="reservationData.reservations"
