@@ -71,9 +71,15 @@ function formatTime(time) {
 	return `${vDate.format(time, "fullTime24h")}`// `${vDate.format(time, "hours24h")}:${vDate.format(time, "minutes")}`
 }
 
-function getTooltip(reservation) {
-	const tip = `${formatTime(reservation.start)} - ${formatTime(reservation.end)}`
-	return tip;
+function getDateTip(reservation) {
+	if (reservation.start.getDate() == reservation.end.getDate()) {
+		return vDate.format(reservation.start, "shortDate")
+	}
+	return `${vDate.format(reservation.start, "shortDate")} - ${vDate.format(reservation.end, "shortDate")}`
+}
+
+function getTimeTip(reservation) {
+	return `${formatTime(reservation.start)} - ${formatTime(reservation.end)}`
 }
 </script>
 
@@ -96,9 +102,15 @@ function getTooltip(reservation) {
 					}"
 				/>
 			</template>
-			<span>
-				{{ getTooltip(reservation) }}
-			</span>
+			<div class="tooltip-grid">
+				<span>{{ vDate.format(reservation.start, "shortDate") }}</span>
+				<span> - </span>
+				<span>{{ vDate.format(reservation.end, "shortDate") }}</span>
+
+				<span>{{ vDate.format(reservation.start, "fullTime24h").substring(0,5) }}</span>
+				<span> - </span>
+				<span>{{ vDate.format(reservation.end, "fullTime24h").substring(0,5) }}</span>
+			</div>
 		</v-tooltip>
 	</div>
 </template>
@@ -131,5 +143,12 @@ function getTooltip(reservation) {
 	&[vertical] {
 		flex-direction: column;
 	}
+}
+
+.tooltip-grid {
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
+	gap: 0px 8px;
+	align-items: center;
 }
 </style>
