@@ -101,4 +101,19 @@ public interface AreaRepository extends JpaRepository<Area, UUID> {
 		WHERE admin.id = :userId
 		""")
 	Page<Area> findByAdmin(UUID userId, Pageable pageable);
+
+	/**
+	 * Finds areas by whether or not they are reservable or planControlled.
+	 *
+	 * @param reservable reservable state of the area
+	 * @param planControl plan controlled state of the area
+	 * @return areas matching the parameters
+	 */
+	@Query("""
+		SELECT area
+		FROM Area area
+		WHERE area.reservable = ?1
+		OR area.planControlled = ?2
+		""")
+	public List<Area> findAllByPlanControlledOrReservable(boolean reservable, boolean planControl);
 }

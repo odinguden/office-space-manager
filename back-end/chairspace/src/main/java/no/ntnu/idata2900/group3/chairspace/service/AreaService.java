@@ -25,9 +25,9 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class AreaService extends EntityService<Area, UUID> {
-	AreaRepository areaRepository;
-	ReservationService reservationService;
-	PlanService planService;
+	private final AreaRepository areaRepository;
+	private final ReservationService reservationService;
+	private final PlanService planService;
 
 	/**
 	 * Creates a new area service.
@@ -70,12 +70,11 @@ public class AreaService extends EntityService<Area, UUID> {
 		LocalDateTime searchEnd,
 		Duration minGapSize
 	) {
-		List<Area> reservableAreas = this.areaRepository.findAllByReservable(true);
-		List<Area> planControlledAreas = this.areaRepository.findAllByPlanControlled(true);
+		List<Area> reservableAreas =
+				this.areaRepository.findAllByPlanControlledOrReservable(true, true);
 
 		Set<Area> areasWithGap = new HashSet<>();
 		reservableAreas.iterator().forEachRemaining(areasWithGap::add);
-		planControlledAreas.iterator().forEachRemaining(areasWithGap::add);
 		Iterator<Area> reservableAreasIterator = reservableAreas.iterator();
 
 		while (reservableAreasIterator.hasNext()) {

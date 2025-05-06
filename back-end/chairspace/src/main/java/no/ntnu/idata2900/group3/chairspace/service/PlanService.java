@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.entity.Plan;
 import no.ntnu.idata2900.group3.chairspace.repository.PlanRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,7 +15,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class PlanService extends EntityService<Plan, UUID> {
-	PlanRepository planRepository;
+	private final PlanRepository planRepository;
 
 	/**
 	 * Creates a new plan service.
@@ -64,18 +61,9 @@ public class PlanService extends EntityService<Plan, UUID> {
 	 * Gets all the plans belonging to a specific area.
 	 *
 	 * @param areaId the id of the area
-	 * @param page the page number to retrieve
-	 * @param size the number of items on the page
 	 * @return plans belonging to a area
 	 */
-	public Page<Plan> getPlansByArea(UUID areaId, Integer page, Integer size) {
-		if (page == null) {
-			page = 0;
-		}
-		if (size == null) {
-			size = DEFAULT_PAGE_SIZE;
-		}
-		Pageable pageRequest = PageRequest.of(page, size);
-		return planRepository.getPlansByArea(areaId, pageRequest);
+	public List<Plan> getPlansByArea(UUID areaId) {
+		return planRepository.getPlansByArea(areaId);
 	}
 }
