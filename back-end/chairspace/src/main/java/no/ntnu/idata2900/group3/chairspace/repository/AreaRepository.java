@@ -31,6 +31,20 @@ public interface AreaRepository extends JpaRepository<Area, UUID> {
 	List<Area> findAllByReservable(boolean reservable);
 
 	/**
+	 * Finds all areas by whether or not they are plan controlled.
+	 *
+	 * @param planControlled the plan controlled status of the area
+	 * @return list of areas by whether or not they are plan controlled
+	 */
+	@Query("""
+		SELECT area
+		FROM Area area
+		WHERE area.planControlled = ?1
+		AND area.reservable = true
+		""")
+	List<Area> findAllByPlanControlled(boolean planControlled);
+
+	/**
 	 * Finds all direct sub areas of a given super area.
 	 *
 	 * @param superAreaId id of the super area to find sub areas for

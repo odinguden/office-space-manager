@@ -71,17 +71,24 @@ public class AreaService extends EntityService<Area, UUID> {
 		Duration minGapSize
 	) {
 		List<Area> reservableAreas = this.areaRepository.findAllByReservable(true);
+		List<Area> planControlledAreas = this.areaRepository.findAllByPlanControlled(true);
+
 		Set<Area> areasWithGap = new HashSet<>();
 		reservableAreas.iterator().forEachRemaining(areasWithGap::add);
+		planControlledAreas.iterator().forEachRemaining(areasWithGap::add);
 		Iterator<Area> reservableAreasIterator = reservableAreas.iterator();
 
 		while (reservableAreasIterator.hasNext()) {
 			Area area = reservableAreasIterator.next();
+
 			boolean hasGap = reservationService.doesAreaHaveFreeGapLike(
 				area.getId(),
 				searchStart,
 				searchEnd,
 				minGapSize
+			) && (
+				!area.isPlanControlled()
+				|| planService.isFree(area.getId(), searchStart, searchEnd)
 			);
 
 			if (!hasGap) {
