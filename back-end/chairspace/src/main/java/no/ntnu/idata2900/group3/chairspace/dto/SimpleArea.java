@@ -30,7 +30,9 @@ public record SimpleArea(
 	Integer capacity,
 	String calendarLink,
 	Boolean reservable,
-	SimpleReservationList reservations
+	SimpleReservationList reservations,
+	Boolean isPlanControlled,
+	List<SimplePlan> plans
 ) {
 	/**
 	 * A builder for simple areas.
@@ -47,6 +49,8 @@ public record SimpleArea(
 		private String calendarLink;
 		private Boolean reservable;
 		private SimpleReservationList reservations;
+		private Boolean planControlled;
+		private List<SimplePlan> simplePlans;
 
 		/**
 		 * Creates a new builder and prefills it with information from the input Area.
@@ -92,7 +96,9 @@ public record SimpleArea(
 				this.capacity,
 				this.calendarLink,
 				this.reservable,
-				this.reservations
+				this.reservations,
+				this.planControlled,
+				this.simplePlans
 			);
 		}
 
@@ -265,6 +271,28 @@ public record SimpleArea(
 		 */
 		public Builder reservations(SimpleReservationList reservations) {
 			this.reservations = reservations;
+			return this;
+		}
+
+		/**
+		 * Sets the plan controlled of this builder.
+		 *
+		 * @param planControlled the plan controlled to set
+		 * @return this builder
+		 */
+		public Builder planControlled(Boolean planControlled) {
+			this.planControlled = planControlled;
+			return this;
+		}
+
+		/**
+		 * Sets the simple plans of the builder.
+		 *
+		 * @param simplePlans the simple plans to set
+		 * @return this builder
+		 */
+		public Builder simplePlans(List<SimplePlan> simplePlans) {
+			this.simplePlans = simplePlans;
 			return this;
 		}
 	}
