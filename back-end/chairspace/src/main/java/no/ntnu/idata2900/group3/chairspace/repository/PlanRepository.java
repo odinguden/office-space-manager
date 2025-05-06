@@ -1,6 +1,6 @@
 package no.ntnu.idata2900.group3.chairspace.repository;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.entity.Plan;
@@ -28,7 +28,7 @@ public interface PlanRepository extends JpaRepository<Plan, UUID> {
 			AND plan.startTime <= ?1
 			AND plan.endTime >= ?2
 		""")
-	List<UUID> getReservablePlanAreas(LocalDateTime start, LocalDateTime end);
+	List<UUID> getReservablePlanAreas(LocalDate start, LocalDate end);
 
 	/**
 	 * Gets all plans belonging to a certain area.

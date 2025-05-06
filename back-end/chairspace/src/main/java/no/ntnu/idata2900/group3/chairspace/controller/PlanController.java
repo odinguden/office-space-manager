@@ -2,7 +2,6 @@ package no.ntnu.idata2900.group3.chairspace.controller;
 
 import java.util.List;
 import java.util.UUID;
-
 import no.ntnu.idata2900.group3.chairspace.dto.SimplePlan;
 import no.ntnu.idata2900.group3.chairspace.entity.Plan;
 import no.ntnu.idata2900.group3.chairspace.service.PlanService;

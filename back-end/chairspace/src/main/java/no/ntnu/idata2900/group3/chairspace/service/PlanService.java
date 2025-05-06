@@ -1,6 +1,7 @@
 package no.ntnu.idata2900.group3.chairspace.service;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.entity.Plan;
@@ -33,7 +34,7 @@ public class PlanService extends EntityService<Plan, UUID> {
 	 * @return the id of all plan controlled areas that are reservable
 	 */
 	public List<UUID> getFreePlanAreas(LocalDateTime start, LocalDateTime end) {
-		return planRepository.getReservablePlanAreas(start, end);
+		return planRepository.getReservablePlanAreas(start.toLocalDate(), end.toLocalDate());
 	}
 
 	/**

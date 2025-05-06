@@ -1,7 +1,7 @@
 package no.ntnu.idata2900.group3.chairspace.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.entity.Plan;
 
@@ -9,7 +9,7 @@ import no.ntnu.idata2900.group3.chairspace.entity.Plan;
  * A simplified container for {@link Plan}.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record SimplePlan(UUID id, UUID areaId, Date start, Date end, String name) {
+public record SimplePlan(UUID id, UUID areaId, LocalDate start, LocalDate end, String name) {
 
 	/**
 	 * Builder for simple plan record.
@@ -17,8 +17,8 @@ public record SimplePlan(UUID id, UUID areaId, Date start, Date end, String name
 	public static class Builder {
 		UUID id;
 		UUID areaId;
-		Date start;
-		Date end;
+		LocalDate start;
+		LocalDate end;
 		String name;
 
 		/**
@@ -85,7 +85,7 @@ public record SimplePlan(UUID id, UUID areaId, Date start, Date end, String name
 		 * @param start the start date of the plan
 		 * @return builder object
 		 */
-		public Builder start(Date start) {
+		public Builder start(LocalDate start) {
 			if (start == null) {
 				throw new IllegalArgumentException("Start is null when value was expected");
 			}
@@ -99,7 +99,7 @@ public record SimplePlan(UUID id, UUID areaId, Date start, Date end, String name
 		 * @param end the end date of the plan
 		 * @return builder object
 		 */
-		public Builder end(Date end) {
+		public Builder end(LocalDate end) {
 			if (end == null) {
 				throw new IllegalArgumentException("End is null when value was expected");
 			}

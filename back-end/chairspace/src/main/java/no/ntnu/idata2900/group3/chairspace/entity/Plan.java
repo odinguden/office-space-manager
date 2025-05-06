@@ -5,7 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 
@@ -21,8 +21,8 @@ public class Plan implements EntityInterface<UUID> {
 	@ManyToOne
 	private Area area;
 	private String name;
-	private Date startTime;
-	private Date endTime;
+	private LocalDate startTime;
+	private LocalDate endTime;
 
 	/**
 	 * No args constructor for JPA.
@@ -40,10 +40,10 @@ public class Plan implements EntityInterface<UUID> {
 	 * @param endTime The end date of the plan.
 	 * @throws InvalidArgumentCheckedException if the start date is after the end date.
 	 */
-	public Plan(String name, Area area, Date startTime, Date endTime)
+	public Plan(String name, Area area, LocalDate startTime, LocalDate endTime)
 		throws InvalidArgumentCheckedException {
 		setName(name);
-		if (startTime.after(endTime)) {
+		if (startTime.isAfter(endTime)) {
 			throw new InvalidArgumentCheckedException();
 		}
 		setArea(area);
@@ -91,7 +91,7 @@ public class Plan implements EntityInterface<UUID> {
 	 * @param startTime The start date of the plan.
 	 * @throws IllegalArgumentException if the start date is null.
 	 */
-	public void setStart(Date startTime) {
+	public void setStart(LocalDate startTime) {
 		if (startTime == null) {
 			throw new IllegalArgumentException("Start date cannot be null.");
 		}
@@ -104,7 +104,7 @@ public class Plan implements EntityInterface<UUID> {
 	 * @param endTime The end date of the plan.
 	 * @throws IllegalArgumentException if the end date is null.
 	 */
-	public void setEnd(Date endTime) {
+	public void setEnd(LocalDate endTime) {
 		if (endTime == null) {
 			throw new IllegalArgumentException("End date cannot be null.");
 		}
@@ -132,7 +132,7 @@ public class Plan implements EntityInterface<UUID> {
 	 *
 	 * @return The start date of the plan.
 	 */
-	public Date getStart() {
+	public LocalDate getStart() {
 		return startTime;
 	}
 
@@ -141,7 +141,7 @@ public class Plan implements EntityInterface<UUID> {
 	 *
 	 * @return The end date of the plan.
 	 */
-	public Date getEnd() {
+	public LocalDate getEnd() {
 		return endTime;
 	}
 
