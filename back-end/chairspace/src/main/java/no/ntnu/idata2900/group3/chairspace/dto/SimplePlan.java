@@ -9,7 +9,13 @@ import no.ntnu.idata2900.group3.chairspace.entity.Plan;
  * A simplified container for {@link Plan}.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record SimplePlan(UUID id, UUID areaId, LocalDate start, LocalDate end, String name) {
+public record SimplePlan(
+	UUID id,
+	UUID areaId,
+	LocalDate start,
+	LocalDate end,
+	String name
+) {
 
 	/**
 	 * Builder for simple plan record.
@@ -58,9 +64,6 @@ public record SimplePlan(UUID id, UUID areaId, LocalDate start, LocalDate end, S
 		 * @return builder object
 		 */
 		public Builder id(UUID id) {
-			if (id == null) {
-				throw new IllegalArgumentException("Id is null when value was expected");
-			}
 			this.id = id;
 			return this;
 		}
@@ -72,9 +75,6 @@ public record SimplePlan(UUID id, UUID areaId, LocalDate start, LocalDate end, S
 		 * @return builder object
 		 */
 		public Builder areaId(UUID areaId) {
-			if (areaId == null) {
-				throw new IllegalArgumentException("Area id was null when value was expected");
-			}
 			this.areaId = areaId;
 			return this;
 		}
@@ -86,9 +86,6 @@ public record SimplePlan(UUID id, UUID areaId, LocalDate start, LocalDate end, S
 		 * @return builder object
 		 */
 		public Builder start(LocalDate start) {
-			if (start == null) {
-				throw new IllegalArgumentException("Start is null when value was expected");
-			}
 			this.start = start;
 			return this;
 		}
@@ -100,9 +97,6 @@ public record SimplePlan(UUID id, UUID areaId, LocalDate start, LocalDate end, S
 		 * @return builder object
 		 */
 		public Builder end(LocalDate end) {
-			if (end == null) {
-				throw new IllegalArgumentException("End is null when value was expected");
-			}
 			this.end = end;
 			return this;
 		}
@@ -114,9 +108,6 @@ public record SimplePlan(UUID id, UUID areaId, LocalDate start, LocalDate end, S
 		 * @return builder object
 		 */
 		public Builder name(String name) {
-			if (name == null) {
-				throw new IllegalArgumentException("Name was null when value was expected");
-			}
 			this.name = name;
 			return this;
 		}
