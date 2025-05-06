@@ -1,12 +1,26 @@
 package no.ntnu.idata2900.group3.chairspace.controller;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import no.ntnu.idata2900.group3.chairspace.assembler.ReservationAssembler;
+import no.ntnu.idata2900.group3.chairspace.dto.MakeReservationDto;
 import no.ntnu.idata2900.group3.chairspace.dto.SimpleReservation;
+import no.ntnu.idata2900.group3.chairspace.dto.SimpleReservationList;
+import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.Reservation;
+import no.ntnu.idata2900.group3.chairspace.entity.User;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.NotReservableException;
+import no.ntnu.idata2900.group3.chairspace.service.AreaService;
 import no.ntnu.idata2900.group3.chairspace.service.ReservationService;
+import no.ntnu.idata2900.group3.chairspace.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +35,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-
-
 /**
  * Controller for the reservation feature entity.
  *
@@ -34,19 +46,27 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/reservation")
 public class ReservationController extends PermissionManager {
 	private final ReservationService reservationService;
+	private final UserService userService;
+	private final AreaService areaService;
 	private final ReservationAssembler reservationAssembler;
 
 	/**
 	 * Creates a new reservation controller.
 	 *
 	 * @param reservationService autowired reservation service
+	 * @param areaService autowired area service
+	 * @param userService autowired user service
 	 * @param reservationAssembler autowired reservation assembler
 	 */
 	public ReservationController(
 		ReservationService reservationService,
+		UserService userService,
+		AreaService areaService,
 		ReservationAssembler reservationAssembler
 	) {
 		this.reservationService = reservationService;
+		this.areaService = areaService;
+		this.userService = userService;
 		this.reservationAssembler = reservationAssembler;
 	}
 
@@ -93,6 +113,86 @@ public class ReservationController extends PermissionManager {
 	}
 
 	/**
+	 * Gets reservations belonging to an area between two timestamps.
+	 *
+	 * @param id the id of the area to retrieve reservations for
+	 * @param start the starting timestamp
+	 * @param end the ending timestamp
+	 * @return a list of reservations for the area within a timespan
+	 */
+	@GetMapping("/area/{id}")
+	public ResponseEntity<List<SimpleReservation>> getForAreaInTime(
+		@PathVariable UUID id,
+		@RequestParam LocalDateTime start,
+		@RequestParam LocalDateTime end
+	) {
+		this.hasPermissionToGet();
+		List<Reservation> reservations =
+			this.reservationService.getReservationsForAreaBetween(id, start, end);
+
+		return new ResponseEntity<>(
+			reservations.stream().map(reservationAssembler::toSimple).toList(),
+			HttpStatus.OK
+		);
+	}
+
+	/**
+	 * Gets the reservation frequency for either a day or a month. If day is null and month/year
+	 * are defined, gets the aggregated frequency of the month. If month/year is null and day is
+	 * defined, gets the frequency of the day. Otherwise returns 404.
+	 *
+	 * @param id the id of the area to retrieve the frequency for
+	 * @param date the day to get the frequency of
+	 * @param year the year to get the frequency of
+	 * @param month the month to get the frequency of
+	 * @return the reservation frequency of the room, as an integer percentage.
+	 */
+	@GetMapping("/area/{id}/frequency")
+	public ResponseEntity<Integer> getReservationFrequency(
+		@PathVariable UUID id,
+		@RequestParam(required = false) LocalDate date,
+		@RequestParam(required = false) Integer year,
+		@RequestParam(required = false) Integer month
+	) {
+		float frequency;
+		if (date == null && month != null && year != null) {
+			frequency = reservationService.getReservationFrequencyForMonth(id, year, month);
+		} else if (date != null && month == null && year == null) {
+			frequency = reservationService.getReservationFrequencyForDay(id, date);
+		} else {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>((int) (frequency * 100), HttpStatus.OK);
+	}
+
+	/**
+	 * Gets the reservation frequency for a month as a list of frequencies for each day.
+	 *
+	 * @param id the id of the area to get the frequencies of
+	 * @param year the year to get the frequency of
+	 * @param month the month to get the frequency of
+	 * @return a list of frequencies for the provided month for the area
+	 */
+	@GetMapping("/area/{id}/frequency/list")
+	public ResponseEntity<List<Integer>> getReservationFrequencyForFullMonth(
+		@PathVariable UUID id,
+		@RequestParam int year,
+		@RequestParam int month
+	) {
+		List<Float> frequencies =
+			reservationService.getReservationFrequencyForDaysInMonth(id, year, month);
+
+		List<Integer> frequencyInts = frequencies.stream()
+			.map(frequency -> (int) (frequency * 100))
+			.toList();
+
+		return new ResponseEntity<>(
+			frequencyInts,
+			HttpStatus.OK
+		);
+	}
+
+	/**
 	 * Creates a new reservation based on a simple reservation.
 	 *
 	 * @param simpleReservation the simple reservation to create from
@@ -113,6 +213,44 @@ public class ReservationController extends PermissionManager {
 		reservationService.create(reservation);
 
 		return new ResponseEntity<>(HttpStatus.CREATED);
+	}
+
+	/**
+	 * Creates a new reservation for the currently logged in user.
+	 *
+	 * @param reservationMakeRequest DTO object containing data to make a reservation
+	 * @return 204 NO CONTENT
+	 */
+	@PostMapping("/make")
+	public ResponseEntity<String> bookRoomForMe(
+		@RequestBody MakeReservationDto reservationMakeRequest
+	) {
+		User user = userService.getSessionUser();
+		if (user == null) {
+			System.out.println("No session user?");
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+		}
+		Area area = areaService.get(reservationMakeRequest.roomId());
+		if (area == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+		}
+		Reservation reservation;
+		try {
+			reservation = new Reservation(
+				area,
+				user,
+				reservationMakeRequest.startTime(),
+				reservationMakeRequest.endTime(),
+				reservationMakeRequest.comment());
+		} catch (InvalidArgumentCheckedException | NotReservableException e) {
+			e.printStackTrace();
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
+		if (!reservationService.create(reservation)) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT);
+		}
+
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	/**
@@ -151,26 +289,80 @@ public class ReservationController extends PermissionManager {
 	 * Gets all reservations belonging to a given user.
 	 *
 	 * @param userId the id of the user to get the reservations of
-	 * @param page the page of the pagination to retrieve
-	 * @param size the size of the page to retrieve
-	 * @return reservations belonging to the user in a paginated format
+	 * @return reservations belonging to the user
 	 * @throws ResponseStatusException 400 BAD_REQUEST if the userId is null or the page is negative
 	 */
 	@GetMapping("/user/{userId}")
-	public ResponseEntity<Page<SimpleReservation>> getReservationsByUser(
-		@PathVariable UUID userId,
-		@RequestParam(required = false) Integer page,
-		@RequestParam(required = false) Integer size
+	public ResponseEntity<List<SimpleReservation>> getReservationsByUser(
+		@PathVariable UUID userId
 	) {
 		this.hasPermissionToGet();
-		Page<Reservation> reservations = reservationService.getReservationsByUserPaged(
-			userId,
-			page,
-			size
-		);
-		Page<SimpleReservation> simpleReservations = reservations.map(
-			reservationAssembler::toSimple
-		);
+		List<Reservation> reservations = reservationService.getReservationsByUser(userId);
+		List<SimpleReservation> simpleReservations = reservations.stream()
+			.map(reservationAssembler::toSimple)
+			.toList();
 		return new ResponseEntity<>(simpleReservations, HttpStatus.OK);
+	}
+
+	/**
+	 * Gets a map of all areas in which the current user has a booking, mapped to all bookings for
+	 *     those areas, from the start of the first booking to the end of the last booking made
+	 *     by the user.
+	 *
+	 * @return a map of all areas the user has booked connected to simple reservation lists
+	 *     for the scope of the user's reservations.
+	 */
+	@GetMapping("/user/me")
+	public ResponseEntity<Map<UUID, SimpleReservationList>> getMyReservationData() {
+		this.hasPermissionToGet();
+		User sessionUser = userService.getSessionUser();
+		if (sessionUser == null) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+		}
+
+		List<Reservation> myReservations = reservationService
+			.getReservationsByUser(sessionUser.getId());
+
+		if (myReservations.isEmpty()) {
+			return new ResponseEntity<>(
+				new HashMap<>(),
+				HttpStatus.OK
+			);
+		}
+
+		LocalDateTime scopeStart = myReservations.stream()
+			.map(Reservation::getStart)
+			.min(Comparator.naturalOrder())
+			.orElseThrow();
+
+		LocalDateTime scopeEnd = myReservations.stream()
+			.map(Reservation::getEnd)
+			.max(Comparator.naturalOrder())
+			.orElseThrow();
+
+		Set<UUID> areaIds = myReservations.stream()
+			.map(Reservation::getArea)
+			.map(Area::getId)
+			.collect(Collectors.toSet());
+
+		Map<UUID, SimpleReservationList> allReservationsMap = new HashMap<>();
+
+		for (UUID areaId : areaIds) {
+			List<SimpleReservation> areaReservations = reservationService
+				.getReservationsForAreaBetween(areaId, scopeStart, scopeEnd)
+				.stream()
+				.map(reservationAssembler::toSimple)
+				.toList();
+
+			SimpleReservationList simpleReservationList = new SimpleReservationList(
+				scopeStart,
+				scopeEnd,
+				areaReservations
+			);
+
+			allReservationsMap.put(areaId, simpleReservationList);
+		}
+
+		return new ResponseEntity<>(allReservationsMap, HttpStatus.OK);
 	}
 }

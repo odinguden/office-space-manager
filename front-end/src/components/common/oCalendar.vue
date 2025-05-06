@@ -2,8 +2,11 @@
 import { useODate } from '@/plugins/oDate';
 const oDate = useODate()
 
-const now = new Date()
+const props = defineProps({
+	area: Object
+})
 
+const now = new Date()
 const selectedYear = ref(now.getFullYear())
 const selectedMonth = ref(now.getMonth())
 </script>
@@ -31,10 +34,13 @@ const selectedMonth = ref(now.getMonth())
 			</o-cycle-input>
 		</header>
 		<v-divider />
-		<o-calendar-month
-			class="calendar-content"
+		<o-calendar-month-view
+			:area="area"
 			:year="selectedYear"
 			:month="selectedMonth"
+			:key="`${selectedYear}-${selectedMonth}`"
+			clickable-days
+			@day-clicked="$emit('day-clicked', $event)"
 		/>
 	</v-sheet>
 </template>
@@ -42,6 +48,5 @@ const selectedMonth = ref(now.getMonth())
 <style scoped lang="scss">
 .calendar {
 	border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-	min-width: 352px;
 }
 </style>

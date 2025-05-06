@@ -113,6 +113,15 @@ public class User implements EntityInterface<UUID> {
 	}
 
 	/**
+	 * Gets the user's externalId.
+	 *
+	 * @return the user's externalId
+	 */
+	public String getExternalId() {
+		return this.externalId;
+	}
+
+	/**
 	 * Return the users favorite areas as a set.
 	 *
 	 * @return the set of favorite areas

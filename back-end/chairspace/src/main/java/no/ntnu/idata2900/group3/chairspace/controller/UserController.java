@@ -4,7 +4,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import no.ntnu.idata2900.group3.chairspace.assembler.AreaAssembler;
+import no.ntnu.idata2900.group3.chairspace.assembler.UserAssembler;
 import no.ntnu.idata2900.group3.chairspace.dto.SimpleArea;
+import no.ntnu.idata2900.group3.chairspace.dto.SimpleUser;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
 import no.ntnu.idata2900.group3.chairspace.entity.User;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
@@ -35,22 +37,27 @@ import org.springframework.web.server.ResponseStatusException;
 public class UserController extends AbstractController<User, UUID> {
 	private final UserService userService;
 	private final AreaService areaService;
+	private final UserAssembler userAssembler;
 	private final AreaAssembler areaAssembler;
+
 	/**
 	 * Creates a new user controller.
 	 *
 	 * @param userService autowired user service.
 	 * @param areaService autowired area service.
+	 * @param userAssembler autowired user assembler
 	 * @param areaAssembler autowired area assembler.
 	 */
 	public UserController(
 		UserService userService,
 		AreaService areaService,
+		UserAssembler userAssembler,
 		AreaAssembler areaAssembler
 	) {
 		super(userService);
 		this.userService = userService;
 		this.areaService = areaService;
+		this.userAssembler = userAssembler;
 		this.areaAssembler = areaAssembler;
 	}
 
@@ -178,5 +185,22 @@ public class UserController extends AbstractController<User, UUID> {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not logged in");
 		}
 		return new ResponseEntity<>(isFavorite, HttpStatus.OK);
+	}
+
+	/**
+	 * Gets the current logged in user, or throws 401 if there is no currently logged in user.
+	 *
+	 * @return 200 OK with the user if requester is logged in, 401 otherwise
+	 */
+	@GetMapping("/whoami")
+	public ResponseEntity<SimpleUser> whoAmI() {
+		User sessionUser = userService.getSessionUser();
+		if (sessionUser == null) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+		}
+		return new ResponseEntity<>(
+			userAssembler.toSimple(sessionUser),
+			HttpStatus.OK
+		);
 	}
 }
