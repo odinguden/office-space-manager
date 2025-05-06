@@ -66,21 +66,6 @@ function getDuration(reservation) {
 
 	return Math.max(duration, 0);
 }
-
-function formatTime(time) {
-	return `${vDate.format(time, "fullTime24h")}`// `${vDate.format(time, "hours24h")}:${vDate.format(time, "minutes")}`
-}
-
-function getDateTip(reservation) {
-	if (reservation.start.getDate() == reservation.end.getDate()) {
-		return vDate.format(reservation.start, "shortDate")
-	}
-	return `${vDate.format(reservation.start, "shortDate")} - ${vDate.format(reservation.end, "shortDate")}`
-}
-
-function getTimeTip(reservation) {
-	return `${formatTime(reservation.start)} - ${formatTime(reservation.end)}`
-}
 </script>
 
 <template>
