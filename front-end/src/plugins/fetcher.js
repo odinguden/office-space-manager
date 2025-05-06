@@ -12,6 +12,9 @@ const RESERVATION_AREA_URL = RESERVATION_URL + "/area"
 
 const SEARCH_URL = BACKEND_URL + "/search"
 
+const USER_URL = BACKEND_URL + "/user"
+const WHOAMI_URL = USER_URL + "/whoami"
+
 const DEFAULT_BODY = {
 	method: "GET",
 	credentials: "include"
@@ -84,5 +87,16 @@ export default {
 			})
 		}
 		return fetch(RESERVATION_MAKE_URL, requestBody)
+	},
+
+	async whoAmI() {
+		return fetch(WHOAMI_URL, DEFAULT_BODY)
+			.then(response => {
+				console.log(response)
+				if (response.ok) {
+					return response.json()
+				}
+				return null
+			})
 	}
 }
