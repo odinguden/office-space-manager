@@ -16,9 +16,7 @@ onMounted(() => authStore.updateState())
 	<v-main v-else-if="authStore.authState === authStore.AUTH_STATES.UNAUTHORIZED">
 		<o-login />
 	</v-main>
-	<v-main v-else>
-		<v-skeleton-loader :type="card" />
-	</v-main>
+	<v-main v-else />
 </template>
 
 <style scoped lang="scss">
