@@ -8,9 +8,9 @@ const NAV_TARGETS = {
 			link: "/"
 		},
 		{
-			name: "My space",
+			name: "My spaces",
 			icon: "mdi-desk",
-			link: null
+			link: "/spaces"
 		},
 		{
 			name: "My bookings",

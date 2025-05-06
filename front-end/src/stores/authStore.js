@@ -12,7 +12,8 @@ const AUTH_STATES = {
 
 export const useAuthStore = defineStore('auth', {
 	state: () => ({
-		authState: AUTH_STATES.UNCHECKED
+		authState: AUTH_STATES.UNCHECKED,
+		me: null
 	}),
 
 	getters: {
@@ -24,15 +25,18 @@ export const useAuthStore = defineStore('auth', {
 		updateState() {
 			fetcher.whoAmI()
 				.then(response => {
+					this.me = null
 					if (response === null) {
 						this.authState = AUTH_STATES.UNAUTHORIZED
 					} else if (response?.userId) {
 						this.authState = AUTH_STATES.AUTHORIZED
+						this.me = response
 					} else {
 						this.authState = AUTH_STATES.PROBLEMATIC
 					}
 				})
 				.catch(() => {
+					this.me = null
 					this.authState = AUTH_STATES.PROBLEMATIC
 				})
 
