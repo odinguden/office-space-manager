@@ -1,13 +1,7 @@
 <script setup>
-const props = defineProps({
-	id: String,
-	func: Function
-})
-
 const emit = defineEmits(["delete"])
 
 function doDelete() {
-	props.func(props.id)
 	emit("delete")
 }
 </script>

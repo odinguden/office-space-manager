@@ -101,7 +101,7 @@ function setReservation(reservationSegment) {
 					:style="{
 						'--reservation-length': getDuration(reservation)
 					}"
-					@click.stop="setReservation(reservation)"
+					@click.prevent="setReservation(reservation)"
 				/>
 			</template>
 			<div class="tooltip-grid">
@@ -139,6 +139,7 @@ function setReservation(reservationSegment) {
 		&.event {
 			background-color: rgb(var(--v-theme-error));
 			border: 2px solid rgba(var(--v-border-color), 0.33);
+			cursor: pointer;
 
 			&.mine {
 				background-color: rgb(var(--v-theme-blue));
