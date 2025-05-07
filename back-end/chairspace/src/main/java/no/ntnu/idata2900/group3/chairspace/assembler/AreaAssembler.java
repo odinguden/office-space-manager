@@ -142,8 +142,9 @@ public class AreaAssembler {
 	 * @return the area represented by a simple area object
 	 */
 	public SimpleArea toSimpleArea(Area area) {
-		SimpleArea.Builder builder = SimpleArea.Builder.fromArea(area);
-		builder.planControlled(area.isPlanControlled());
+		SimpleArea.Builder builder = SimpleArea.Builder.fromArea(area)
+			.planControlled(area.isPlanControlled());
+
 		if (area.isPlanControlled()) {
 			builder.simplePlans(getPlansForArea(area.getId()));
 		}
