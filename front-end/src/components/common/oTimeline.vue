@@ -7,7 +7,8 @@ const vDate = useDate()
 const props = defineProps({
 	reservations: Array,
 	scopeStart: Date,
-	scopeEnd: Date
+	scopeEnd: Date,
+	disabled: Boolean
 })
 
 const selectedReservation = ref(null)
@@ -83,8 +84,8 @@ function setReservation(reservationSegment) {
 </script>
 
 <template>
-	<div class="timeline-container">
-		<v-tooltip v-for="reservation in timeline">
+	<div class="timeline-container" :class="{ disabled }">
+		<v-tooltip v-for="reservation in timeline" :disabled="disabled">
 			<template
 				v-slot:activator="{ props }"
 			>
@@ -94,11 +95,13 @@ function setReservation(reservationSegment) {
 					:class="{
 						'event': reservation.type === 'event',
 						'gap': reservation.type === 'gap',
-						'mine': reservation.isMine
+						'mine': reservation.isMine,
+						'disabled': disabled
 					}"
 					:style="{
 						'--reservation-length': getDuration(reservation)
 					}"
+					:disabled="disabled"
 					@click.prevent="setReservation(reservation)"
 				/>
 			</template>
@@ -130,6 +133,10 @@ function setReservation(reservationSegment) {
 	display: flex;
 	background-color: rgba(var(--v-theme-on-surface), 0.1);
 	border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+
+	&.disabled {
+		background-color: rgba(var(--v-theme-on-surface), 0.3)
+	}
 
 	.timeline-component {
 		flex-grow: var(--reservation-length);
