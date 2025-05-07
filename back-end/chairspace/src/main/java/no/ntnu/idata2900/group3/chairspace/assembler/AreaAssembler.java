@@ -145,11 +145,7 @@ public class AreaAssembler {
 		SimpleArea.Builder builder = SimpleArea.Builder.fromArea(area);
 		builder.planControlled(area.isPlanControlled());
 		if (area.isPlanControlled()) {
-			List<SimplePlan> simplePlans = planService.getPlansByArea(area.getId())
-				.stream()
-				.map(planAssembler::toSimple)
-				.toList();
-			builder.simplePlans(simplePlans);
+			builder.simplePlans(getPlansForArea(area.getId()));
 		}
 
 		return builder.build();
@@ -179,16 +175,12 @@ public class AreaAssembler {
 			reservations
 		);
 
-		SimpleArea.Builder builder = SimpleArea.Builder.fromArea(area);
-		builder.reservations(simpleReservationList);
-		builder.planControlled(area.isPlanControlled());
+		SimpleArea.Builder builder = SimpleArea.Builder.fromArea(area)
+			.reservations(simpleReservationList)
+			.planControlled(area.isPlanControlled());
 
 		if (area.isPlanControlled()) {
-			List<SimplePlan> simplePlans = planService.getPlansByArea(area.getId())
-				.stream()
-				.map(planAssembler::toSimple)
-				.toList();
-			builder.simplePlans(simplePlans);
+			builder.simplePlans(getPlansForArea(area.getId()));
 		}
 
 		return builder.build();
@@ -256,5 +248,12 @@ public class AreaAssembler {
 		UUID areaId, LocalDateTime start, LocalDateTime end
 	) {
 		return reservationService.getReservationsForAreaBetween(areaId, start, end);
+	}
+
+	private List<SimplePlan> getPlansForArea(UUID areaId) {
+		return planService.getPlansByArea(areaId)
+			.stream()
+			.map(planAssembler::toSimple)
+			.toList();
 	}
 }
