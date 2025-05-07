@@ -18,6 +18,8 @@ const startDate = ref(new Date())
 const endDate = ref(new Date())
 const comment = ref("")
 
+const loading = ref(false)
+
 const bothDates = computed({
 	get() {
 		return startDate.value
@@ -83,7 +85,10 @@ const isValid = computed(() => {
 })
 
 function trySubmit() {
+	loading.value = true
 	fetcher.tryCreatePlan(props.areaId, startDate.value, endDate.value, comment.value)
+		.then(() => window.location.reload())
+		.finally(() => loading.value = false)
 }
 </script>
 
@@ -133,6 +138,7 @@ function trySubmit() {
 			/>
 			<div class="h-input-group reverse-on-mobile">
 				<v-btn
+					:loading="loading"
 					text="cancel"
 					@click="emit('close')"
 				/>
