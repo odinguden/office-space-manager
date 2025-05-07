@@ -1,5 +1,11 @@
 <script setup>
 const emit = defineEmits(["delete"])
+const props = defineProps({
+	text: {
+		type: String,
+		default: "Delete"
+	}
+})
 
 function doDelete() {
 	emit("delete")
@@ -12,7 +18,7 @@ function doDelete() {
 		prepend-icon="mdi-delete"
 		variant="outlined"
 	>
-		Delete
+		{{ props.text }}
 		<o-confirm-dialog activator="parent" @confirm="doDelete">
 			Are you certain you want to delete this?
 		</o-confirm-dialog>

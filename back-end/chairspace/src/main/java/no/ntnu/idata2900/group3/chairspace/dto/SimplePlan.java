@@ -12,6 +12,7 @@ import no.ntnu.idata2900.group3.chairspace.entity.Plan;
 public record SimplePlan(
 	UUID id,
 	UUID areaId,
+	String areaName,
 	LocalDate start,
 	LocalDate end,
 	String name
@@ -23,6 +24,7 @@ public record SimplePlan(
 	public static class Builder {
 		UUID id;
 		UUID areaId;
+		String areaName;
 		LocalDate start;
 		LocalDate end;
 		String name;
@@ -37,6 +39,7 @@ public record SimplePlan(
 			return new Builder()
 				.id(plan.getId())
 				.areaId(plan.getArea().getId())
+				.areaName(plan.getArea().getName())
 				.start(plan.getStart())
 				.end(plan.getEnd())
 				.name(plan.getName());
@@ -51,6 +54,7 @@ public record SimplePlan(
 			return new SimplePlan(
 				id,
 				areaId,
+				areaName,
 				start,
 				end,
 				name
@@ -76,6 +80,17 @@ public record SimplePlan(
 		 */
 		public Builder areaId(UUID areaId) {
 			this.areaId = areaId;
+			return this;
+		}
+
+		/**
+		 * Sets the areaName of this builder.
+		 *
+		 * @param areaName the areaName to set
+		 * @return this builder
+		 */
+		public Builder areaName(String areaName) {
+			this.areaName = areaName;
 			return this;
 		}
 

@@ -1,12 +1,16 @@
 <script setup>
+import { useDate } from 'vuetify'
+
 const props = defineProps({
 	clickableDays: Boolean,
+	area: Object,
 	month: Number,
 	week: Object,
 	frequencies: Array
 })
 
 const emit = defineEmits(["week-clicked", "day-clicked"])
+const vDate = useDate()
 
 function weekClicked() {
 	if (!props.clickableDays) {
@@ -21,9 +25,34 @@ function weekNumberClicked() {
 }
 
 function dayClicked(day) {
-	if (props.clickableDays) {
+	if (props.clickableDays && getIsDayAvailable(day)) {
 		emit("day-clicked", day)
 	}
+}
+
+function getIsDayAvailable(day) {
+	if (!props.area.isPlanControlled) {
+		return true
+	}
+
+	let isPlanOpened = false
+
+	for (let plan of props.area.plans) {
+		const planStart = new Date(plan.start)
+		const planEnd = new Date(plan.end)
+
+		if (
+			(vDate.isAfter(day, planStart) && vDate.isBefore(day, planEnd))
+			||
+			vDate.isEqual(day, planStart)
+			||
+			vDate.isEqual(day, planEnd)
+		) {
+			isPlanOpened = true
+		}
+	}
+
+	return isPlanOpened;
 }
 </script>
 
@@ -47,15 +76,20 @@ function dayClicked(day) {
 			v-for="(day, idx) in week.days"
 			:class="{
 				'out-of-month': (month !== undefined && day.getMonth() != props.month),
-				'hoverable': props.clickableDays
+				'hoverable': props.clickableDays,
+				'disabled': !getIsDayAvailable(day)
 			}"
 			:style="{
 				'--frequency': (month === undefined || day.getMonth() == props.month)
 					? frequencies[day.getDate() - 1] / 100 : 0
 			}"
-			v-ripple="props.clickableDays"
+			v-ripple="props.clickableDays && getIsDayAvailable(day)"
+			:disabled="!getIsDayAvailable(day)"
 			@click="dayClicked(day)"
 		>
+			<v-tooltip v-if="!getIsDayAvailable(day)" activator="parent">
+				<span>This day cannot be booked</span>
+			</v-tooltip>
 			<div>
 				{{ day.getDate() }}
 			</div>
@@ -97,9 +131,13 @@ function dayClicked(day) {
 	> .out-of-month {
 		opacity: 0.5;
 	}
+
+	> .disabled {
+		background-color: rgba(var(--v-theme-on-surface), 0.1)
+	}
 }
 
-.hoverable:hover {
+.hoverable:not(.disabled):hover {
 	opacity: 0.8;
 }
 </style>

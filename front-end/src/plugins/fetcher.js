@@ -15,6 +15,9 @@ const MY_RESERVATIONS_URL = RESERVATION_URL + "/user"
 
 const SEARCH_URL = BACKEND_URL + "/search"
 
+const PLANS_URL = BACKEND_URL + "/plan"
+const USER_PLANS_URL = PLANS_URL + "/user"
+
 const USER_URL = BACKEND_URL + "/user"
 const WHOAMI_URL = USER_URL + "/whoami"
 
@@ -66,8 +69,8 @@ export default {
 	},
 
 	async getReservationsForAreaInTime(areaId, startTime, endTime) {
-		startTime = timeUtil.formatDateForSend(startTime)
-		endTime = timeUtil.formatDateForSend(endTime)
+		startTime = timeUtil.formatDateTimeForSend(startTime)
+		endTime = timeUtil.formatDateTimeForSend(endTime)
 		return doFetch(`${RESERVATION_AREA_URL}/${areaId}?start=${startTime}&end=${endTime}`)
 			.then(response => response.json())
 	},
@@ -85,8 +88,8 @@ export default {
 			},
 			body: JSON.stringify({
 				roomId: areaId,
-				startTime: timeUtil.formatDateForSend(startTime),
-				endTime: timeUtil.formatDateForSend(endTime),
+				startTime: timeUtil.formatDateTimeForSend(startTime),
+				endTime: timeUtil.formatDateTimeForSend(endTime),
 				comment
 			})
 		}
@@ -123,5 +126,32 @@ export default {
 	async deleteBooking(id) {
 		const body = { method: 'DELETE' }
 		return doFetch(`${RESERVATION_URL}/${id}`, body)
+	},
+
+	async tryCreatePlan(areaId, startTime, endTime, name) {
+		const body = {
+			method: "POST",
+			headers: {
+				"Content-type": "application/json"
+			},
+			body: JSON.stringify({
+				areaId,
+				start: timeUtil.formatDateForSend(startTime),
+				end: timeUtil.formatDateForSend(endTime),
+				name
+			})
+		}
+
+		return doFetch(PLANS_URL, body)
+	},
+
+	async getAllUsersPlans(userId) {
+		return doFetch(`${USER_PLANS_URL}/${userId}`)
+			.then(response => response.json())
+	},
+
+	async deletePlan(id) {
+		const body = { method: 'DELETE' }
+		return doFetch(`${PLANS_URL}/${id}`, body)
 	}
 }
