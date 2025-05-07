@@ -1,6 +1,7 @@
 package no.ntnu.idata2900.group3.chairspace.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
@@ -80,7 +81,10 @@ public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT
 			description = "No entity with the given ID was found"
 			)
 	})
-	public ResponseEntity<EntityT> getEntity(@PathVariable IdTypeT id) {
+	public ResponseEntity<EntityT> getEntity(
+		@Parameter(description = "The id of the entity to get")
+		@PathVariable IdTypeT id
+	) {
 		this.hasPermissionToGet();
 
 		EntityT entity = entityService.get(id);
@@ -158,7 +162,10 @@ public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT
 			description = "Failed to create a new entity as it already exists"
 			)
 	})
-	public ResponseEntity<String> postEntity(@RequestBody EntityT object) {
+	public ResponseEntity<String> postEntity(
+		@Parameter(description = "The entity to save to database")
+		@RequestBody EntityT object
+	) {
 		this.hasPermissionToPost();
 		if (!entityService.create(object)) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT);
@@ -200,7 +207,10 @@ public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT
 			description = "Failed to update the entity as it doesn't exist"
 			)
 	})
-	public ResponseEntity<String> putEntity(@RequestBody EntityT object) {
+	public ResponseEntity<String> putEntity(
+		@Parameter(description = "The entity to update in the database")
+		@RequestBody EntityT object
+	) {
 		this.hasPermissionToPut();
 		if (!entityService.update(object)) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -241,7 +251,10 @@ public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT
 			description = "Failed to delete the entity as it doesn't exist"
 			)
 	})
-	public ResponseEntity<String> deleteEntity(@PathVariable IdTypeT id) {
+	public ResponseEntity<String> deleteEntity(
+		@Parameter(description = "The id of the entity to delete")
+		@PathVariable IdTypeT id
+	) {
 		this.hasPermissionToDelete();
 		if (!entityService.delete(id)) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
