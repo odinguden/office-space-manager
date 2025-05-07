@@ -10,6 +10,8 @@ const props = defineProps({
 	scopeEnd: Date
 })
 
+const selectedReservation = ref(null)
+
 const timeline = computed(() => {
 	const timeline = []
 
@@ -41,7 +43,8 @@ const timeline = computed(() => {
 			end,
 			startPercent: (start - startScope) / totalMs,
 			durationPercent: (end - start) / totalMs,
-			isMine: reservation.isMine
+			isMine: reservation.isMine,
+			data: reservation
 		})
 
 		lastEnd = end
@@ -68,6 +71,17 @@ function getDuration(reservation) {
 
 	return Math.max(duration, 0);
 }
+
+const isModalOpen = computed({
+	get: () => selectedReservation.value != null,
+	set: () => selectedReservation.value = null
+})
+
+function setReservation(reservationSegment) {
+	if (reservationSegment.type === 'event') {
+		selectedReservation.value = reservationSegment.data
+	}
+}
 </script>
 
 <template>
@@ -87,6 +101,7 @@ function getDuration(reservation) {
 					:style="{
 						'--reservation-length': getDuration(reservation)
 					}"
+					@click.stop="setReservation(reservation)"
 				/>
 			</template>
 			<div class="tooltip-grid">
@@ -99,6 +114,10 @@ function getDuration(reservation) {
 				<span>{{ vDate.format(reservation.end, "fullTime24h").substring(0,5) }}</span>
 			</div>
 		</v-tooltip>
+		<o-reservation-modal
+			v-model="isModalOpen"
+			:reservation="selectedReservation"
+		/>
 	</div>
 </template>
 

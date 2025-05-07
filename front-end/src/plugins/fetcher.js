@@ -118,5 +118,10 @@ export default {
 
 		return doFetch(`${MY_RESERVATIONS_URL}/me`)
 			.then(response => response.json())
+	},
+
+	async deleteBooking(id) {
+		const body = { method: 'DELETE' }
+		return doFetch(`${RESERVATION_URL}/${id}`, body)
 	}
 }
