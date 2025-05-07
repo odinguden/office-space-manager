@@ -142,7 +142,17 @@ public class AreaAssembler {
 	 * @return the area represented by a simple area object
 	 */
 	public SimpleArea toSimpleArea(Area area) {
-		return SimpleArea.Builder.fromArea(area).build();
+		SimpleArea.Builder builder = SimpleArea.Builder.fromArea(area);
+		if (area.isPlanControlled()) {
+			List<SimplePlan> simplePlans = planService.getPlansByArea(area.getId())
+				.stream()
+				.map(planAssembler::toSimple)
+				.toList();
+			builder.planControlled(area.isPlanControlled());
+			builder.simplePlans(simplePlans);
+		}
+
+		return builder.build();
 	}
 
 	/**
@@ -169,45 +179,19 @@ public class AreaAssembler {
 			reservations
 		);
 
-		return SimpleArea.Builder.fromArea(area)
-			.reservations(simpleReservationList)
-			.build();
-	}
+		SimpleArea.Builder builder = SimpleArea.Builder.fromArea(area);
+		builder.reservations(simpleReservationList);
 
-	/**
-	 * Creates a simple area containing both reservations and plans.
-	 *
-	 * @param area the area to simplify
-	 * @param start the time start of the search
-	 * @param end the time end of the search
-	 * @return the area represented by a simple area object
-	 */
-	public SimpleArea toSimpleAreaWithReservationsAndPlans(
-		Area area,
-		LocalDateTime start,
-		LocalDateTime end
-	) {
-		List<SimpleReservation> reservations = getReservationsForArea(area.getId(), start, end)
-			.stream()
-			.map(reservationAssembler::toSimple)
-			.toList();
+		if (area.isPlanControlled()) {
+			List<SimplePlan> simplePlans = planService.getPlansByArea(area.getId())
+				.stream()
+				.map(planAssembler::toSimple)
+				.toList();
+			builder.planControlled(area.isPlanControlled());
+			builder.simplePlans(simplePlans);
+		}
 
-		SimpleReservationList simpleReservationList = new SimpleReservationList(
-			start,
-			end,
-			reservations
-		);
-
-		List<SimplePlan> simplePlans = planService.getPlansByArea(area.getId())
-			.stream()
-			.map(planAssembler::toSimple)
-			.toList();
-
-		return SimpleArea.Builder.fromArea(area)
-			.reservations(simpleReservationList)
-			.simplePlans(simplePlans)
-			.build();
-
+		return builder.build();
 	}
 
 	/**

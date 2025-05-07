@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class PlanAssembler {
-	private AreaService areaService;
+	private final AreaService areaService;
 
 	/**
 	 * Creates new instance of PlanAssembler.
