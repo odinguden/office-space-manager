@@ -1,5 +1,9 @@
 package no.ntnu.idata2900.group3.chairspace.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 
 
 /**
@@ -55,17 +60,35 @@ public class SearchController {
 	 * @param duration the duration for the search (optional)
 	 * @return a ResponseEntity containing a PaginationDto with the search results
 	 */
-	//TODO swagger documentation
 	@GetMapping("")
+	@Operation(
+		summary = "Does a search, and returns the marching areas in a pagination",
+		description = "Searches based on several parameters."
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Search was preformed "
+			)
+	})
 	public ResponseEntity<Page<SimpleArea>> doSearch(
+		@Parameter(description = "the page number to retrieve (required)")
 		@RequestParam() int page,
+		@Parameter(description = "the number of items per page (required)")
 		@RequestParam(name = "items-per-page", required = false) Integer itemsPerPage,
+		@Parameter(description = "the capacity of the area (optional)")
 		@RequestParam(required = false) Integer capacity,
+		@Parameter(description = "the ID of the super area (optional)")
 		@RequestParam(name = "super-area", required = false) UUID superAreaId,
+		@Parameter(description = "the ID of the area type (optional)")
 		@RequestParam(name = "area-type", required = false) String areaTypeId,
+		@Parameter(description = "the list of area feature IDs (optional)")
 		@RequestParam(name = "features", required = false) List<String> areaFeatureIds,
+		@Parameter(description = "the start date and time for the search (optional)")
 		@RequestParam(name = "start-time") LocalDateTime startDateTime,
+		@Parameter(description = "the end date and time for the search (optional)")
 		@RequestParam(name = "end-time") LocalDateTime endDateTime,
+		@Parameter(description = "the duration for the search (optional)")
 		@RequestParam() Duration duration
 	) {
 		Page<Area> areas = searchService.doSearch(
