@@ -143,12 +143,12 @@ public class AreaAssembler {
 	 */
 	public SimpleArea toSimpleArea(Area area) {
 		SimpleArea.Builder builder = SimpleArea.Builder.fromArea(area);
+		builder.planControlled(area.isPlanControlled());
 		if (area.isPlanControlled()) {
 			List<SimplePlan> simplePlans = planService.getPlansByArea(area.getId())
 				.stream()
 				.map(planAssembler::toSimple)
 				.toList();
-			builder.planControlled(area.isPlanControlled());
 			builder.simplePlans(simplePlans);
 		}
 
@@ -181,13 +181,13 @@ public class AreaAssembler {
 
 		SimpleArea.Builder builder = SimpleArea.Builder.fromArea(area);
 		builder.reservations(simpleReservationList);
+		builder.planControlled(area.isPlanControlled());
 
 		if (area.isPlanControlled()) {
 			List<SimplePlan> simplePlans = planService.getPlansByArea(area.getId())
 				.stream()
 				.map(planAssembler::toSimple)
 				.toList();
-			builder.planControlled(area.isPlanControlled());
 			builder.simplePlans(simplePlans);
 		}
 
