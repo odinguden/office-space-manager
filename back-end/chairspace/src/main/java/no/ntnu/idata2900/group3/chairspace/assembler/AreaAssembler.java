@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.dto.SimpleArea;
+import no.ntnu.idata2900.group3.chairspace.dto.SimplePlan;
 import no.ntnu.idata2900.group3.chairspace.dto.SimpleReservation;
 import no.ntnu.idata2900.group3.chairspace.dto.SimpleReservationList;
 import no.ntnu.idata2900.group3.chairspace.entity.Area;
@@ -17,6 +18,7 @@ import no.ntnu.idata2900.group3.chairspace.exceptions.AdminCountException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.ElementNotFoundException;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
 import no.ntnu.idata2900.group3.chairspace.service.AreaService;
+import no.ntnu.idata2900.group3.chairspace.service.PlanService;
 import no.ntnu.idata2900.group3.chairspace.service.ReservationService;
 import no.ntnu.idata2900.group3.chairspace.service.UserService;
 import org.springframework.stereotype.Component;
@@ -30,6 +32,8 @@ public class AreaAssembler {
 	private final UserService userService;
 	private final ReservationService reservationService;
 	private final ReservationAssembler reservationAssembler;
+	private final PlanService planService;
+	private final PlanAssembler planAssembler;
 
 	/**
 	 * Creates a new Area Assembler.
@@ -38,17 +42,23 @@ public class AreaAssembler {
 	 * @param userService the user service connected to this assembler
 	 * @param reservationService the reservation service connected to this assembler
 	 * @param reservationAssembler autowired reservation assembler
+	 * @param planService autowired plan service
+	 * @param planAssembler autowired plan assembler
 	 */
 	public AreaAssembler(
 		AreaService areaService,
 		UserService userService,
 		ReservationService reservationService,
-		ReservationAssembler reservationAssembler
+		ReservationAssembler reservationAssembler,
+		PlanService planService,
+		PlanAssembler planAssembler
 	) {
 		this.areaService = areaService;
 		this.userService = userService;
 		this.reservationService = reservationService;
 		this.reservationAssembler = reservationAssembler;
+		this.planService = planService;
+		this.planAssembler = planAssembler;
 	}
 
 	/**
@@ -74,7 +84,8 @@ public class AreaAssembler {
 			.features(area.areaFeatures())
 			.calendarLink(area.calendarLink())
 			.reservable(area.reservable())
-			.id(area.id());
+			.id(area.id())
+			.isPlanControlled(area.isPlanControlled());
 
 		return areaBuilder.build();
 	}
@@ -131,7 +142,14 @@ public class AreaAssembler {
 	 * @return the area represented by a simple area object
 	 */
 	public SimpleArea toSimpleArea(Area area) {
-		return SimpleArea.Builder.fromArea(area).build();
+		SimpleArea.Builder builder = SimpleArea.Builder.fromArea(area)
+			.planControlled(area.isPlanControlled());
+
+		if (area.isPlanControlled()) {
+			builder.simplePlans(getPlansForArea(area.getId()));
+		}
+
+		return builder.build();
 	}
 
 	/**
@@ -158,9 +176,15 @@ public class AreaAssembler {
 			reservations
 		);
 
-		return SimpleArea.Builder.fromArea(area)
+		SimpleArea.Builder builder = SimpleArea.Builder.fromArea(area)
 			.reservations(simpleReservationList)
-			.build();
+			.planControlled(area.isPlanControlled());
+
+		if (area.isPlanControlled()) {
+			builder.simplePlans(getPlansForArea(area.getId()));
+		}
+
+		return builder.build();
 	}
 
 	/**
@@ -225,5 +249,12 @@ public class AreaAssembler {
 		UUID areaId, LocalDateTime start, LocalDateTime end
 	) {
 		return reservationService.getReservationsForAreaBetween(areaId, start, end);
+	}
+
+	private List<SimplePlan> getPlansForArea(UUID areaId) {
+		return planService.getPlansByArea(areaId)
+			.stream()
+			.map(planAssembler::toSimple)
+			.toList();
 	}
 }
