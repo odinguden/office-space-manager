@@ -64,6 +64,6 @@ public class PlanService extends EntityService<Plan, UUID> {
 	 * @return plans belonging to a area
 	 */
 	public List<Plan> getPlansByArea(UUID areaId) {
-		return planRepository.getPlansByArea(areaId);
+		return planRepository.findByAreaId(areaId);
 	}
 }

@@ -36,12 +36,7 @@ public interface PlanRepository extends JpaRepository<Plan, UUID> {
 	 * @param areaId the id of the area
 	 * @return all plans belonging to the area with the given id
 	 */
-	@Query("""
-		SELECT plan
-		FROM Plan plan
-		WHERE plan.area.id = ?1
-		""")
-	List<Plan> getPlansByArea(UUID areaId);
+	List<Plan> findByAreaId(UUID areaId);
 
 	/**
 	 * Returns true if there is a plan marking the area as free for the given time slot.
