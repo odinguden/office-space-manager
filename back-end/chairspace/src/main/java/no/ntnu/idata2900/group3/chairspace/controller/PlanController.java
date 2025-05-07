@@ -6,7 +6,6 @@ import no.ntnu.idata2900.group3.chairspace.assembler.PlanAssembler;
 import no.ntnu.idata2900.group3.chairspace.dto.SimplePlan;
 import no.ntnu.idata2900.group3.chairspace.entity.Plan;
 import no.ntnu.idata2900.group3.chairspace.exceptions.InvalidArgumentCheckedException;
-import no.ntnu.idata2900.group3.chairspace.repository.PlanRepository;
 import no.ntnu.idata2900.group3.chairspace.service.PlanService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +26,6 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/plan")
 public class PlanController extends PermissionManager {
-
-	private final PlanRepository planRepository;
 	private final PlanService planService;
 	private final PlanAssembler planAssembler;
 
@@ -40,12 +37,10 @@ public class PlanController extends PermissionManager {
 	 */
 	public PlanController(
 		PlanService planService,
-		PlanAssembler planAssembler,
-		PlanRepository planRepository
+		PlanAssembler planAssembler
 	) {
 		this.planService = planService;
 		this.planAssembler = planAssembler;
-		this.planRepository = planRepository;
 	}
 
 	/**
@@ -94,10 +89,8 @@ public class PlanController extends PermissionManager {
 	 */
 	@DeleteMapping("/{planId}")
 	public ResponseEntity<String> deleteEntity(@PathVariable UUID planId) {
-		if (!planRepository.existsById(planId)) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-		}
-		planRepository.deleteById(planId);
+		this.hasPermissionToDelete();
+		planService.delete(planId);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 }
