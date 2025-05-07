@@ -51,6 +51,8 @@ function confirm() {
 					:text="cancelText"
 					@click="cancel"
 				/>
+			</slot>
+			<slot name="confirm-button">
 				<v-btn
 					color="success"
 					variant="flat"

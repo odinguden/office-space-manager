@@ -15,6 +15,7 @@ public record SimpleReservation(
 	UUID areaId,
 	String areaName,
 	UUID userId,
+	String userName,
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	LocalDateTime startTime,
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
@@ -30,6 +31,7 @@ public record SimpleReservation(
 		private UUID areaId;
 		private String areaName;
 		private UUID userId;
+		private String userName;
 		private LocalDateTime startTime;
 		private LocalDateTime endTime;
 		private String comment;
@@ -46,6 +48,7 @@ public record SimpleReservation(
 				this.areaId,
 				this.areaName,
 				this.userId,
+				this.userName,
 				this.startTime,
 				this.endTime,
 				this.comment,
@@ -65,6 +68,7 @@ public record SimpleReservation(
 				.areaId(reservation.getArea().getId())
 				.areaName(reservation.getArea().getName())
 				.userId(reservation.getUser().getId())
+				.userName(reservation.getUser().getName())
 				.startTime(reservation.getStart())
 				.endTime(reservation.getEnd())
 				.comment(reservation.getComment());
@@ -111,6 +115,17 @@ public record SimpleReservation(
 		 */
 		public Builder userId(UUID userId) {
 			this.userId = userId;
+			return this;
+		}
+
+		/**
+		 * Sets the userName of this builder.
+		 *
+		 * @param userName the userName to set
+		 * @return this builder
+		 */
+		public Builder userName(String userName) {
+			this.userName = userName;
 			return this;
 		}
 
