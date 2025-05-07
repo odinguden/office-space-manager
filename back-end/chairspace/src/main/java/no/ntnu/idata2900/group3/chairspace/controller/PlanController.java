@@ -1,5 +1,9 @@
 package no.ntnu.idata2900.group3.chairspace.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.assembler.PlanAssembler;
@@ -37,6 +41,7 @@ public class PlanController extends PermissionManager {
 	 *
 	 * @param planService autowired plan service
 	 * @param planAssembler autowired plan assembler
+	 * @param planRepository autowired plan repository
 	 */
 	public PlanController(
 		PlanService planService,
@@ -55,7 +60,25 @@ public class PlanController extends PermissionManager {
 	 * @return plans belonging to a single area
 	 */
 	@GetMapping("/area/{areaId}")
+	@Operation(
+		summary = "Gets all plans for a area"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Found plans of area"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users do not have access to read plans"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to read these plans"
+			)
+	})
 	public ResponseEntity<List<SimplePlan>> getPlansByArea(
+		@Parameter(description = "Id of the area to get plans for")
 		@PathVariable UUID areaId
 	) {
 		hasPermissionToGet();
@@ -75,7 +98,33 @@ public class PlanController extends PermissionManager {
 	 * @throws ResponseStatusException 400 bad request if values for simple plan is invalid
 	 */
 	@PostMapping("")
-	public ResponseEntity<String> postMethodName(@RequestBody SimplePlan plan) {
+	@Operation(
+		summary = "Creates a new plan",
+		description = "Creates a new plan based on data from simple plan"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "201",
+			description = "Plan was successfully created"
+			),
+		@ApiResponse(
+			responseCode = "400",
+			description = "If values within simple plan object are invalid to create new plan"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users are not permitted to create new plans"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to create a new plan"
+			),
+	})
+	public ResponseEntity<String> postMethodName(
+		@Parameter(description = "Data used to create new plan")
+		@RequestBody SimplePlan plan
+	) {
+		hasPermissionToPost();
 		Plan realPlan;
 		try {
 			realPlan = planAssembler.toDomain(plan);
@@ -83,7 +132,7 @@ public class PlanController extends PermissionManager {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		}
 		planService.create(realPlan);
-		return new ResponseEntity<>(HttpStatus.OK);
+		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
 	/**
@@ -93,7 +142,24 @@ public class PlanController extends PermissionManager {
 	 * @return 200 ok if the plan was deleted
 	 */
 	@DeleteMapping("/{planId}")
-	public ResponseEntity<String> deleteEntity(@PathVariable UUID planId) {
+	@Operation(
+		summary = "Deletes a plan",
+		description = "Deletes a plan using the given id"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "204",
+			description = "Plan was deleted"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Could not find plan with given id"
+			)
+	})
+	public ResponseEntity<String> deleteEntity(
+		@Parameter(description = "The id of the plan to delete")
+		@PathVariable UUID planId
+	) {
 		if (!planRepository.existsById(planId)) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 		}
