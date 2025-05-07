@@ -25,19 +25,26 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class AreaService extends EntityService<Area, UUID> {
-	AreaRepository areaRepository;
-	ReservationService reservationService;
+	private final AreaRepository areaRepository;
+	private final ReservationService reservationService;
+	private final PlanService planService;
 
 	/**
 	 * Creates a new area service.
 	 *
 	 * @param repository autowired AreaRepository
 	 * @param reservationService autowired reservationService
+	 * @param planService autowired planService
 	 */
-	public AreaService(AreaRepository repository, ReservationService reservationService) {
+	public AreaService(
+		AreaRepository repository,
+		ReservationService reservationService,
+		PlanService planService
+	) {
 		super(repository);
 		this.areaRepository = repository;
 		this.reservationService = reservationService;
+		this.planService = planService;
 	}
 
 	@Override
@@ -63,18 +70,24 @@ public class AreaService extends EntityService<Area, UUID> {
 		LocalDateTime searchEnd,
 		Duration minGapSize
 	) {
-		List<Area> reservableAreas = this.areaRepository.findAllByReservable(true);
+		List<Area> reservableAreas =
+				this.areaRepository.findAllByPlanControlledOrReservable(true, true);
+
 		Set<Area> areasWithGap = new HashSet<>();
 		reservableAreas.iterator().forEachRemaining(areasWithGap::add);
 		Iterator<Area> reservableAreasIterator = reservableAreas.iterator();
 
 		while (reservableAreasIterator.hasNext()) {
 			Area area = reservableAreasIterator.next();
+
 			boolean hasGap = reservationService.doesAreaHaveFreeGapLike(
 				area.getId(),
 				searchStart,
 				searchEnd,
 				minGapSize
+			) && (
+				!area.isPlanControlled()
+				|| planService.isFree(area.getId(), searchStart, searchEnd)
 			);
 
 			if (!hasGap) {
