@@ -16,6 +16,7 @@ const MY_RESERVATIONS_URL = RESERVATION_URL + "/user"
 const SEARCH_URL = BACKEND_URL + "/search"
 
 const PLANS_URL = BACKEND_URL + "/plan"
+const USER_PLANS_URL = PLANS_URL + "/user"
 
 const USER_URL = BACKEND_URL + "/user"
 const WHOAMI_URL = USER_URL + "/whoami"
@@ -142,5 +143,15 @@ export default {
 		}
 
 		return doFetch(PLANS_URL, body)
+	},
+
+	async getAllUsersPlans(userId) {
+		return doFetch(`${USER_PLANS_URL}/${userId}`)
+			.then(response => response.json())
+	},
+
+	async deletePlan(id) {
+		const body = { method: 'DELETE' }
+		return doFetch(`${PLANS_URL}/${id}`, body)
 	}
 }
