@@ -1,9 +1,5 @@
 <script setup>
-import { BACKEND_URL, LOGIN_ENDPOINT } from '@/plugins/config';
-
-const destinationRoute = computed(
-	() => `${BACKEND_URL}${LOGIN_ENDPOINT}`
-)
+import { LOGIN_ENDPOINT } from '@/plugins/config';
 </script>
 
 
@@ -17,7 +13,7 @@ const destinationRoute = computed(
 				You are not logged in. Please log in using your Microsoft account.
 				<o-entra
 					class="mt-2"
-					:href="destinationRoute"
+					:href="LOGIN_ENDPOINT"
 				/>
 			</v-card-text>
 		</v-card>

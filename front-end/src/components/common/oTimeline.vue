@@ -20,8 +20,10 @@ const timeline = computed(() => {
 	let lastEnd = new Date(startScope)
 
 	for (let reservation of props.reservations) {
-		const start = new Date(reservation.startTime)
-		const end = new Date(reservation.endTime)
+		let start = new Date(reservation.startTime)
+		start = vDate.addHours(start, 2)
+		let end = new Date(reservation.endTime)
+		end = vDate.addHours(end, 2)
 
 		if (start > lastEnd) {
 			timeline.push({
@@ -65,21 +67,6 @@ function getDuration(reservation) {
 	const duration = Math.min(end, 1) - Math.max(start, 0)
 
 	return Math.max(duration, 0);
-}
-
-function formatTime(time) {
-	return `${vDate.format(time, "fullTime24h")}`// `${vDate.format(time, "hours24h")}:${vDate.format(time, "minutes")}`
-}
-
-function getDateTip(reservation) {
-	if (reservation.start.getDate() == reservation.end.getDate()) {
-		return vDate.format(reservation.start, "shortDate")
-	}
-	return `${vDate.format(reservation.start, "shortDate")} - ${vDate.format(reservation.end, "shortDate")}`
-}
-
-function getTimeTip(reservation) {
-	return `${formatTime(reservation.start)} - ${formatTime(reservation.end)}`
 }
 </script>
 
