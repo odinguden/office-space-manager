@@ -1,5 +1,9 @@
 <script setup>
 import fetcher from '@/plugins/fetcher';
+import { useDate } from 'vuetify';
+
+const vDate = useDate()
+
 const props = defineProps({
 	reservation: Object
 })
@@ -28,6 +32,15 @@ function onDelete() {
 		.finally(() => loading.value = false)
 
 }
+
+const startTime = computed(() => {
+	return vDate.format(new Date(oldReservation.value.startTime), "fullDateTime24h")
+})
+
+const endTime = computed(() => {
+	return vDate.format(new Date(oldReservation.value.endTime), "fullDateTime24h")
+
+})
 </script>
 
 <template>
@@ -58,7 +71,7 @@ function onDelete() {
 						From:
 					</th>
 					<td>
-						{{ oldReservation.startTime }}
+						{{ startTime }}
 					</td>
 				</tr>
 				<tr>
@@ -66,7 +79,15 @@ function onDelete() {
 						To:
 					</th>
 					<td>
-						{{ oldReservation.endTime }}
+						{{ endTime }}
+					</td>
+				</tr>
+				<tr>
+					<th>
+						Comment:
+					</th>
+					<td>
+						{{ oldReservation.comment }}
 					</td>
 				</tr>
 			</table>
@@ -81,14 +102,22 @@ function onDelete() {
 </template>
 
 <style scoped lang="scss">
-table > tr {
-	> th {
-		text-align: right;
-		padding-right: 8px;
-	}
+table {
+	border-collapse: collapse;
+	width: 100%;
 
-	>td {
-		text-align: left;
+	> tr{
+		vertical-align: top;
+
+		> th {
+			text-align: right;
+			padding-right: 8px;
+		}
+
+		>td {
+			text-align: left;
+			word-break: break-word;
+		}
 	}
 }
 </style>
