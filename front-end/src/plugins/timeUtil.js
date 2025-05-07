@@ -1,6 +1,7 @@
+const pad = (str) => String(str).padStart(2, '0')
+
 export const timeUtil = {
 	toTimeString(input) {
-		const pad = (str) => String(str).padStart(2, '0')
 		return `${pad(input.getHours())}:${pad(input.getMinutes())}`
 	},
 
@@ -16,6 +17,7 @@ export const timeUtil = {
 	},
 
 	formatDateForSend(input) {
-		return input.toISOString().slice(0, 19)
+		return `${input.getFullYear()}-${pad(input.getMonth() + 1)}-${pad(input.getDate())}`
+			+ `T${pad(input.getHours())}:${pad(input.getMinutes())}:${pad(input.getSeconds())}`
 	},
 }
