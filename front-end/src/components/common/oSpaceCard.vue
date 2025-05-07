@@ -32,6 +32,7 @@ const breadcrumbs = computed(() => {
 		</div>
 		<div class="card-content">
 			<p>{{ area.description }}</p>
+			<o-plan-control-tooltip v-if="area.isPlanControlled" />
 		</div>
 		<div class="card-extras">
 			<o-space-extras :features="area.areaFeatures" />
@@ -47,6 +48,7 @@ const breadcrumbs = computed(() => {
 				</div>
 			</slot>
 		</div>
+		
 		<div class="one-span-two">
 			<slot name="actions" />
 		</div>

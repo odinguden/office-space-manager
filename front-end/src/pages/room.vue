@@ -60,6 +60,7 @@ getArea()
 			<v-icon>mdi-desk</v-icon>
 			<h1>{{ area.name }}</h1>
 			<p>{{ area.description }}</p>
+			<o-plan-control-tooltip v-if="area.isPlanControlled" />
 			<o-space-extras :features="area.areaFeatures" />
 		</header>
 		<v-btn

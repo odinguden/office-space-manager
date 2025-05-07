@@ -87,6 +87,9 @@ function getIsDayAvailable(day) {
 			:disabled="!getIsDayAvailable(day)"
 			@click="dayClicked(day)"
 		>
+			<v-tooltip v-if="!getIsDayAvailable(day)" activator="parent">
+				<span>This day cannot be booked</span>
+			</v-tooltip>
 			<div>
 				{{ day.getDate() }}
 			</div>
