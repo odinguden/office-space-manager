@@ -92,7 +92,7 @@ function tryBook() {
 				errorMessage.value = "Failed to book this room"
 			}
 		} else {
-			emit('cancel')
+			window.location.reload()
 		}
 	})
 }
