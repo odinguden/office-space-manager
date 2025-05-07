@@ -25,7 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
  * Controller for plan entity.
  */
 @RestController
-@RequestMapping("/plans")
+@RequestMapping("/plan")
 public class PlanController extends PermissionManager {
 
 	private final PlanRepository planRepository;

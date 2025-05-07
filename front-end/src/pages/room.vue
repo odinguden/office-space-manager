@@ -1,6 +1,9 @@
 <script setup>
 import fetcher from '@/plugins/fetcher';
+import { useAuthStore } from '@/stores/authStore';
 import { useRoute } from 'vue-router';
+
+const authStore = useAuthStore()
 
 const route = useRoute()
 
@@ -42,6 +45,8 @@ function closeModal() {
 	showModal.value = false
 }
 
+const isMine = computed(() => area.value.administratorIds.includes(authStore.me.userId))
+const isPlanned = computed(() => area.value.isPlanControlled)
 getArea()
 </script>
 
@@ -81,6 +86,23 @@ getArea()
 				</v-card-text>
 			</v-card>
 		</v-dialog>
+		<v-btn
+			v-if="isMine && isPlanned"
+			color="primary"
+			tile
+			variant="outlined"
+		>
+			Create plan
+			<o-closeable-dialog
+				activator="parent"
+				max-width="512px"
+				title="Create Plan"
+			>
+				<v-card-text>
+					<o-plan :area-id="area.id" />
+				</v-card-text>
+			</o-closeable-dialog>
+		</v-btn>
 		<o-calendar :area="area" @day-clicked="openModal($event)" />
 	</section>
 	<v-skeleton-loader

@@ -23,21 +23,30 @@ public class ReservationService extends EntityService<Reservation, UUID> {
 	/** * The amount of milliseconds in a single full day. */
 	public static final int MS_IN_DAY = 24 * 60 * 60 * 1000;
 	private final ReservationRepository reservationRepository;
+	private final PlanService planService;
 
 	/**
 	 * Creates a new user service.
 	 *
 	 * @param repository autowired UserRepository
+	 * @param planService autowired planService
 	 */
-	public ReservationService(ReservationRepository repository) {
+	public ReservationService(ReservationRepository repository, PlanService planService) {
 		super(repository);
 		this.reservationRepository = repository;
+		this.planService = planService;
 	}
 
 	@Override
 	// Override to ensure reservations cannot overlap
 	protected boolean save(Reservation reservation) {
 		boolean canAdd = reservationRepository.isTimeSlotFree(
+			reservation.getArea().getId(),
+			reservation.getStart(),
+			reservation.getEnd()
+		);
+
+		canAdd = canAdd && planService.isFree(
 			reservation.getArea().getId(),
 			reservation.getStart(),
 			reservation.getEnd()

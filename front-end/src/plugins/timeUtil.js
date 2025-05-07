@@ -16,8 +16,12 @@ export const timeUtil = {
 		return `PT${input.hours}H${input.minutes}M`
 	},
 
-	formatDateForSend(input) {
+	formatDateTimeForSend(input) {
 		return `${input.getFullYear()}-${pad(input.getMonth() + 1)}-${pad(input.getDate())}`
 			+ `T${pad(input.getHours())}:${pad(input.getMinutes())}:${pad(input.getSeconds())}`
 	},
+
+	formatDateForSend(input) {
+		return `${input.getFullYear()}-${pad(input.getMonth() + 1)}-${pad(input.getDate())}`
+	}
 }

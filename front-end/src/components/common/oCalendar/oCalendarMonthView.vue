@@ -63,9 +63,11 @@ function getIsDayAvailable(day) {
 		const planEnd = new Date(plan.end)
 
 		if (
-			(vDate.isEqual(planStart, planEnd) && vDate.isEqual(day, planStart))
+			(vDate.isAfter(day, planStart) && vDate.isBefore(day, planEnd))
 			||
-			(vDate.isAfter(planStart, day) && vDate.isBefore(planEnd, day))
+			vDate.isEqual(day, planStart)
+			||
+			vDate.isEqual(day, planEnd)
 		) {
 			isPlanOpened = true
 		}
