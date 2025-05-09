@@ -161,11 +161,6 @@ public class PlanController extends PermissionManager {
 		@Parameter(description = "The id of the plan to delete")
 		@PathVariable UUID planId
 	) {
-		if (!planRepository.existsById(planId)) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-		}
-		planRepository.deleteById(planId);
-	public ResponseEntity<String> deleteEntity(@PathVariable UUID planId) {
 		this.hasPermissionToDelete();
 		planService.delete(planId);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
