@@ -2,6 +2,7 @@
 import fetcher from '@/plugins/fetcher';
 import { useODate } from '@/plugins/oDate';
 import { watch } from 'vue';
+import { useDate } from 'vuetify';
 const props = defineProps({
 	year: Number,
 	month: Number,
@@ -9,6 +10,7 @@ const props = defineProps({
 	clickableDays: Boolean
 })
 
+const vDate = useDate()
 const oDate = useODate()
 
 const selectedWeek = ref(undefined)
@@ -49,6 +51,31 @@ function onWeekClicked(week) {
 	}
 }
 
+function getIsDayAvailable(day) {
+	if (!props.area.isPlanControlled) {
+		return true
+	}
+
+	let isPlanOpened = false
+
+	for (let plan of props.area.plans) {
+		const planStart = new Date(plan.start)
+		const planEnd = new Date(plan.end)
+
+		if (
+			(vDate.isAfter(day, planStart) && vDate.isBefore(day, planEnd))
+			||
+			vDate.isEqual(day, planStart)
+			||
+			vDate.isEqual(day, planEnd)
+		) {
+			isPlanOpened = true
+		}
+	}
+
+	return isPlanOpened;
+}
+
 watch(props, () => selectedWeek.value = undefined)
 getFrequencies()
 </script>
@@ -61,6 +88,7 @@ getFrequencies()
 			:week="week"
 			:month="month"
 			:frequencies="frequencies"
+			:area="area"
 			@week-clicked="onWeekClicked(week)"
 		/>
 	</v-sheet>
@@ -69,6 +97,7 @@ getFrequencies()
 			:week="selectedWeek"
 			:month="month"
 			:frequencies="frequencies"
+			:area="area"
 			clickable-days
 			@day-clicked="$emit('day-clicked', $event)"
 		>
@@ -97,6 +126,7 @@ getFrequencies()
 					:reservations="timelines[idx].reservations"
 					:scope-start="timelines[idx].scopeStart"
 					:scope-end="timelines[idx].scopeEnd"
+					:disabled="!getIsDayAvailable(day)"
 					vertical
 				/>
 				<div v-else />

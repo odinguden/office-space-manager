@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.entity.Plan;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -37,6 +39,15 @@ public interface PlanRepository extends JpaRepository<Plan, UUID> {
 	 * @return all plans belonging to the area with the given id
 	 */
 	List<Plan> findByAreaId(UUID areaId);
+
+	/**
+	 * Finds all plans that belong to the given areas.
+	 *
+	 * @param areaIds list of all areas to get plans for
+	 * @param pageable the pageable to use for pagination
+	 * @return a page of areas to get plans for
+	 */
+	Page<Plan> findByAreaIdIn(List<UUID> areaIds, Pageable pageable);
 
 	/**
 	 * Returns true if there is a plan marking the area as free for the given time slot.

@@ -91,8 +91,8 @@ export const useSearchStore = defineStore('search', {
 			const endDate = new Date(selectedDate)
 			endDate.setHours(this.timeEnd.getHours(), this.timeEnd.getMinutes())
 
-			queryParams["start-time"] = timeUtil.formatDateForSend(startDate)
-			queryParams["end-time"] = timeUtil.formatDateForSend(endDate)
+			queryParams["start-time"] = timeUtil.formatDateTimeForSend(startDate)
+			queryParams["end-time"] = timeUtil.formatDateTimeForSend(endDate)
 
 			let realDuration = this.duration;
 

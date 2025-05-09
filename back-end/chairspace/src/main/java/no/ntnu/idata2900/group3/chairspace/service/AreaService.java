@@ -184,6 +184,16 @@ public class AreaService extends EntityService<Area, UUID> {
 			size = DEFAULT_PAGE_SIZE;
 		}
 		Pageable paging = PageRequest.of(page, size);
-		return areaRepository.findByAdmin(userId, paging);
+		return areaRepository.findByAdministrators_Id(userId, paging);
+	}
+
+	/**
+	 * Gets all areas that are administrated by a user.
+	 *
+	 * @param userId the user to get areas for
+	 * @return a list of all areas administrated by a user
+	 */
+	public List<Area> getAreasByUserAsList(UUID userId) {
+		return areaRepository.findByAdministrators_Id(userId);
 	}
 }

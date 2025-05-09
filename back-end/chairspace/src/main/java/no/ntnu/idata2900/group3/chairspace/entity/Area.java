@@ -535,8 +535,12 @@ public class Area implements EntityInterface<UUID> {
 		 * @param planControlled the plan controlled status of the area.
 		 * @return builder object
 		 */
-		public Builder isPlanControlled(boolean planControlled) {
-			this.isPlanControlled = planControlled;
+		public Builder isPlanControlled(Boolean planControlled) {
+			if (planControlled == null) {
+				this.isPlanControlled = false;
+			} else {
+				this.isPlanControlled = planControlled;
+			}
 			return this;
 		}
 
