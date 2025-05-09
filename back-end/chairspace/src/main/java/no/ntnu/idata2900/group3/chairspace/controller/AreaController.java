@@ -1,5 +1,9 @@
 package no.ntnu.idata2900.group3.chairspace.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.assembler.AreaAssembler;
@@ -52,7 +56,31 @@ public class AreaController extends PermissionManager {
 	 * @return 200 OK with the retrieved area as a simple area
 	 */
 	@GetMapping("/{id}")
-	public ResponseEntity<SimpleArea> get(@PathVariable UUID id) {
+	@Operation(
+		summary = "Gets a single area",
+		description = "Returns a single simple area object for a area with the given id"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Found a area with the given id"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "No area with the given id was found"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users do not have access to read areas"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to read areas"
+			),
+	})
+	public ResponseEntity<SimpleArea> get(
+		@Parameter(description = "Id of area to get") @PathVariable UUID id
+	) {
 		this.hasPermissionToGet();
 		Area area = this.areaService.get(id);
 
@@ -70,7 +98,27 @@ public class AreaController extends PermissionManager {
 	 * @return 200 OK with a pagination containing all areas as simple areas
 	 */
 	@GetMapping("")
+	@Operation(
+		summary = "Returns all areas",
+		description = "Returns all areas paginated."
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "returns the requested page of all areas"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users do not have access to read areas"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to read areas"
+			),
+
+	})
 	public ResponseEntity<Page<SimpleArea>> getAll(
+		@Parameter(description = "The page that is requested. Will be 0 if not included")
 		@RequestParam(required = false) Integer page
 	) {
 		if (page == null || page < 0) {
@@ -89,7 +137,18 @@ public class AreaController extends PermissionManager {
 	 * @return 200 OK with a pagination of areas with reservations for the next 12 hours
 	 */
 	@GetMapping("/home")
+	@Operation(
+		summary = "Returns areas for homepage",
+		description = "Returns areas that contain reservations, specifically for the homepage"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = ""
+			)
+	})
 	public ResponseEntity<Page<SimpleArea>> getHome(
+		@Parameter(description = "The page that is requested. will be 0 if not included")
 		@RequestParam(required = false) Integer page
 	) {
 		if (page == null || page < 0) {
@@ -114,7 +173,32 @@ public class AreaController extends PermissionManager {
 	 * @return 201 CREATED
 	 */
 	@PostMapping("")
-	public ResponseEntity<UUID> post(@RequestBody SimpleArea simpleArea) {
+	@Operation(
+		summary = "Creates a new area",
+		description = "Creates a new area, granted that one does not already exist"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "201",
+			description = "Created entity"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users are not permitted to create new areas"
+			),
+		@ApiResponse(
+			responseCode = "400",
+			description = "Not able to create a new area with the provided data"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Id provided in request does not correspond to an entity in the database"
+			)
+	})
+	public ResponseEntity<UUID> post(
+		@Parameter(description = "Data used to create a area")
+		@RequestBody SimpleArea simpleArea
+	) {
 		this.hasPermissionToPost();
 		Area area;
 
@@ -141,7 +225,29 @@ public class AreaController extends PermissionManager {
 	 * @return 204 NO CONTENT
 	 */
 	@PutMapping("")
-	public ResponseEntity<String> put(@RequestBody SimpleArea simpleArea) {
+	@Operation(
+		summary = "Updates an existing area",
+		description = "Updates a area based data from the simple area object."
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "204",
+			description = "Object was updated"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Object to update was not found"
+			),
+		@ApiResponse(
+			responseCode = "400",
+			description = "Not able to map simple area object provided to an area"
+			)
+	})
+	public ResponseEntity<String> put(
+		@Parameter(description = "Object containing data used to update area."
+			+ " Values not to be updated should be null.")
+		@RequestBody SimpleArea simpleArea
+	) {
 		this.hasPermissionToPut();
 
 		Area area;
@@ -167,7 +273,28 @@ public class AreaController extends PermissionManager {
 	 * @return 204 NO CONTENT
 	 */
 	@DeleteMapping("/{id}")
-	public ResponseEntity<String> delete(@PathVariable UUID id) {
+	@Operation(
+		summary = "Deletes an area",
+		description = "Deletes a area based on the provided id"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "204",
+			description = "Element deleted"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users are not permitted to delete entities"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to delete entities"
+			),
+	})
+	public ResponseEntity<String> delete(
+		@Parameter(description = "Id of the area to delete")
+		@PathVariable UUID id
+	) {
 		this.hasPermissionToDelete();
 		areaService.delete(id);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -182,9 +309,26 @@ public class AreaController extends PermissionManager {
 	 * @return a page of areas that have this user as an admin
 	 */
 	@GetMapping("/user/{userId}")
+	@Operation(
+		summary = "Gets all areas administered by a single user",
+		description = " "
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Areas found with"
+			),
+		@ApiResponse(
+			responseCode = "",
+			description = ""
+			)
+	})
 	public ResponseEntity<Page<SimpleArea>> findAreasByAdmin(
+		@Parameter(description = "Id of user to get areas for")
 		@PathVariable UUID userId,
+		@Parameter(description = "pagination page")
 		@RequestParam(required = false) Integer page,
+		@Parameter(description = "Number of items included on the page")
 		@RequestParam(required = false) Integer size
 	) {
 		this.hasPermissionToGetAll();

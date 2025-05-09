@@ -1,5 +1,9 @@
 package no.ntnu.idata2900.group3.chairspace.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -22,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
 
 
 
@@ -71,8 +76,29 @@ public class UserController extends AbstractController<User, UUID> {
 	 * @throws ResponseStatusException if the user is not found or the current user is not an admin
 	 */
 	@PostMapping("{userId}/admin/")
+	@Operation(
+		summary = "Sets the user as admin or not admin.",
+		description = "Sets the user as admin or not admin. Can only be performed by an admin user"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "204",
+			description = "Users admin privileges was changed"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "User is not logged in"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User is not authorized to perform this action"
+			)
+	})
 	public ResponseEntity<String> setAdmin(
-		@PathVariable UUID userId, @RequestParam boolean adminState
+		@Parameter(description = "The id of the user to give new admin privileges")
+		@PathVariable UUID userId,
+		@Parameter(description = "The new admin state to give the user")
+		@RequestParam boolean adminState
 	) {
 		hasPermissionToPut();
 		User currentUser = userService.getSessionUser();
@@ -103,7 +129,29 @@ public class UserController extends AbstractController<User, UUID> {
 	 * @throws ResponseStatusException 404 if the area is not found
 	 */
 	@PostMapping("/favorite/{areaId}")
-	public ResponseEntity<String> addFavorite(@PathVariable UUID areaId) {
+	@Operation(
+		summary = "Adds a favorite area to the user",
+		description = "Adds an area to the user's favorites."
+		+ "This can only be performed by a logged-in user."
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "204",
+			description = "favorite area was added"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Area with the given id was not found"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "User is not logged in"
+			)
+	})
+	public ResponseEntity<String> addFavorite(
+		@Parameter(description = "The id of the area to set as favorite")
+		@PathVariable UUID areaId
+	) {
 		super.hasPermissionToPost();
 		Area area = areaService.get(areaId);
 		if (area == null) {
@@ -126,7 +174,29 @@ public class UserController extends AbstractController<User, UUID> {
 	 * @throws ResponseStatusException 404 if the area is not found
 	 */
 	@DeleteMapping("/favorite/{areaId}")
-	public ResponseEntity<String> removeFavorite(@PathVariable UUID areaId) {
+	@Operation(
+		summary = "Removes a favorite area to the user",
+		description = "Removes an area to the user's favorites."
+		+ "This can only be performed by a logged-in user."
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "204",
+			description = "favorite area Removed"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Area with the given id was not found"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "User is not logged in"
+			)
+	})
+	public ResponseEntity<String> removeFavorite(
+		@Parameter(description = "The id of the area to add as favorite")
+		@PathVariable UUID areaId
+	) {
 		super.hasPermissionToDelete();
 		Area area = areaService.get(areaId);
 		if (area == null) {
@@ -148,6 +218,21 @@ public class UserController extends AbstractController<User, UUID> {
 	 * @throws ResponseStatusException 401 if the user is not logged in
 	 */
 	@GetMapping("/favorite")
+	@Operation(
+		summary = "Gets the favorite areas of a user",
+		description = "Gets the favorite areas of a user."
+		+ "This can only be performed by a logged-in user."
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Found favorite areas"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "User is not logged in"
+			)
+	})
 	public ResponseEntity<Set<SimpleArea>> getFavorites() {
 		super.hasPermissionToGet();
 		Set<Area> areas;
@@ -172,7 +257,24 @@ public class UserController extends AbstractController<User, UUID> {
 	 * @throws ResponseStatusException 404 if the area is not found
 	 */
 	@GetMapping("/favorite/{areaId}")
-	public ResponseEntity<Boolean> isFavorite(@PathVariable UUID areaId) {
+	@Operation(
+		summary = "Checks if a area is the favorite of the current user",
+		description = "Checks if a area is the favorite of the current user"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Found the favorite status of the area"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "User is not logged in"
+			)
+	})
+	public ResponseEntity<Boolean> isFavorite(
+		@Parameter(description = "The id of the area to check")
+		@PathVariable UUID areaId
+	) {
 		super.hasPermissionToGet();
 		boolean isFavorite;
 		Area area = areaService.get(areaId);
@@ -193,6 +295,21 @@ public class UserController extends AbstractController<User, UUID> {
 	 * @return 200 OK with the user if requester is logged in, 401 otherwise
 	 */
 	@GetMapping("/whoami")
+	@Operation(
+		summary = "Returns the data of the current user",
+		description = "Returns the data of the current user in a simple user object."
+			+ " Can only be done by a signed in user"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Found current session user"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "User not logged in"
+			)
+	})
 	public ResponseEntity<SimpleUser> whoAmI() {
 		User sessionUser = userService.getSessionUser();
 		if (sessionUser == null) {
