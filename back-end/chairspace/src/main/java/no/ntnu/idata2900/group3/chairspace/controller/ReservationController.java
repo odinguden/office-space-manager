@@ -1,5 +1,9 @@
 package no.ntnu.idata2900.group3.chairspace.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -34,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
 
 /**
  * Controller for the reservation feature entity.
@@ -77,7 +82,32 @@ public class ReservationController extends PermissionManager {
 	 * @return 200 OK with the found reservation, 404 if not found
 	 */
 	@GetMapping("/{id}")
-	public ResponseEntity<SimpleReservation> get(@PathVariable UUID id) {
+	@Operation(
+		summary = "Gets a single reservation based on id",
+		description = "Gets a reservation based on the provided id"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Found a reservation with the given id"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "If a reservation cannot be found with the given id"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users do not have access to read reservations"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to read reservations"
+			)
+	})
+	public ResponseEntity<SimpleReservation> get(
+		@Parameter(description = "The id of the reservation to get")
+		@PathVariable UUID id
+	) {
 		this.hasPermissionToGet();
 		Reservation reservation = this.reservationService.get(id);
 
@@ -95,7 +125,26 @@ public class ReservationController extends PermissionManager {
 	 * @return a page of the pagination of reservations
 	 */
 	@GetMapping("")
+	@Operation(
+		summary = "Gets all reservations",
+		description = "Returns all reservations paginated"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Found all reservations"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users do not have access to read reservations"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to read reservations"
+			)
+	})
 	public ResponseEntity<Page<SimpleReservation>> getAll(
+		@Parameter(description = "The requested page, Will be 0 if not provided")
 		@RequestParam(required = false) Integer page
 	) {
 		if (page == null || page < 0) {
@@ -121,9 +170,30 @@ public class ReservationController extends PermissionManager {
 	 * @return a list of reservations for the area within a timespan
 	 */
 	@GetMapping("/area/{id}")
+	@Operation(
+		summary = "Gets reservations belonging to an area between two timestamps.",
+		description = "Gets a list of all the reservations of a area between timestamps"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Found all reservations"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users do not have access to read reservations"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to read reservations"
+			)
+	})
 	public ResponseEntity<List<SimpleReservation>> getForAreaInTime(
+		@Parameter(description = "The id of the area to retrieve reservations for")
 		@PathVariable UUID id,
+		@Parameter(description = "The starting timestamp")
 		@RequestParam LocalDateTime start,
+		@Parameter(description = "The ending timestamp")
 		@RequestParam LocalDateTime end
 	) {
 		this.hasPermissionToGet();
@@ -148,10 +218,31 @@ public class ReservationController extends PermissionManager {
 	 * @return the reservation frequency of the room, as an integer percentage.
 	 */
 	@GetMapping("/area/{id}/frequency")
+	@Operation(
+		summary = "Gets the reservation frequency for either a day or a month",
+		description = "Gets the reservation frequency for either a day or a month."
+		+ " If day is null and month/year are defined, gets the aggregated frequency of the month."
+		+ " If month/year is null and day is defined, gets the frequency of the day."
+		+ " Otherwise returns 404."
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Calculated frequency"
+			),
+		@ApiResponse(
+			responseCode = "400",
+			description = "Missing necessary data"
+			)
+	})
 	public ResponseEntity<Integer> getReservationFrequency(
+		@Parameter(description = "the id of the area to retrieve the frequency for")
 		@PathVariable UUID id,
+		@Parameter(description = "the day to get the frequency of")
 		@RequestParam(required = false) LocalDate date,
+		@Parameter(description = "the year to get the frequency of")
 		@RequestParam(required = false) Integer year,
+		@Parameter(description = "the month to get the frequency of")
 		@RequestParam(required = false) Integer month
 	) {
 		float frequency;
@@ -174,9 +265,23 @@ public class ReservationController extends PermissionManager {
 	 * @return a list of frequencies for the provided month for the area
 	 */
 	@GetMapping("/area/{id}/frequency/list")
+	@Operation(
+		summary = "Gets the reservation frequency for a month",
+		description = "Gets the reservation frequency for a month as a list of"
+			+ " frequencies for each day"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Found frequencies for month"
+			),
+	})
 	public ResponseEntity<List<Integer>> getReservationFrequencyForFullMonth(
+		@Parameter(description = "The id of the area to get the frequencies of ")
 		@PathVariable UUID id,
+		@Parameter(description = "The year to get the frequency of")
 		@RequestParam int year,
+		@Parameter(description = "The month to get the frequency of")
 		@RequestParam int month
 	) {
 		List<Float> frequencies =
@@ -199,7 +304,24 @@ public class ReservationController extends PermissionManager {
 	 * @return 201 CREATED
 	 */
 	@PostMapping("")
-	public ResponseEntity<UUID> post(@RequestBody SimpleReservation simpleReservation) {
+	@Operation(
+		summary = "Creates a new reservation",
+		description = "Creates a new reservation based on simple reservation"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "201",
+			description = "Reservation was created"
+			),
+		@ApiResponse(
+			responseCode = "400",
+			description = "If simple reservation contains invalid data"
+			)
+	})
+	public ResponseEntity<UUID> post(
+		@Parameter(description = "The simple reservation to create from")
+		@RequestBody SimpleReservation simpleReservation
+	) {
 		this.hasPermissionToPost();
 		Reservation reservation;
 
@@ -222,12 +344,24 @@ public class ReservationController extends PermissionManager {
 	 * @return 204 NO CONTENT
 	 */
 	@PostMapping("/make")
+	@Operation(
+		summary = "Creates new reservation for the current user"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "201",
+			description = "Reservation was created"
+			),
+		@ApiResponse(
+			responseCode = "400",
+			description = "If simple reservation contains invalid data"
+			)	})
 	public ResponseEntity<String> bookRoomForMe(
+		@Parameter(description = "The simple reservation to create from")
 		@RequestBody MakeReservationDto reservationMakeRequest
 	) {
 		User user = userService.getSessionUser();
 		if (user == null) {
-			System.out.println("No session user?");
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 		}
 		Area area = areaService.get(reservationMakeRequest.roomId());
@@ -260,7 +394,31 @@ public class ReservationController extends PermissionManager {
 	 * @return 204 NO CONTENT
 	 */
 	@PutMapping("")
-	public ResponseEntity<String> put(@RequestBody SimpleReservation simpleReservation) {
+	@Operation(
+		summary = "Updates a reservation",
+		description = "Updates an existing reservation based on data from a simple reservation"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "201",
+			description = "Successfully updated reservation"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users are not permitted to update reservations"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to update reservations"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Failed to update the entity as it doesn't exist"
+			)	})
+	public ResponseEntity<String> put(
+		@Parameter(description = "The simple reservation to update from")
+		@RequestBody SimpleReservation simpleReservation
+	) {
 		this.hasPermissionToPut();
 		Reservation reservation;
 		try {
@@ -279,7 +437,32 @@ public class ReservationController extends PermissionManager {
 	 * @return 204 NO CONTENT
 	 */
 	@DeleteMapping("/{id}")
-	public ResponseEntity<String> delete(@PathVariable UUID id) {
+	@Operation(
+		summary = "Deletes a reservation",
+		description = "Attempts to delete a reservation with the given ID"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "204",
+			description = "Successfully deleted the reservation"
+			),
+		@ApiResponse(
+			responseCode = "401",
+			description = "Unauthorized users are not permitted to delete reservations"
+			),
+		@ApiResponse(
+			responseCode = "403",
+			description = "User has insufficient permissions to delete reservations"
+			),
+		@ApiResponse(
+			responseCode = "404",
+			description = "Failed to delete the reservation as it doesn't exist"
+			)
+	})
+	public ResponseEntity<String> delete(
+		@Parameter(description = "The id of the reservation to delete")
+		@PathVariable UUID id
+	) {
 		this.hasPermissionToDelete();
 		reservationService.delete(id);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -290,10 +473,20 @@ public class ReservationController extends PermissionManager {
 	 *
 	 * @param userId the id of the user to get the reservations of
 	 * @return reservations belonging to the user
-	 * @throws ResponseStatusException 400 BAD_REQUEST if the userId is null or the page is negative
 	 */
 	@GetMapping("/user/{userId}")
+	@Operation(
+		summary = "Gets all the reservations belonging to a user",
+		description = "Gets all the reservations belonging to a user in a list"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Found the reservations belonging to the user"
+			),
+	})
 	public ResponseEntity<List<SimpleReservation>> getReservationsByUser(
+		@Parameter(description = "The id of the user")
 		@PathVariable UUID userId
 	) {
 		this.hasPermissionToGet();
@@ -313,6 +506,18 @@ public class ReservationController extends PermissionManager {
 	 *     for the scope of the user's reservations.
 	 */
 	@GetMapping("/user/me")
+	@Operation(
+		summary = "Gets a map of all the areas where the current user has made a reservation",
+		description = "Gets a map of all areas in which the current user has a booking,"
+			+ "mapped to all bookings for those areas, "
+			+ "from the start of the first booking to the end of the last booking made by the user."
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "Found the areas where the current user has made a reservation"
+			)
+	})
 	public ResponseEntity<Map<UUID, SimpleReservationList>> getMyReservationData() {
 		this.hasPermissionToGet();
 		User sessionUser = userService.getSessionUser();

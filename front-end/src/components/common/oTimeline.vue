@@ -7,8 +7,11 @@ const vDate = useDate()
 const props = defineProps({
 	reservations: Array,
 	scopeStart: Date,
-	scopeEnd: Date
+	scopeEnd: Date,
+	disabled: Boolean
 })
+
+const selectedReservation = ref(null)
 
 const timeline = computed(() => {
 	const timeline = []
@@ -20,8 +23,8 @@ const timeline = computed(() => {
 	let lastEnd = new Date(startScope)
 
 	for (let reservation of props.reservations) {
-		const start = new Date(reservation.startTime)
-		const end = new Date(reservation.endTime)
+		let start = new Date(reservation.startTime)
+		let end = new Date(reservation.endTime)
 
 		if (start > lastEnd) {
 			timeline.push({
@@ -39,7 +42,8 @@ const timeline = computed(() => {
 			end,
 			startPercent: (start - startScope) / totalMs,
 			durationPercent: (end - start) / totalMs,
-			isMine: reservation.isMine
+			isMine: reservation.isMine,
+			data: reservation
 		})
 
 		lastEnd = end
@@ -67,25 +71,21 @@ function getDuration(reservation) {
 	return Math.max(duration, 0);
 }
 
-function formatTime(time) {
-	return `${vDate.format(time, "fullTime24h")}`// `${vDate.format(time, "hours24h")}:${vDate.format(time, "minutes")}`
-}
+const isModalOpen = computed({
+	get: () => selectedReservation.value != null,
+	set: () => selectedReservation.value = null
+})
 
-function getDateTip(reservation) {
-	if (reservation.start.getDate() == reservation.end.getDate()) {
-		return vDate.format(reservation.start, "shortDate")
+function setReservation(reservationSegment) {
+	if (reservationSegment.type === 'event') {
+		selectedReservation.value = reservationSegment.data
 	}
-	return `${vDate.format(reservation.start, "shortDate")} - ${vDate.format(reservation.end, "shortDate")}`
-}
-
-function getTimeTip(reservation) {
-	return `${formatTime(reservation.start)} - ${formatTime(reservation.end)}`
 }
 </script>
 
 <template>
-	<div class="timeline-container">
-		<v-tooltip v-for="reservation in timeline">
+	<div class="timeline-container" :class="{ disabled }">
+		<v-tooltip v-for="reservation in timeline" :disabled="disabled">
 			<template
 				v-slot:activator="{ props }"
 			>
@@ -95,11 +95,14 @@ function getTimeTip(reservation) {
 					:class="{
 						'event': reservation.type === 'event',
 						'gap': reservation.type === 'gap',
-						'mine': reservation.isMine
+						'mine': reservation.isMine,
+						'disabled': disabled
 					}"
 					:style="{
 						'--reservation-length': getDuration(reservation)
 					}"
+					:disabled="disabled"
+					@click.prevent="setReservation(reservation)"
 				/>
 			</template>
 			<div class="tooltip-grid">
@@ -112,6 +115,10 @@ function getTimeTip(reservation) {
 				<span>{{ vDate.format(reservation.end, "fullTime24h").substring(0,5) }}</span>
 			</div>
 		</v-tooltip>
+		<o-reservation-modal
+			v-model="isModalOpen"
+			:reservation="selectedReservation"
+		/>
 	</div>
 </template>
 
@@ -127,12 +134,17 @@ function getTimeTip(reservation) {
 	background-color: rgba(var(--v-theme-on-surface), 0.1);
 	border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 
+	&.disabled {
+		background-color: rgba(var(--v-theme-on-surface), 0.3)
+	}
+
 	.timeline-component {
 		flex-grow: var(--reservation-length);
 
 		&.event {
 			background-color: rgb(var(--v-theme-error));
 			border: 2px solid rgba(var(--v-border-color), 0.33);
+			cursor: pointer;
 
 			&.mine {
 				background-color: rgb(var(--v-theme-blue));

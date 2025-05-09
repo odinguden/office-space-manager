@@ -1,7 +1,6 @@
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
-import { useRouter } from 'vue-router';
-import { BACKEND_URL, LOGOUT_ENDPOINT } from '@/plugins/config';
+import { LOGOUT_ENDPOINT } from '@/plugins/config';
 
 const authStore = useAuthStore()
 </script>
@@ -18,7 +17,7 @@ const authStore = useAuthStore()
 		<v-card-actions class="me-actions">
 			<v-btn
 				variant="outlined"
-				:href="BACKEND_URL + LOGOUT_ENDPOINT"
+				:href="LOGOUT_ENDPOINT"
 			>
 				Log out
 			</v-btn>

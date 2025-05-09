@@ -71,20 +71,13 @@ watch(date, () => {
 
 const errorMessage = ref("")
 
-function parseTime(input) {
-	return input.split(":").map(Number)
-}
-
-
 function tryBook() {
 	if (!valid.value) return;
 
 	const startDate = new Date(dateAsDate.value)
-	const [sHours, sMinutes] = parseTime(startTime.value)
-	startDate.setHours(sHours, sMinutes, 0, 0)
+	startDate.setHours(startTime.value.getHours(), startTime.value.getMinutes(), 0, 0)
 	const endDate = new Date(dateAsDate.value)
-	const [eHours, eMinutes] = parseTime(endTime.value)
-	endDate.setHours(eHours, eMinutes, 0, 0)
+	endDate.setHours(endTime.value.getHours(), endTime.value.getMinutes(), 0, 0)
 
 	fetcher.tryMakeReservation(
 		props.area.id,
@@ -99,7 +92,7 @@ function tryBook() {
 				errorMessage.value = "Failed to book this room"
 			}
 		} else {
-			emit('cancel')
+			window.location.reload()
 		}
 	})
 }
@@ -134,12 +127,12 @@ function tryBook() {
 				type="date"
 			/>
 			<div class="h-input-group">
-				<v-text-field
+				<o-time-input
 					v-model="startTime"
 					label="From"
 					type="time"
 				/>
-				<v-text-field
+				<o-time-input
 					v-model="endTime"
 					label="To"
 					type="time"

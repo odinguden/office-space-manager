@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { BACKEND_URL, LOGIN_ENDPOINT } from "@/plugins/config";
+import { LOGIN_ENDPOINT, LOGOUT_ENDPOINT } from "@/plugins/config";
 import fetcher from '@/plugins/fetcher';
 
 const AUTH_STATES = {
@@ -18,7 +18,8 @@ export const useAuthStore = defineStore('auth', {
 
 	getters: {
 		AUTH_STATES: () => (AUTH_STATES),
-		LOGIN_ENDPOINT: () => (BACKEND_URL + LOGIN_ENDPOINT)
+		LOGIN_ENDPOINT: () => (LOGIN_ENDPOINT),
+		LOGOUT_ENDPOINT: () => (LOGOUT_ENDPOINT)
 	},
 
 	actions: {

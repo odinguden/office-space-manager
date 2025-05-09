@@ -132,7 +132,7 @@ public abstract class EntityService<EntityT extends EntityInterface<IdT>, IdT> {
 	 * @return true if the entity was deleted, false if it does not exist
 	 */
 	public boolean delete(IdT id) {
-		if (this.exists(id)) {
+		if (!this.exists(id)) {
 			return false;
 		}
 

@@ -1,25 +1,13 @@
 import { defineStore } from "pinia";
-
-function formatDate(input) {
-	return input.toISOString().slice(0, 19)
-}
-
-function parseTime(input) {
-	const [hours, minutes] = input.split(":").map(Number)
-	return {hours, minutes}
-}
-
-function formatDuration(input) {
-	return `PT${input.hours}H${input.minutes}M`
-}
+import { timeUtil } from "@/plugins/timeUtil";
 
 export const useSearchStore = defineStore('search', {
 	state: () => ({
 		areaType: "desk",
 		capacity: 1,
 		date: null,
-		timeStart: "00:00",
-		timeEnd: "23:59",
+		timeStart: timeUtil.fromTimeString("00:00"),
+		timeEnd: timeUtil.fromTimeString("23:59"),
 		duration: {
 			hours: undefined,
 			minutes: undefined
@@ -31,26 +19,6 @@ export const useSearchStore = defineStore('search', {
 	}),
 
 	getters: {
-		dateStart() {
-			let selectedDate = this.date || new Date()
-
-			const startDate = new Date(selectedDate)
-			const startTime = parseTime(this.timeStart)
-			startDate.setHours(startTime.hours)
-			startDate.setMinutes(startTime.minutes)
-
-			return startDate
-		},
-		dateEnd() {
-			let selectedDate = this.date || new Date()
-
-			const endDate = new Date(selectedDate)
-			const endTime = parseTime(this.timeEnd)
-			endDate.setHours(endTime.hours)
-			endDate.setMinutes(endTime.minutes)
-
-			return endDate
-		},
 		defaultDuration() {
 			if (this.timeStart == null || this.timeEnd == null) {
 				return {hours: "00", minutes: "00"}
@@ -73,7 +41,7 @@ export const useSearchStore = defineStore('search', {
 				}
 			}
 
-			let minutes = Math.abs(this.vDate.getDiff(this.dateStart, this.dateEnd, "minutes"))
+			let minutes = Math.abs(this.vDate.getDiff(this.timeStart, this.timeEnd, "minutes"))
 			const hours = Math.floor(minutes / 60)
 			minutes = minutes - hours * 60
 			return {hours, minutes}
@@ -118,17 +86,13 @@ export const useSearchStore = defineStore('search', {
 			let selectedDate = this.date || new Date()
 
 			const startDate = new Date(selectedDate)
-			const startTime = parseTime(this.timeStart)
-			startDate.setHours(startTime.hours)
-			startDate.setMinutes(startTime.minutes)
+			startDate.setHours(this.timeStart.getHours(), this.timeEnd.getMinutes())
 
 			const endDate = new Date(selectedDate)
-			const endTime = parseTime(this.timeEnd)
-			endDate.setHours(endTime.hours)
-			endDate.setMinutes(endTime.minutes)
+			endDate.setHours(this.timeEnd.getHours(), this.timeEnd.getMinutes())
 
-			queryParams["start-time"] = formatDate(startDate)
-			queryParams["end-time"] = formatDate(endDate)
+			queryParams["start-time"] = timeUtil.formatDateTimeForSend(startDate)
+			queryParams["end-time"] = timeUtil.formatDateTimeForSend(endDate)
 
 			let realDuration = this.duration;
 
@@ -141,7 +105,7 @@ export const useSearchStore = defineStore('search', {
 				realDuration = this.defaultDuration
 			}
 
-			queryParams["duration"] = formatDuration(realDuration)
+			queryParams["duration"] = timeUtil.formatDurationForSend(realDuration)
 
 			const nonEmptyParams = {}
 			for (let [idx, param] of Object.entries(queryParams)) {

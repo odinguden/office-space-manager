@@ -19,8 +19,8 @@ const NAV_TARGETS = {
 		},
 		{
 			name: "My plans",
-			icon: "mdi-clock",
-			link: null
+			icon: "mdi-calendar-clock",
+			link: "/plans"
 		}
 	],
 	admin: [
