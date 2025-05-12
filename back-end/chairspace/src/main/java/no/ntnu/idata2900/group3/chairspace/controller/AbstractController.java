@@ -162,15 +162,17 @@ public abstract class AbstractController<EntityT extends EntityInterface<IdTypeT
 			description = "Failed to create a new entity as it already exists"
 			)
 	})
-	public ResponseEntity<String> postEntity(
+	public ResponseEntity<IdTypeT> postEntity(
 		@Parameter(description = "The entity to save to database")
 		@RequestBody EntityT object
 	) {
 		this.hasPermissionToPost();
-		if (!entityService.create(object)) {
+		IdTypeT id = entityService.create(object);
+		if (id == null) {
+			// The entity already exists
 			throw new ResponseStatusException(HttpStatus.CONFLICT);
 		}
-		return new ResponseEntity<>(HttpStatus.CREATED);
+		return new ResponseEntity<IdTypeT>(id, HttpStatus.CREATED);
 	}
 
 	/**

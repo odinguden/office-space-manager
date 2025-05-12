@@ -39,7 +39,7 @@ public class ReservationService extends EntityService<Reservation, UUID> {
 
 	@Override
 	// Override to ensure reservations cannot overlap
-	protected boolean save(Reservation reservation) {
+	protected UUID save(Reservation reservation) {
 		boolean canAdd = reservationRepository.isTimeSlotFree(
 			reservation.getArea().getId(),
 			reservation.getStart(),
@@ -51,12 +51,11 @@ public class ReservationService extends EntityService<Reservation, UUID> {
 			reservation.getStart(),
 			reservation.getEnd()
 		);
-
+		UUID reservationId = null;
 		if (canAdd) {
-			canAdd = super.save(reservation);
+			reservationId = super.save(reservation);
 		}
-
-		return canAdd;
+		return reservationId;
 	}
 
 	/**

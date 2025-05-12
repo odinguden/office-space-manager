@@ -121,7 +121,7 @@ public class PlanController extends PermissionManager {
 			description = "User has insufficient permissions to create a new plan"
 			),
 	})
-	public ResponseEntity<String> postMethodName(
+	public ResponseEntity<UUID> postMethodName(
 		@Parameter(description = "Data used to create new plan")
 		@RequestBody SimplePlan plan
 	) {
@@ -132,8 +132,8 @@ public class PlanController extends PermissionManager {
 		} catch (InvalidArgumentCheckedException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		}
-		planService.create(realPlan);
-		return new ResponseEntity<>(HttpStatus.CREATED);
+		UUID id = planService.create(realPlan);
+		return new ResponseEntity<>(id, HttpStatus.CREATED);
 	}
 
 	/**

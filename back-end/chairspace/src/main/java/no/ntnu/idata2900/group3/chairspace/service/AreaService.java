@@ -49,11 +49,10 @@ public class AreaService extends EntityService<Area, UUID> {
 
 	@Override
 	// Override to ensure areas cannot be saved with themselves as their super area
-	protected boolean save(Area area) {
+	protected UUID save(Area area) {
 		if (area.isSuperArea(area)) {
-			return false;
+			return null;
 		}
-
 		return super.save(area);
 	}
 

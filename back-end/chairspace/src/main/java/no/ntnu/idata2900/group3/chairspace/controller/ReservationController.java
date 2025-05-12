@@ -356,7 +356,7 @@ public class ReservationController extends PermissionManager {
 			responseCode = "400",
 			description = "If simple reservation contains invalid data"
 			)	})
-	public ResponseEntity<String> bookRoomForMe(
+	public ResponseEntity<UUID> bookRoomForMe(
 		@Parameter(description = "The simple reservation to create from")
 		@RequestBody MakeReservationDto reservationMakeRequest
 	) {
@@ -380,11 +380,12 @@ public class ReservationController extends PermissionManager {
 			e.printStackTrace();
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		}
-		if (!reservationService.create(reservation)) {
+		UUID id = reservationService.create(reservation);
+		if (id == null) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT);
 		}
 
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(id, HttpStatus.NO_CONTENT);
 	}
 
 	/**

@@ -211,10 +211,8 @@ public class AreaController extends PermissionManager {
 			e.printStackTrace();
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		}
-
-		areaService.create(area);
-
-		return new ResponseEntity<>(HttpStatus.CREATED);
+		UUID id = areaService.create(area);
+		return new ResponseEntity<>(id, HttpStatus.CREATED);
 	}
 
 	/**

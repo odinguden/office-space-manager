@@ -97,19 +97,19 @@ public abstract class EntityService<EntityT extends EntityInterface<IdT>, IdT> {
 		if (entity.getId() == null || !this.exists(entity.getId())) {
 			return false;
 		}
-
-		return this.save(entity);
+		this.save(entity);
+		return true;
 	}
 
 	/**
 	 * Attempts to create a new entity.
 	 *
 	 * @param entity the entity to save
-	 * @return true if the entity was created, false if it already exists
+	 * @return The ID of the created entity, or null if it already exists
 	 */
-	public boolean create(EntityT entity) {
+	public IdT create(EntityT entity) {
 		if (entity.getId() != null && this.exists(entity.getId())) {
-			return false;
+			return null;
 		}
 
 		return this.save(entity);
@@ -120,9 +120,9 @@ public abstract class EntityService<EntityT extends EntityInterface<IdT>, IdT> {
 	 *
 	 * @param entity entity to save.
 	 */
-	protected boolean save(EntityT entity) {
-		this.repository.save(entity);
-		return true;
+	protected IdT save(EntityT entity) {
+		EntityT savedEntity = this.repository.save(entity);
+		return savedEntity.getId();
 	}
 
 	/**
