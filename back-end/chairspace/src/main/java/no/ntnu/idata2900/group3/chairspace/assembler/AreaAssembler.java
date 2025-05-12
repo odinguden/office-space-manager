@@ -213,7 +213,8 @@ public class AreaAssembler {
 		boolean doesAreaExist = simpleArea != null
 			&& simpleArea.superAreas() != null
 			&& !simpleArea.superAreas().isEmpty()
-			&& simpleArea.superAreas().get(0) != null;
+			&& simpleArea.superAreas().get(0) != null
+			&& simpleArea.superAreas().get(0).id() != null;
 
 		Area area = null;
 

@@ -175,7 +175,7 @@ public record SimpleArea(
 				.id(area.getId())
 				.build();
 
-			this.superAreas.add(simpleSuperArea);
+			this.superAreas.add(0, simpleSuperArea);
 
 			return this;
 		}
