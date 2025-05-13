@@ -1,21 +1,26 @@
 <script setup>
-function getIcon(name) {
-	switch (name) {
-		case "Screen":
-			return "mdi-monitor"
-		case "Camera":
-			return "mdi-camera"
-		case "Microphone":
-			return "mdi-microphone"
-		default:
-			return "mdi-help-box"
-	}
-
-}
+import { FEATURE_ICON_MAPPINGS } from '@/plugins/config';
 
 const props = defineProps({
-	features: Array
+	features: Array,
+	type: {
+		type: String,
+		default: "space"
+	}
 })
+
+function getIcon(name) {
+	name = name.toLowerCase()
+
+	if (name in FEATURE_ICON_MAPPINGS) {
+		return FEATURE_ICON_MAPPINGS[name]
+	}
+
+	console.log(name)
+	return FEATURE_ICON_MAPPINGS["other"]
+}
+
+
 </script>
 
 <template>
@@ -29,7 +34,7 @@ const props = defineProps({
 			<span>
 				{{ extra.id }}
 				<br>
-				This space comes equipped with {{ extra.desc }}
+				This {{ props.type }} {{ extra.description }}
 			</span>
 		</v-tooltip>
 	</div>

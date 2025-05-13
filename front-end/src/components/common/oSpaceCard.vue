@@ -1,4 +1,7 @@
 <script setup>
+import { TYPE_ICON_MAPPINGS } from '@/plugins/config'
+import { computed } from 'vue'
+
 const props = defineProps({
 	area: Object
 })
@@ -13,6 +16,16 @@ const breadcrumbs = computed(() => {
 	}
 	return newCrumbs
 })
+
+const icon = computed(() => {
+	const typeName = props.area.areaType.id.toLowerCase()
+
+	if (typeName in TYPE_ICON_MAPPINGS) {
+		return TYPE_ICON_MAPPINGS[typeName]
+	}
+
+	return TYPE_ICON_MAPPINGS["other"]
+})
 </script>
 
 <template>
@@ -26,7 +39,14 @@ const breadcrumbs = computed(() => {
 			class="card-crumbs"
 			:items="breadcrumbs"
 		/>
-		<v-icon>mdi-desk</v-icon>
+		<v-tooltip>
+			<template v-slot:activator="{ props }">
+				<v-icon v-bind="props">
+					{{ icon }}
+				</v-icon>
+			</template>
+			{{ area.areaType.id }}
+		</v-tooltip>
 		<div class="card-header">
 			<h1><router-link :to="`/room/${area.id}`">{{ area.name }}</router-link></h1>
 		</div>
@@ -35,7 +55,7 @@ const breadcrumbs = computed(() => {
 			<o-plan-control-tooltip v-if="area.isPlanControlled" />
 		</div>
 		<div class="card-extras">
-			<o-space-extras :features="area.areaFeatures" />
+			<o-space-extras :features="area.areaFeatures" :type="area.areaType.id" />
 		</div>
 		<div class="one-span-two">
 			<slot name="timeline">
@@ -48,7 +68,6 @@ const breadcrumbs = computed(() => {
 				</div>
 			</slot>
 		</div>
-		
 		<div class="one-span-two">
 			<slot name="actions" />
 		</div>
