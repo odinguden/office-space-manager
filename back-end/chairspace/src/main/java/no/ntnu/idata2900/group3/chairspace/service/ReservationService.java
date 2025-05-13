@@ -46,11 +46,13 @@ public class ReservationService extends EntityService<Reservation, UUID> {
 			reservation.getEnd()
 		);
 
-		canAdd = canAdd && planService.isFree(
-			reservation.getArea().getId(),
-			reservation.getStart(),
-			reservation.getEnd()
-		);
+		canAdd = canAdd && (
+			!reservation.getArea().isPlanControlled()
+			|| planService.isFree(
+				reservation.getArea().getId(),
+				reservation.getStart(),
+				reservation.getEnd()
+			));
 		UUID reservationId = null;
 		if (canAdd) {
 			reservationId = super.save(reservation);

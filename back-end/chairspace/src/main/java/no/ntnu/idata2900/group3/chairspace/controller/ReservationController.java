@@ -332,9 +332,12 @@ public class ReservationController extends PermissionManager {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		}
 
-		reservationService.create(reservation);
+		UUID id = reservationService.create(reservation);
+		if (id == null) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT);
+		}
 
-		return new ResponseEntity<>(HttpStatus.CREATED);
+		return new ResponseEntity<>(id, HttpStatus.CREATED);
 	}
 
 	/**
