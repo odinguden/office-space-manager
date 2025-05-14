@@ -57,7 +57,7 @@ const icon = computed(() => {
 		<div class="card-extras">
 			<o-space-extras :features="area.areaFeatures" :type="area.areaType.id" />
 		</div>
-		<div class="one-span-two">
+		<div v-if="area.reservable" class="one-span-two">
 			<slot name="timeline">
 				<div class="card-timeline">
 					<o-timeline
@@ -68,6 +68,12 @@ const icon = computed(() => {
 				</div>
 			</slot>
 		</div>
+		<span v-else class="text-faded card-extras">
+			<v-icon size="small">
+				mdi-information-slab-circle
+			</v-icon>
+			Space is not reservable
+		</span>
 		<div class="one-span-two">
 			<slot name="actions" />
 		</div>
@@ -117,5 +123,10 @@ const icon = computed(() => {
 	.one-span-two {
 		grid-column: 1 / span 2;
 	}
+}
+
+.text-faded {
+	opacity: var(--v-high-emphasis-opacity);
+	font-size: 0.8rem;
 }
 </style>
