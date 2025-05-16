@@ -16,7 +16,7 @@ const FEATURE_TO_ICON_MAPPING = {
 	"no elevator access": "mdi-elevator-passenger-off",
 	"wheelchair accessible": "mdi-wheelchair-accessibility",
 	"parking": "mdi-parking",
-	"no wifi": "wifi-off",
+	"no wifi": "mdi-wifi-off",
 	"other": "mdi-help-box"
 }
 
