@@ -23,7 +23,7 @@ const ROOM_TYPES = [
 	},
 	{
 		name: "All",
-		value: null,
+		value: "all",
 		icon: "mdi-dots-horizontal"
 	}
 ]

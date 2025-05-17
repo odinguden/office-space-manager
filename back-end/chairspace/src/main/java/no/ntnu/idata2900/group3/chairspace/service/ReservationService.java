@@ -113,14 +113,14 @@ public class ReservationService extends EntityService<Reservation, UUID> {
 		Iterator<Reservation> reservations = reservationRepository
 			.findReservationsForAreaInTimePeriod(areaId, searchStart, searchEnd).iterator();
 
-		boolean hasGap = true;
+		boolean hasGap = false;
 		LocalDateTime prevEnd = searchStart;
 
-		while (reservations.hasNext() && hasGap) {
+		while (reservations.hasNext() && !hasGap) {
 			Reservation reservation = reservations.next();
 
-			if (!isGapGreaterThanDuration(prevEnd, reservation.getStart(), minDuration)) {
-				hasGap = false;
+			if (isGapGreaterThanDuration(prevEnd, reservation.getStart(), minDuration)) {
+				hasGap = true;
 			}
 
 			prevEnd = reservation.getEnd().isBefore(searchEnd) ? reservation.getEnd() : searchEnd;
