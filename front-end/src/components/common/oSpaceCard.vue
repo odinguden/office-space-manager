@@ -25,6 +25,24 @@ const capacityTooltip = computed(() => {
 	const plurality = props.area.capacity === 1 ? "person" : "people"
 	return `This ${props.area.areaType.id} holds ${props.area.capacity} ${plurality}`
 })
+
+const breadcrumbs = computed(() => {
+	const crumbs = []
+	for (let superArea of props.area.superAreas) {
+		crumbs.push({
+			title: superArea.name,
+			to: `/room/${superArea.id}`
+		})
+	}
+
+	crumbs.push({
+		title: props.area.name,
+		to: `/room/${props.area.id}`,
+		self: true
+	})
+
+	return crumbs
+})
 </script>
 
 <template>
@@ -35,6 +53,29 @@ const capacityTooltip = computed(() => {
 		:subtitle="props.area.description"
 		:to="`/room/${area.id}`"
 	>
+		<template v-slot:title>
+			<v-breadcrumbs
+				class="area-breadcrumbs"
+				:items="breadcrumbs"
+				v-ripple.stop
+				density="compact"
+			>
+				<template v-slot:item="{ item }">
+					<router-link
+						:to="item.to"
+						class="v-breadcrumbs-item"
+						:class="{'superarea-crumb': !item.self}"
+					>
+						{{ item.title }}
+					</router-link>
+				</template>
+				<template v-slot:divider>
+					<div class="area-crumb-divider">
+						/
+					</div>
+				</template>
+			</v-breadcrumbs>
+		</template>
 		<template v-slot:prepend>
 			<v-icon v-tooltip="areaTypeName">
 				{{ icon }}
@@ -119,5 +160,15 @@ const capacityTooltip = computed(() => {
 .card-details-container {
 	display: flex;
 	justify-content: space-between;
+}
+
+.area-breadcrumbs, .v-breadcrumbs-item {
+	padding: 0;
+}
+
+.superarea-crumb, .area-crumb-divider {
+	opacity: var(--v-medium-emphasis-opacity);
+	
+	font-size: 0.8rem;
 }
 </style>
