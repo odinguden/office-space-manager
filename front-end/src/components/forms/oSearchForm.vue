@@ -14,6 +14,11 @@ search.setDateUtil(vDate)
 // The different types of rooms permissible for search
 const ROOM_TYPES = [
 	{
+		name: "All",
+		value: "all",
+		icon: "mdi-dots-horizontal"
+	},
+	{
 		name: "Rooms",
 		value: "room",
 		icon: "mdi-theater"
@@ -23,11 +28,6 @@ const ROOM_TYPES = [
 		value: "desk",
 		icon: "mdi-desk"
 	},
-	{
-		name: "All",
-		value: "all",
-		icon: "mdi-dots-horizontal"
-	}
 ]
 
 const areaFeatures = ref([])

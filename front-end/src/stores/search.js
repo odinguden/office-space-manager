@@ -3,7 +3,7 @@ import { timeUtil } from "@/plugins/timeUtil";
 
 export const useSearchStore = defineStore('search', {
 	state: () => ({
-		areaType: "desk",
+		areaType: "all",
 		capacity: 1,
 		date: null,
 		timeStart: timeUtil.fromTimeString("00:00"),
