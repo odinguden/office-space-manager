@@ -11,10 +11,6 @@
 				<o-user-card />
 			</v-menu>
 		</v-btn>
-		<v-btn
-			icon="mdi-cog"
-			aria-label="Open site settings"
-		/>
 	</div>
 </template>
 
