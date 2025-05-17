@@ -79,6 +79,10 @@ export const useSearchStore = defineStore('search', {
 				"super-area": this.location
 			}
 
+			if (this.areaType === "all") {
+				delete queryParams["area-type"]
+			}
+
 			if (this.features.length > 0) {
 				queryParams["features"] = this.features
 			}
