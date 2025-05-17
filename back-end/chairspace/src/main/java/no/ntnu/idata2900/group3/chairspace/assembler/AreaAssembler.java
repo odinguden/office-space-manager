@@ -187,6 +187,14 @@ public class AreaAssembler {
 		return builder.build();
 	}
 
+	public SimpleArea toSimpleSuperArea(Area area) {
+		return new SimpleArea.Builder()
+			.id(area.getId())
+			.name(area.getName())
+			.areaType(area.getAreaType())
+			.build();
+	}
+
 	/**
 	 * Returns {@code primary} as long as it is not null, and {@code fallback} otherwise.
 	 *

@@ -195,4 +195,9 @@ public class AreaService extends EntityService<Area, UUID> {
 	public List<Area> getAreasByUserAsList(UUID userId) {
 		return areaRepository.findByAdministrators_Id(userId);
 	}
+
+	public List<Area> getSuperAreasByName(String name) {
+		Pageable limit20 = PageRequest.of(0, 20);
+		return areaRepository.findSuperAreasByName(name, limit20).getContent();
+	}
 }

@@ -23,6 +23,11 @@ public interface AreaRepository extends JpaRepository<Area, UUID> {
 	 * @param superAreaId id of the super area to find sub areas for
 	 * @return a list of sub areas of the given super area
 	 */
+	@Query("""
+		SELECT area.id
+		FROM Area area
+		WHERE area.superArea.id = :superAreaId
+		""")
 	List<UUID> findIdBySuperAreaId(UUID superAreaId);
 
 	/**
@@ -91,4 +96,11 @@ public interface AreaRepository extends JpaRepository<Area, UUID> {
 		OR area.planControlled = ?2
 		""")
 	public List<Area> findAllByPlanControlledOrReservable(boolean reservable, boolean planControl);
+
+	@Query("""
+		SELECT DISTINCT area.superArea
+		FROM Area area
+		WHERE area.superArea.name LIKE %:name%
+		""")
+	public Page<Area> findSuperAreasByName(String name, Pageable pageable);
 }
