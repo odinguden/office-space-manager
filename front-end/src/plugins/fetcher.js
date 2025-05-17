@@ -7,6 +7,7 @@ const AREA_FEATURE_URL = BACKEND_URL + "/area-feature"
 const AREA_URL = BACKEND_URL + "/area"
 const ALL_AREAS_URL = AREA_URL + "/home"
 const MY_AREAS_URL = AREA_URL + "/user"
+const SUPERAREAS_URL = AREA_URL + "/superareas"
 
 const RESERVATION_URL = BACKEND_URL + "/reservation"
 const RESERVATION_MAKE_URL = RESERVATION_URL + "/make"
@@ -153,5 +154,10 @@ export default {
 	async deletePlan(id) {
 		const body = { method: 'DELETE' }
 		return doFetch(`${PLANS_URL}/${id}`, body)
+	},
+
+	async getSuperAreasByName(name="") {
+		return doFetch(`${SUPERAREAS_URL}?name=${name}`)
+			.then(response => response.json())
 	}
 }

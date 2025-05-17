@@ -309,18 +309,13 @@ public class AreaController extends PermissionManager {
 	 */
 	@GetMapping("/user/{userId}")
 	@Operation(
-		summary = "Gets all areas administered by a single user",
-		description = " "
+		summary = "Gets all areas administered by a single user"
 	)
 	@ApiResponses(value = {
 		@ApiResponse(
 			responseCode = "200",
-			description = "Areas found with"
+			description = "A list of areas found by admin"
 			),
-		@ApiResponse(
-			responseCode = "",
-			description = ""
-			)
 	})
 	public ResponseEntity<Page<SimpleArea>> findAreasByAdmin(
 		@Parameter(description = "Id of user to get areas for")
@@ -338,6 +333,18 @@ public class AreaController extends PermissionManager {
 		);
 	}
 
+	/**
+	 * Fetches up to 20 superareas that loosely match the input search term.
+	 *
+	 * @param name the search term
+	 * @return a list of up to 20 superareas that loosely match the input search term
+	 */
+	@ApiResponses(value={
+		@ApiResponse(
+			responseCode = "200",
+			description = "A list of up to 20 super areas that match the search term"
+		)
+	})
 	@GetMapping("/superareas")
 	public ResponseEntity<List<SimpleArea>> findSuperAreasByName(@RequestParam String name) {
 		this.hasPermissionToGet();

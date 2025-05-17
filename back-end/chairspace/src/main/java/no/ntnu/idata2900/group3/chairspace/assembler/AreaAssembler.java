@@ -187,6 +187,12 @@ public class AreaAssembler {
 		return builder.build();
 	}
 
+	/**
+	 * Creates an extremely simple representation of a super area.
+	 *
+	 * @param area the area to turn into a simple representation
+	 * @return a simple representation of the area as a super area
+	 */
 	public SimpleArea toSimpleSuperArea(Area area) {
 		return new SimpleArea.Builder()
 			.id(area.getId())

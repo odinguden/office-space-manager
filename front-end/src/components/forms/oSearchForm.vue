@@ -4,6 +4,8 @@ import { useDate } from 'vuetify'
 import { useRouter } from 'vue-router'
 import fetcher from '@/plugins/fetcher'
 import { useSearchStore } from '@/stores/search'
+import { TYPE_ICON_MAPPINGS } from '@/plugins/config'
+
 const vDate = useDate()
 const router = useRouter()
 const search = useSearchStore()
@@ -12,14 +14,14 @@ search.setDateUtil(vDate)
 // The different types of rooms permissible for search
 const ROOM_TYPES = [
 	{
-		name: "Desks",
-		value: "desk",
-		icon: "mdi-desk"
-	},
-	{
 		name: "Rooms",
 		value: "room",
 		icon: "mdi-theater"
+	},
+	{
+		name: "Desks",
+		value: "desk",
+		icon: "mdi-desk"
 	},
 	{
 		name: "All",
@@ -30,16 +32,23 @@ const ROOM_TYPES = [
 
 const areaFeatures = ref([])
 const areaTypes = ref([])
+const superAreas = ref([])
 
 function fetchAreaFeatures() {
 	if (areaFeatures.value.length == 0) {
 		fetcher.getAreaFeatures().then(response => areaFeatures.value = response)
 	}
 }
+function fetchSuperAreas(name) {
+	if (typeof(name) !== "string") return;
+	fetcher.getSuperAreasByName(name)
+		.then(response => superAreas.value = response)
+}
 function fetchAreaTypes() {
 	fetcher.getAreaTypes().then(response => areaTypes.value = response)
 }
 fetchAreaTypes()
+fetchSuperAreas()
 
 const computedDate = computed({
 	get() {
@@ -57,6 +66,14 @@ const computedDate = computed({
 const durationPlaceholder = computed(() => {
 	return search.defaultDuration
 })
+
+function getIcon(typeName) {
+	if (typeName in TYPE_ICON_MAPPINGS) {
+		return TYPE_ICON_MAPPINGS[typeName]
+	}
+
+	return TYPE_ICON_MAPPINGS["other"]
+}
 
 function onDateClicked() {
 	if (search.date == null) {
@@ -160,18 +177,31 @@ function onSubmit() {
 			<v-autocomplete
 				v-model="search.location"
 				:error-messages="search.errorMessages.location"
+				:items="superAreas"
+				item-title="name"
+				item-value="id"
 				density="compact"
 				label="Location"
 				placeholder="Any"
 				prepend-inner-icon="mdi-magnify"
 				persistent-placeholder
 				hide-details="auto"
-			/>
+				@update:search="fetchSuperAreas"
+			>
+				<template v-slot:item="{ props, item }">
+					<v-list-item
+						v-bind="props"
+						:prepend-icon="getIcon(item.raw.areaType.id)"
+						:title="item.raw.name"
+					/>
+				</template>
+			</v-autocomplete>
 			<v-divider />
 			<v-autocomplete
 				v-model="search.features"
 				:error-messages="search.errorMessages.features"
 				:items="areaFeatures"
+				no-filter
 				item-title="id"
 				multiple
 				chips
