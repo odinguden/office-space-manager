@@ -85,36 +85,38 @@ function setReservation(reservationSegment) {
 
 <template>
 	<div class="timeline-container" :class="{ disabled }">
-		<v-tooltip v-for="reservation in timeline" :disabled="disabled">
-			<template
-				v-slot:activator="{ props }"
-			>
-				<div
-					v-bind="props"
-					class="timeline-component"
-					:class="{
-						'event': reservation.type === 'event',
-						'gap': reservation.type === 'gap',
-						'mine': reservation.isMine,
-						'disabled': disabled
-					}"
-					:style="{
-						'--reservation-length': getDuration(reservation)
-					}"
-					:disabled="disabled"
-					@click.prevent="setReservation(reservation)"
-				/>
-			</template>
-			<div class="tooltip-grid">
-				<span>{{ vDate.format(reservation.start, "shortDate") }}</span>
-				<span> - </span>
-				<span>{{ vDate.format(reservation.end, "shortDate") }}</span>
+		<div class="timeline-inner-container">
+			<v-tooltip v-for="reservation in timeline" :disabled="disabled">
+				<template
+					v-slot:activator="{ props }"
+				>
+					<div
+						v-bind="props"
+						class="timeline-component"
+						:class="{
+							'event': reservation.type === 'event',
+							'gap': reservation.type === 'gap',
+							'mine': reservation.isMine,
+							'disabled': disabled
+						}"
+						:style="{
+							'--reservation-length': getDuration(reservation)
+						}"
+						:disabled="disabled"
+						@click.prevent="setReservation(reservation)"
+					/>
+				</template>
+				<div class="tooltip-grid">
+					<span>{{ vDate.format(reservation.start, "shortDate") }}</span>
+					<span> - </span>
+					<span>{{ vDate.format(reservation.end, "shortDate") }}</span>
 
-				<span>{{ vDate.format(reservation.start, "fullTime24h").substring(0,5) }}</span>
-				<span> - </span>
-				<span>{{ vDate.format(reservation.end, "fullTime24h").substring(0,5) }}</span>
-			</div>
-		</v-tooltip>
+					<span>{{ vDate.format(reservation.start, "fullTime24h").substring(0,5) }}</span>
+					<span> - </span>
+					<span>{{ vDate.format(reservation.end, "fullTime24h").substring(0,5) }}</span>
+				</div>
+			</v-tooltip>
+		</div>
 		<o-reservation-modal
 			v-model="isModalOpen"
 			:reservation="selectedReservation"
@@ -124,15 +126,25 @@ function setReservation(reservationSegment) {
 
 <style scoped lang="scss">
 .timeline-container {
-	position: relative;
 	width: 100%;
 	height: 100%;
 
-	padding: 4px;
+	padding: 6px;
 
-	display: flex;
+	border-radius: 100vmax;
+
 	background-color: rgba(var(--v-theme-on-surface), 0.1);
-	border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+
+	.timeline-inner-container {
+		display: flex;
+		gap: 1px;
+		width: 100%;
+		height: 100%;
+		border-radius: 100vmax;
+		overflow: hidden;
+	}
 
 	&.disabled {
 		background-color: rgba(var(--v-theme-on-surface), 0.3)
@@ -143,17 +155,23 @@ function setReservation(reservationSegment) {
 
 		&.event {
 			background-color: rgb(var(--v-theme-error));
-			border: 2px solid rgba(var(--v-border-color), 0.33);
+			border-color: rgb(var(--v-theme-error));
+			border: 2px solid;
 			cursor: pointer;
 
 			&.mine {
 				background-color: rgb(var(--v-theme-blue));
+				border-color: rgb(var(--v-theme-blue));
 			}
 		}
 	}
 
 	&[vertical] {
-		flex-direction: column;
+		border-radius: 0;
+		.timeline-inner-container {
+			flex-direction: column;
+			border-radius: 0;
+		}
 	}
 }
 

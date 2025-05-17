@@ -51,7 +51,7 @@ getArea()
 </script>
 
 <template>
-	<section class="room-page" v-if="area !== null">
+	<section class="room-page" v-if="area !== null" :key="area.id">
 		<o-breadcrumbs
 			:items="breadcrumbs"
 			class="breadcrumbs"
