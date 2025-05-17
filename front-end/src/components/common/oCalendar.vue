@@ -12,7 +12,7 @@ const selectedMonth = ref(now.getMonth())
 </script>
 
 <template>
-	<v-sheet class="calendar">
+	<v-card class="calendar" elevation="3">
 		<header>
 			<o-cycle-input
 				v-model="selectedYear"
@@ -42,11 +42,5 @@ const selectedMonth = ref(now.getMonth())
 			clickable-days
 			@day-clicked="$emit('day-clicked', $event)"
 		/>
-	</v-sheet>
+	</v-card>
 </template>
-
-<style scoped lang="scss">
-.calendar {
-	border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-}
-</style>

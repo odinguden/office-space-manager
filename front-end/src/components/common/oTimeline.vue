@@ -154,14 +154,14 @@ function setReservation(reservationSegment) {
 		flex-grow: var(--reservation-length);
 
 		&.event {
-			background-color: rgb(var(--v-theme-error));
-			border-color: rgb(var(--v-theme-error));
+			color: rgb(var(--v-theme-error));
+			background-color: currentColor;
+			border-color: currentColor;
 			border: 2px solid;
 			cursor: pointer;
 
 			&.mine {
-				background-color: rgb(var(--v-theme-blue));
-				border-color: rgb(var(--v-theme-blue));
+				color: rgb(var(--v-theme-blue));
 			}
 		}
 	}
