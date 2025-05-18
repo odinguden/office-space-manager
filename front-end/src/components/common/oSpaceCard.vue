@@ -1,20 +1,9 @@
 <script setup>
-import { TYPE_ICON_MAPPINGS } from '@/plugins/config'
-import { computed } from 'vue'
+import { defineProps } from 'vue';
+import { TYPE_ICON_MAPPINGS } from '@/plugins/config';
 
 const props = defineProps({
 	area: Object
-})
-
-const breadcrumbs = computed(() => {
-	const newCrumbs = []
-	for (let superArea of props.area.superAreas) {
-		newCrumbs.push({
-			text: superArea.name,
-			link: `/room/${superArea.id}`
-		})
-	}
-	return newCrumbs
 })
 
 const icon = computed(() => {
@@ -26,40 +15,105 @@ const icon = computed(() => {
 
 	return TYPE_ICON_MAPPINGS["other"]
 })
+
+const areaTypeName = computed(() => {
+	const name = props.area.areaType.id
+	return name.substring(0,1).toUpperCase() + name.substring(1)
+})
+
+const capacityTooltip = computed(() => {
+	const plurality = props.area.capacity === 1 ? "person" : "people"
+	return `This ${props.area.areaType.id} holds ${props.area.capacity} ${plurality}`
+})
+
+const breadcrumbs = computed(() => {
+	const crumbs = []
+	for (let superArea of props.area.superAreas) {
+		crumbs.push({
+			title: superArea.name,
+			to: `/room/${superArea.id}`
+		})
+	}
+
+	crumbs.push({
+		title: props.area.name,
+		to: `/room/${props.area.id}`,
+		self: true
+	})
+
+	return crumbs
+})
 </script>
 
 <template>
-	<o-flat-card
-		class="space-card"
-		elevation="0"
-		tile
+	<v-card
+		elevation="3"
+		:prepend-icon="icon"
+		:title="props.area.name"
+		:subtitle="props.area.description"
+		:to="`/room/${area.id}`"
 	>
-		<o-breadcrumbs
-			v-if="area.superAreas.length > 0"
-			class="card-crumbs"
-			:items="breadcrumbs"
-		/>
-		<v-tooltip>
-			<template v-slot:activator="{ props }">
-				<v-icon v-bind="props">
-					{{ icon }}
+		<template v-slot:title>
+			<v-breadcrumbs
+				class="area-breadcrumbs"
+				:items="breadcrumbs"
+				v-ripple.stop
+				density="compact"
+			>
+				<template v-slot:item="{ item }">
+					<router-link
+						:to="item.to"
+						class="v-breadcrumbs-item"
+						:class="{'superarea-crumb': !item.self}"
+					>
+						{{ item.title }}
+					</router-link>
+				</template>
+				<template v-slot:divider>
+					<div class="area-crumb-divider">
+						/
+					</div>
+				</template>
+			</v-breadcrumbs>
+		</template>
+		<template v-slot:prepend>
+			<v-icon v-tooltip="areaTypeName">
+				{{ icon }}
+			</v-icon>
+		</template>
+		<template v-slot:append>
+			<div class="card-capacity card-info" v-tooltip="capacityTooltip">
+				{{ props.area.capacity }}
+				<v-icon size="small">
+					mdi-account-group
 				</v-icon>
-			</template>
-			{{ area.areaType.id }}
-		</v-tooltip>
-		<div class="card-header">
-			<h1><router-link :to="`/room/${area.id}`">{{ area.name }}</router-link></h1>
-		</div>
-		<div class="card-content">
-			<p>{{ area.description }}</p>
-			<o-plan-control-tooltip v-if="area.isPlanControlled" />
-		</div>
-		<div class="card-extras">
-			<o-space-extras :features="area.areaFeatures" :type="area.areaType.id" />
-		</div>
-		<div v-if="area.reservable" class="one-span-two">
+			</div>
+		</template>
+		<v-card-text class="card-text">
+			<div class="card-details-container">
+				<div v-if="props.area.isPlanControlled">
+					<v-icon>
+						mdi-information-slab-circle-outline
+					</v-icon>
+					This {{ props.area.areaType.id }} is controlled by a plan
+				</div>
+				<div v-else-if="!props.area.reservable" class="card-info">
+					<v-icon>
+						mdi-information-slab-circle-outline
+					</v-icon>
+					This {{ props.area.areaType.id }} is not bookable
+				</div>
+				<v-spacer v-else />
+				<o-space-extras
+					v-if="area.areaFeatures.length"
+					class="card-features"
+					:features="area.areaFeatures"
+					:type="area.areaType.id"
+				/>
+				<v-icon v-else />
+			</div>
 			<slot name="timeline">
-				<div class="card-timeline">
+				<div v-if="props.area.reservable" class="card-timeline">
 					<o-timeline
 						:scope-start="new Date(area.reservations.scopeStart)"
 						:scope-end="new Date(area.reservations.scopeEnd)"
@@ -67,66 +121,54 @@ const icon = computed(() => {
 					/>
 				</div>
 			</slot>
-		</div>
-		<span v-else class="text-faded card-extras">
-			<v-icon size="small">
-				mdi-information-slab-circle
-			</v-icon>
-			Space is not reservable
-		</span>
-		<div class="one-span-two">
-			<slot name="actions" />
-		</div>
-	</o-flat-card>
+		</v-card-text>
+	</v-card>
 </template>
 
 <style scoped lang="scss">
-.space-card {
-	display: grid;
-	grid-template-columns: auto 1fr;
-	grid-template-rows: auto 1fr;
-	gap: 8px 16px;
+.card-timeline {
+	height: 20px;
+}
+
+.card-prepend {
+	display: flex;
+	flex-direction: column;
 	align-items: center;
+	gap: 2px;
+}
 
-	.card-crumbs {
-		grid-column: 1 / span 2;
-		font-size: 0.75rem;
-		opacity: 0.7;
-		margin: -8px,
-	}
+.card-capacity {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
 
-	.card-header {
-		display: grid;
-		grid-template-columns: 1fr auto;
-		gap: 16px;
-		align-items: center;
-	}
+.card-text {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
 
-	.card-content {
-		grid-column: 2;
-
-		word-break: break-word;
-		hyphens: auto;
-		-ms-hyphens: auto;
-		-moz-hyphens: auto;
-		-webkit-hyphens: auto;
-	}
-
-	.card-extras {
-		grid-column: 2;
-	}
-
-	.card-timeline {
-		height: 24px;
-	}
-
-	.one-span-two {
-		grid-column: 1 / span 2;
+	.card-features {
+		justify-self: end;
 	}
 }
 
-.text-faded {
-	opacity: var(--v-high-emphasis-opacity);
+.card-info {
+	color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+}
+
+.card-details-container {
+	display: flex;
+	justify-content: space-between;
+}
+
+.area-breadcrumbs, .v-breadcrumbs-item {
+	padding: 0;
+}
+
+.superarea-crumb, .area-crumb-divider {
+	opacity: var(--v-medium-emphasis-opacity);
+	
 	font-size: 0.8rem;
 }
 </style>

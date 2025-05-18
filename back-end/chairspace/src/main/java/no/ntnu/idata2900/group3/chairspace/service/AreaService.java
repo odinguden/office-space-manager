@@ -195,4 +195,15 @@ public class AreaService extends EntityService<Area, UUID> {
 	public List<Area> getAreasByUserAsList(UUID userId) {
 		return areaRepository.findByAdministrators_Id(userId);
 	}
+
+	/**
+	 * Finds up to 20 superareas found by searching the input name.
+	 *
+	 * @param name the search term
+	 * @return up to 20 superareas found by searching the input name
+	 */
+	public List<Area> getSuperAreasByName(String name) {
+		Pageable limit20 = PageRequest.of(0, 20);
+		return areaRepository.findSuperAreasByName(name, limit20).getContent();
+	}
 }

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import no.ntnu.idata2900.group3.chairspace.assembler.AreaAssembler;
 import no.ntnu.idata2900.group3.chairspace.dto.SimpleArea;
@@ -308,18 +309,13 @@ public class AreaController extends PermissionManager {
 	 */
 	@GetMapping("/user/{userId}")
 	@Operation(
-		summary = "Gets all areas administered by a single user",
-		description = " "
+		summary = "Gets all areas administered by a single user"
 	)
 	@ApiResponses(value = {
 		@ApiResponse(
 			responseCode = "200",
-			description = "Areas found with"
+			description = "A list of areas found by admin"
 			),
-		@ApiResponse(
-			responseCode = "",
-			description = ""
-			)
 	})
 	public ResponseEntity<Page<SimpleArea>> findAreasByAdmin(
 		@Parameter(description = "Id of user to get areas for")
@@ -333,6 +329,34 @@ public class AreaController extends PermissionManager {
 		Page<Area> areas = areaService.getAreasByUser(userId, page, size);
 		return new ResponseEntity<>(
 			areas.map(areaAssembler::toSimpleArea),
+			HttpStatus.OK
+		);
+	}
+
+	/**
+	 * Fetches up to 20 superareas that loosely match the input search term.
+	 *
+	 * @param name the search term
+	 * @return a list of up to 20 superareas that loosely match the input search term
+	 */
+	@GetMapping("/superareas")
+	@Operation(
+		summary = "Searches all areas that are superAreas by name"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "A list of up to 20 super areas that match the search term"
+			)
+	})
+	public ResponseEntity<List<SimpleArea>> findSuperAreasByName(@RequestParam String name) {
+		this.hasPermissionToGet();
+
+		return new ResponseEntity<>(
+			areaService.getSuperAreasByName(name)
+				.stream()
+				.map(areaAssembler::toSimpleSuperArea)
+				.toList(),
 			HttpStatus.OK
 		);
 	}

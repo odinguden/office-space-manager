@@ -1,148 +1,206 @@
 <script setup>
-import fetcher from '@/plugins/fetcher';
-import { useAuthStore } from '@/stores/authStore';
 import { useRoute } from 'vue-router';
-
-const authStore = useAuthStore()
+import { useAuthStore } from '@/stores/authStore';
+import fetcher from '@/plugins/fetcher';
+import { TYPE_ICON_MAPPINGS } from '@/plugins/config';
 
 const route = useRoute()
-
 const area = ref(null)
 const selectedDate = ref(null)
-const breadcrumbs = ref([])
-const showModal = ref(false)
+const authStore = useAuthStore()
+
+const modalOpen = ref(false)
+
+const isMine = computed(() => {
+	return area.value.administratorIds.includes(authStore.me.userId)
+})
+
+const icon = computed(() => {
+	if (area.value === null) return;
+	const typeName = area.value.areaType.id.toLowerCase()
+
+	if (typeName in TYPE_ICON_MAPPINGS) {
+		return TYPE_ICON_MAPPINGS[typeName]
+	}
+
+	return TYPE_ICON_MAPPINGS["other"]
+})
+
+const breadcrumbs = computed(() => {
+	const crumbs = []
+	for (let superArea of area.value.superAreas) {
+		crumbs.push({
+			title: superArea.name,
+			to: `/room/${superArea.id}`
+		})
+	}
+
+	crumbs.push({
+		title: area.value.name,
+		to: `/room/${area.value.id}`,
+		self: true
+	})
+
+	return crumbs
+})
+
+const capacityTooltip = computed(() => {
+	const plurality = area.value.capacity === 1 ? "person" : "people"
+	return `This ${area.value.areaType.id} holds ${area.value.capacity} ${plurality}`
+})
+
+
+function openModalForDay(day) {
+	selectedDate.value = day
+	modalOpen.value = true
+}
 
 function getArea() {
 	const id = route.params.id
 
 	fetcher.getArea(id)
 		.then(response => area.value = response)
-		.then(() => {
-			const newCrumbs = []
-			for (let superArea of area.value.superAreas) {
-				newCrumbs.push({
-					text: superArea.name,
-					link: `/room/${superArea.id}`
-				})
-			}
-
-			newCrumbs.push({
-				text: area.value.name,
-				link: null
-			})
-
-			breadcrumbs.value = newCrumbs
-		})
 }
 
-function openModal(day) {
-	if (day == undefined) day = new Date()
-	selectedDate.value = day
-	showModal.value = true
-}
-
-function closeModal() {
-	showModal.value = false
-}
-
-const isMine = computed(() => area.value.administratorIds.includes(authStore.me.userId))
-const isPlanned = computed(() => area.value.isPlanControlled)
 getArea()
 </script>
 
 <template>
-	<section class="room-page" v-if="area !== null">
-		<o-breadcrumbs
-			:items="breadcrumbs"
-			class="breadcrumbs"
-		/>
-		<header class="room-header">
-			<v-icon>mdi-desk</v-icon>
-			<h1>{{ area.name }}</h1>
-			<p>{{ area.description }}</p>
-			<o-plan-control-tooltip v-if="area.isPlanControlled" />
-			<o-space-extras :features="area.areaFeatures" />
-		</header>
-		<v-btn
-			color="primary"
-			text="Book this room"
-			tile
-			variant="outlined"
-			@click="openModal()"
-		/>
-		<v-dialog
-			v-model="showModal"
-			max-width="512px"
+	<section v-if="area" class="room-container">
+		<v-card
+			:title="area.name"
+			:prepend-icon="icon"
+			flat
 		>
-			<v-card>
-				<v-card-title>
-					Booking
-				</v-card-title>
-				<v-card-text>
-					<o-booking
-						:area="area"
-						:start-date="selectedDate"
-						@cancel="closeModal"
-					/>
-				</v-card-text>
-			</v-card>
-		</v-dialog>
-		<v-btn
-			v-if="isMine && isPlanned"
-			color="primary"
-			tile
-			variant="outlined"
-		>
-			Create plan
-			<o-closeable-dialog
-				activator="parent"
-				max-width="512px"
-				title="Create Plan"
+			<template v-slot:append>
+				<div class="area-description" v-tooltip="capacityTooltip">
+					{{ area.capacity }}
+					<v-icon size="small">
+						mdi-account-group
+					</v-icon>
+				</div>
+		</template>
+			<template v-slot:title>
+				<v-breadcrumbs
+					class="area-breadcrumbs"
+					:items="breadcrumbs"
+					v-ripple.stop
+					density="compact"
+				>
+					<template v-slot:item="{ item }">
+						<router-link
+							:to="item.to"
+							class="v-breadcrumbs-item"
+							:class="{'superarea-crumb': !item.self}"
+						>
+							{{ item.title }}
+						</router-link>
+					</template>
+					<template v-slot:divider>
+						<div class="area-crumb-divider">
+							/
+						</div>
+					</template>
+				</v-breadcrumbs>
+			</template>
+			<v-card-text class="area-description">
+				{{ area.description }}
+			</v-card-text>
+		</v-card>
+		<div v-if="isMine">
+			<div class="area-info area-description mb-5">
+				<v-icon>
+					mdi-account-hard-hat-outline
+				</v-icon>
+				You are an administrator of this area
+			</div>
+			<v-btn
+				v-if="area.isPlanControlled"
+				color="primary"
+				variant="outlined"
+				block
 			>
-				<v-card-text>
-					<o-plan :area-id="area.id" />
-				</v-card-text>
-			</o-closeable-dialog>
-		</v-btn>
-		<o-calendar :area="area" @day-clicked="openModal($event)" />
+				Create plan
+				<o-closeable-dialog
+					activator="parent"
+					max-width="512px"
+					title="Create Plan"
+				>
+					<v-card-text>
+						<o-plan :area-id="area.id" />
+					</v-card-text>
+				</o-closeable-dialog>
+			</v-btn>
+		</div>
+		<div v-if="area.reservable" class="reservation-utils">
+			<v-btn
+				color="primary"
+				class="mb-5"
+				block
+			>
+				Book this room
+				<v-dialog
+					v-model="modalOpen"
+					activator="parent"
+					max-width="512px"
+				>
+					<template v-slot:default="{ isActive }">
+						<v-card>
+							<v-card-title>
+								Booking
+							</v-card-title>
+							<v-card-text>
+								<o-booking
+									:area="area"
+									:start-date="selectedDate"
+									@cancel="isActive.value = false"
+								/>
+							</v-card-text>
+						</v-card>
+					</template>
+				</v-dialog>
+			</v-btn>
+			<o-calendar
+				:area="area"
+				@day-clicked="openModalForDay"
+			/>
+		</div>
+		<div v-if="!area.reservable" class="area-info area-description">
+			<v-icon>
+				mdi-information-slab-circle-outline
+			</v-icon>
+			<div>
+				This {{ area.areaType.id }} is not bookable
+			</div>
+		</div>
 	</section>
-	<v-skeleton-loader
-		v-else
-		type="heading,paragraph,card"
-	/>
 </template>
 
 <style scoped lang="scss">
-
-section.room-page {
+.room-container {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
 	margin: 8px auto;
-	width: 448px;
 }
 
-header.room-header {
-	display: grid;
-	grid-template-columns: auto 1fr;
-	grid-template-rows: auto auto;
-	gap: 8px 16px;
-
-	align-items: center;
-
-	> :first-child {
-		font-size: 2em;
-	}
-
-	> :not(:first-child) {
-		grid-column: 2;
-		width: 100%;
-		text-wrap: wrap;
-		word-break: break-word;
-	}
+.area-info {
+	display: flex;
+	gap: 8px;
 }
 
-.breadcrumbs {
-	opacity: 0.8;
+.area-description {
+	opacity: var(--v-medium-emphasis-opacity);
+	color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity))
+}
+
+.area-breadcrumbs, .v-breadcrumbs-item {
+	padding: 0;
+}
+
+.superarea-crumb, .area-crumb-divider {
+	opacity: var(--v-medium-emphasis-opacity);
+
+	font-size: 0.8rem;
 }
 </style>

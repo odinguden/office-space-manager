@@ -1,4 +1,8 @@
 <script setup>
+import { useAuthStore } from '@/stores/authStore';
+
+const authStore = useAuthStore()
+
 // Specification for the different menu items to navigate to.
 const NAV_TARGETS = {
 	default: [
@@ -52,7 +56,8 @@ const NAV_TARGETS = {
 		/>
 		<v-divider class="my-3" />
 		<v-list-item
-		v-for="target in NAV_TARGETS.admin"
+			v-for="target in NAV_TARGETS.admin"
+			v-if="authStore.me.isAdmin"
 			:key="target.name"
 			:title="target.name"
 			:to="target.link || undefined"

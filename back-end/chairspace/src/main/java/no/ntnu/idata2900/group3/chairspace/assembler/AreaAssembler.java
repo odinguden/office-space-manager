@@ -188,6 +188,20 @@ public class AreaAssembler {
 	}
 
 	/**
+	 * Creates an extremely simple representation of a super area.
+	 *
+	 * @param area the area to turn into a simple representation
+	 * @return a simple representation of the area as a super area
+	 */
+	public SimpleArea toSimpleSuperArea(Area area) {
+		return new SimpleArea.Builder()
+			.id(area.getId())
+			.name(area.getName())
+			.areaType(area.getAreaType())
+			.build();
+	}
+
+	/**
 	 * Returns {@code primary} as long as it is not null, and {@code fallback} otherwise.
 	 *
 	 * @param primary the primary choice for a value
