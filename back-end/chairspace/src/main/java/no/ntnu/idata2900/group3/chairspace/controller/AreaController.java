@@ -339,13 +339,16 @@ public class AreaController extends PermissionManager {
 	 * @param name the search term
 	 * @return a list of up to 20 superareas that loosely match the input search term
 	 */
+	@GetMapping("/superareas")
+	@Operation(
+		summary = "Searches all areas that are superAreas by name"
+	)
 	@ApiResponses(value = {
 		@ApiResponse(
 			responseCode = "200",
 			description = "A list of up to 20 super areas that match the search term"
 			)
 	})
-	@GetMapping("/superareas")
 	public ResponseEntity<List<SimpleArea>> findSuperAreasByName(@RequestParam String name) {
 		this.hasPermissionToGet();
 
